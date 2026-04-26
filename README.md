@@ -24,13 +24,6 @@ Only English-to-Chinese translation is supported in this version.
 Install with Homebrew:
 
 ```bash
-brew tap yongyaoduan/livenotes
-brew install --cask livenotes
-```
-
-You can also use the fully qualified cask name:
-
-```bash
 brew install yongyaoduan/livenotes/livenotes
 ```
 
