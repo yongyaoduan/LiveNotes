@@ -109,7 +109,7 @@ jobs:
             gh release create "$release_tag" \
               --repo "${{ github.repository }}" \
               --title "LiveNotes ${{ steps.version.outputs.version }}" \
-              --notes "Install with `brew install --cask yongyaoduan/livenotes/livenotes`."
+              --notes "Install with `brew tap yongyaoduan/livenotes` and `brew install --cask livenotes`."
           fi
           gh release upload "$release_tag" "${{ steps.app_zip.outputs.zip_path }}" --repo "${{ github.repository }}" --clobber
 

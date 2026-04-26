@@ -24,7 +24,14 @@ Only English-to-Chinese translation is supported in this version.
 Install with Homebrew:
 
 ```bash
-brew install --cask yongyaoduan/livenotes/livenotes
+brew tap yongyaoduan/livenotes
+brew install --cask livenotes
+```
+
+You can also use the fully qualified cask name:
+
+```bash
+brew install yongyaoduan/livenotes/livenotes
 ```
 
 The cask installs the app and downloads model artifacts to `~/Library/Application Support/LiveNotes/LiveNotesArtifacts`. After installation, the app runs recording, transcription, translation, and topic notes locally on this Mac.
