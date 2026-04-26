@@ -1,0 +1,132 @@
+name: Release Homebrew
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release version. Leave empty to use MARKETING_VERSION."
+        required: false
+        type: string
+  push:
+    tags:
+      - "v*"
+      - "desktop-v*"
+      - "*.*.*"
+
+jobs:
+  homebrew-release:
+    runs-on: macos-15
+    permissions:
+      contents: write
+    env:
+      TAP_REPO: yongyaoduan/homebrew-livenotes
+      HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select Xcode with Swift 6
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Resolve version
+        id: version
+        run: |
+          input_version="${{ inputs.version }}"
+          if [[ -n "$input_version" ]]; then
+            version="$input_version"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            version="${GITHUB_REF_NAME#desktop-v}"
+            version="${version#v}"
+          else
+            version="$(
+              xcodebuild -project LiveNotes.xcodeproj -scheme LiveNotes -configuration Release -showBuildSettings 2>/dev/null |
+                awk -F= '/ MARKETING_VERSION / { gsub(/[[:space:]]/, "", $2); print $2; exit }'
+            )"
+          fi
+          if [[ -z "$version" ]]; then
+            echo "Unable to resolve release version" >&2
+            exit 65
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Run core tests
+        run: cd LiveNotesCore && swift test
+
+      - name: Build app
+        run: xcodebuild build -project LiveNotes.xcodeproj -scheme LiveNotes -destination 'platform=macOS,arch=arm64'
+
+      - name: Run UI tests
+        run: ./scripts/run-ui-tests.sh
+
+      - name: Upload UI test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: livenotes-ui-test-results
+          path: dist/LiveNotesUITests.xcresult
+          if-no-files-found: ignore
+
+      - name: Test Homebrew cask generator
+        run: ./scripts/test-homebrew-cask.sh
+
+      - name: Test bundled artifact preparation script
+        run: ./scripts/test-prepare-bundled-artifacts.sh
+
+      - name: Build Homebrew app zip
+        id: app_zip
+        env:
+          LIVENOTES_RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          zip_path="$(./scripts/build-homebrew-app-zip.sh | tail -n 1)"
+          sha256="$(shasum -a 256 "$zip_path" | awk '{print $1}')"
+          echo "zip_path=$zip_path" >> "$GITHUB_OUTPUT"
+          echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
+
+      - name: Generate Homebrew cask
+        id: cask
+        run: |
+          zip_url="https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/LiveNotes-${{ steps.version.outputs.version }}.zip"
+          cask_path="$(./scripts/write-homebrew-cask.sh "${{ steps.version.outputs.version }}" "$zip_url" "${{ steps.app_zip.outputs.sha256 }}" | tail -n 1)"
+          echo "cask_path=$cask_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload Homebrew release draft artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: livenotes-homebrew-release
+          path: |
+            ${{ steps.app_zip.outputs.zip_path }}
+            ${{ steps.cask.outputs.cask_path }}
+
+      - name: Publish app zip to tap release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_tag="${{ steps.version.outputs.tag }}"
+          if ! gh release view "$release_tag" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release create "$release_tag" \
+              --repo "${{ github.repository }}" \
+              --title "LiveNotes ${{ steps.version.outputs.version }}" \
+              --notes "Install with `brew install --cask yongyaoduan/livenotes/livenotes`."
+          fi
+          gh release upload "$release_tag" "${{ steps.app_zip.outputs.zip_path }}" --repo "${{ github.repository }}" --clobber
+
+      - name: Update tap cask
+        if: startsWith(github.ref, 'refs/tags/') && env.HOMEBREW_TAP_TOKEN != ''
+        env:
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          git clone "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/${TAP_REPO}.git" "$RUNNER_TEMP/homebrew-livenotes"
+          mkdir -p "$RUNNER_TEMP/homebrew-livenotes/Casks"
+          cp "${{ steps.cask.outputs.cask_path }}" "$RUNNER_TEMP/homebrew-livenotes/Casks/livenotes.rb"
+          git -C "$RUNNER_TEMP/homebrew-livenotes" config user.name "github-actions[bot]"
+          git -C "$RUNNER_TEMP/homebrew-livenotes" config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git -C "$RUNNER_TEMP/homebrew-livenotes" diff --quiet -- Casks/livenotes.rb; then
+            echo "Tap cask is already current."
+            exit 0
+          fi
+          git -C "$RUNNER_TEMP/homebrew-livenotes" add Casks/livenotes.rb
+          git -C "$RUNNER_TEMP/homebrew-livenotes" commit -m "Update LiveNotes to ${{ steps.version.outputs.version }}"
+          git -C "$RUNNER_TEMP/homebrew-livenotes" push origin HEAD:main

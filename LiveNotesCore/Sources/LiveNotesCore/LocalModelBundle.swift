@@ -147,3 +147,63 @@ public struct LocalModelBundleVerifier: Sendable {
         return LocalModelBundleValidation(missingArtifacts: missingArtifacts)
     }
 }
+
+public struct LocalModelBundleLocator {
+    public static let artifactsDirectoryName = "LiveNotesArtifacts"
+
+    public init() {}
+
+    public func applicationSupportArtifactsURL(
+        fileManager: FileManager = .default
+    ) -> URL {
+        let base = fileManager.urls(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask
+        ).first ?? fileManager.temporaryDirectory
+        return base
+            .appendingPathComponent("LiveNotes", isDirectory: true)
+            .appendingPathComponent(Self.artifactsDirectoryName, isDirectory: true)
+    }
+
+    public func candidateRoots(
+        bundleResourceURL: URL?,
+        applicationSupportArtifactsURL: URL
+    ) -> [URL] {
+        var roots: [URL] = []
+        if let bundleResourceURL {
+            roots.append(
+                bundleResourceURL.appendingPathComponent(
+                    Self.artifactsDirectoryName,
+                    isDirectory: true
+                )
+            )
+        }
+        roots.append(applicationSupportArtifactsURL)
+        return roots
+    }
+
+    public func validateFirstReadyRoot(
+        bundleResourceURL: URL?,
+        applicationSupportArtifactsURL: URL,
+        manifest: LocalModelBundleManifest = .default,
+        verifier: LocalModelBundleVerifier = LocalModelBundleVerifier()
+    ) -> LocalModelBundleValidation {
+        let roots = candidateRoots(
+            bundleResourceURL: bundleResourceURL,
+            applicationSupportArtifactsURL: applicationSupportArtifactsURL
+        )
+        var firstValidation: LocalModelBundleValidation?
+        for root in roots {
+            let validation = verifier.validate(root: root, manifest: manifest)
+            if validation.isReady {
+                return validation
+            }
+            if firstValidation == nil {
+                firstValidation = validation
+            }
+        }
+        return firstValidation ?? LocalModelBundleValidation(
+            missingArtifacts: manifest.requiredArtifactPaths
+        )
+    }
+}

@@ -11,13 +11,23 @@ The product keeps the interface focused on four jobs:
 
 ## Models
 
-The release bundle is local-only. It uses:
+LiveNotes runs models locally. It uses:
 
 - `mlx-community/whisper-medium-mlx` for transcription.
 - `mlx-community/Qwen3-4B-4bit` for topic summaries.
 - `mlx-community/Qwen3-1.7B-4bit` for English-to-Chinese translation.
 
 Only English-to-Chinese translation is supported in this version.
+
+## Install
+
+Install with Homebrew:
+
+```bash
+brew install --cask yongyaoduan/livenotes/livenotes
+```
+
+The cask installs the app and downloads model artifacts to `~/Library/Application Support/LiveNotes/LiveNotesArtifacts`. After installation, the app runs recording, transcription, translation, and topic notes locally on this Mac.
 
 ## Development
 
@@ -46,27 +56,27 @@ Test the DMG script with fixture artifacts:
 ./scripts/test-build-dmg.sh
 ```
 
-Test release asset splitting and model preparation:
+Test Homebrew and model preparation scripts:
 
 ```bash
-./scripts/test-package-release-assets.sh
+./scripts/test-homebrew-cask.sh
 ./scripts/test-prepare-bundled-artifacts.sh
 ```
 
 ## Release
 
-Prepare local model artifacts:
+Build the app zip used by the Homebrew cask:
 
 ```bash
-./scripts/prepare-bundled-artifacts.sh .cache
+./scripts/build-homebrew-app-zip.sh
 ```
 
-Build a DMG with bundled models:
+Generate a cask file:
 
 ```bash
-LIVENOTES_BUNDLED_ARTIFACT_SOURCE_ROOT=.cache ./scripts/build-dmg.sh
+./scripts/write-homebrew-cask.sh 0.1.0 <zip-url> <sha256>
 ```
 
-The release workflow runs on tags matching `*.*.*` or `desktop-v*`, and it can also be run manually from GitHub Actions. It runs Swift tests, builds the app, runs XCUITest, verifies the packaging scripts, prepares bundled model artifacts, builds a DMG, packages release assets, and uploads the result.
+The `Release Homebrew` workflow runs on tags matching `v*`, `desktop-v*`, or `*.*.*`, and it can also be run manually from GitHub Actions. It runs Swift tests, builds the app, runs XCUITest, verifies the Homebrew cask generator, uploads `LiveNotes.app.zip` to this repository's GitHub Release, and updates the tap cask.
 
-GitHub Release assets must stay below the per-file size limit, so the workflow can publish the offline DMG as split `.part-*` files with a restore script and SHA-256 checksum. The restored DMG still contains the bundled models.
+`Build Offline DMG` remains available as a manual workflow for internal testing of a fully bundled offline DMG, but the user-facing distribution path is Homebrew.

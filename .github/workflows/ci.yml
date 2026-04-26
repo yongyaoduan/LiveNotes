@@ -42,3 +42,6 @@ jobs:
 
       - name: Test bundled artifact preparation script
         run: ./scripts/test-prepare-bundled-artifacts.sh
+
+      - name: Test Homebrew cask generator
+        run: ./scripts/test-homebrew-cask.sh

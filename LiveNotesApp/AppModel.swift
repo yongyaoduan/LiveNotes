@@ -173,14 +173,12 @@ final class AppModel: ObservableObject {
     }
 
     private static func bundledModelStatus() -> String {
-        guard let resourceURL = Bundle.main.resourceURL else {
-            return LocalModelBundleValidation(
-                missingArtifacts: LocalModelBundleManifest.default.requiredArtifactPaths
-            ).userFacingStatus
-        }
-        let artifactsURL = resourceURL.appendingPathComponent("LiveNotesArtifacts", isDirectory: true)
-        return LocalModelBundleVerifier()
-            .validate(root: artifactsURL, manifest: .default)
+        let locator = LocalModelBundleLocator()
+        return locator
+            .validateFirstReadyRoot(
+                bundleResourceURL: Bundle.main.resourceURL,
+                applicationSupportArtifactsURL: locator.applicationSupportArtifactsURL()
+            )
             .userFacingStatus
     }
 }

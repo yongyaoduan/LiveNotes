@@ -43,14 +43,7 @@ struct LocalModelBundleTests {
     @Test("bundle verifier accepts a complete local artifact tree")
     func bundleVerifierAcceptsCompleteTree() throws {
         let root = try temporaryDirectory()
-        for path in LocalModelBundleManifest.default.requiredArtifactPaths {
-            let fileURL = root.appendingPathComponent(path)
-            try FileManager.default.createDirectory(
-                at: fileURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            try Data("fixture".utf8).write(to: fileURL)
-        }
+        try writeFixtureArtifacts(to: root)
 
         let result = LocalModelBundleVerifier().validate(
             root: root,
@@ -62,10 +55,50 @@ struct LocalModelBundleTests {
         #expect(result.missingArtifacts.isEmpty)
     }
 
+    @Test("bundle locator accepts Homebrew application support artifacts")
+    func bundleLocatorAcceptsApplicationSupportArtifacts() throws {
+        let applicationSupportRoot = try temporaryDirectory()
+        try writeFixtureArtifacts(to: applicationSupportRoot)
+
+        let result = LocalModelBundleLocator().validateFirstReadyRoot(
+            bundleResourceURL: nil,
+            applicationSupportArtifactsURL: applicationSupportRoot
+        )
+
+        #expect(result.isReady == true)
+        #expect(result.userFacingStatus == "Ready")
+    }
+
+    @Test("bundle locator prefers any ready local root")
+    func bundleLocatorPrefersAnyReadyLocalRoot() throws {
+        let missingBundleResourceRoot = try temporaryDirectory()
+        let externalRoot = try temporaryDirectory()
+        try writeFixtureArtifacts(to: externalRoot)
+
+        let result = LocalModelBundleLocator().validateFirstReadyRoot(
+            bundleResourceURL: missingBundleResourceRoot,
+            applicationSupportArtifactsURL: externalRoot
+        )
+
+        #expect(result.isReady == true)
+        #expect(result.missingArtifacts.isEmpty)
+    }
+
     private func temporaryDirectory() throws -> URL {
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent(UUID().uuidString, isDirectory: true)
         try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
         return url
+    }
+
+    private func writeFixtureArtifacts(to root: URL) throws {
+        for path in LocalModelBundleManifest.default.requiredArtifactPaths {
+            let fileURL = root.appendingPathComponent(path)
+            try FileManager.default.createDirectory(
+                at: fileURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try Data("fixture".utf8).write(to: fileURL)
+        }
     }
 }

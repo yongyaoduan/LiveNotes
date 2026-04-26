@@ -1,11 +1,7 @@
-name: Release Desktop
+name: Build Offline DMG
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "desktop-v*"
-      - "*.*.*"
 
 jobs:
   macos-release:
@@ -68,29 +64,3 @@ jobs:
         with:
           name: livenotes-macos-release-assets
           path: dist/release-assets/*
-
-      - name: Publish GitHub Release asset
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          name: LiveNotes ${{ github.ref_name }}
-          body: |
-            ## Highlights
-            - Native macOS app for local live recording, transcription, English-to-Chinese translation, and topic notes.
-            - Sidebar sessions are one recording each.
-            - Core models are bundled into the app: Whisper Medium, Qwen3 4B, and Qwen3 1.7B.
-            - Audio, transcripts, translations, and topic summaries stay on this Mac.
-
-            ## Install
-            1. If the release has one `.dmg` file, download it directly. If it has `.part-*` files, download every part plus the `restore-*.sh` script, then run `bash restore-LiveNotes-*.dmg.sh` in that folder.
-            2. Open the dmg and drag `LiveNotes.app` to `Applications`.
-            3. Open `Applications`, right-click `LiveNotes`, and choose `Open` on first launch.
-            4. If macOS blocks the app, open `System Settings` -> `Privacy & Security`, scroll to `Security`, click `Open Anyway`, then confirm `Open Anyway`.
-            5. This extra step is usually only needed once.
-
-            ## Notes
-            - This release is built for Apple Silicon Macs.
-            - English-to-Chinese translation is the only translation direction in this version.
-            - Model files are included in the dmg, so the first download is large.
-            - GitHub limits each release asset to less than 2 GiB, so large offline builds may be published as split parts.
-          files: dist/release-assets/*
