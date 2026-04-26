@@ -40,6 +40,9 @@ jobs:
       - name: Test dmg packaging script
         run: ./scripts/test-build-dmg.sh
 
+      - name: Test release asset packaging
+        run: ./scripts/test-package-release-assets.sh
+
       - name: Prepare bundled models
         run: ./scripts/prepare-bundled-artifacts.sh "$RUNNER_TEMP/livenotes-artifacts"
 
@@ -54,11 +57,14 @@ jobs:
           dmg_path="$(tail -n 1 "$log_path")"
           echo "dmg_path=$dmg_path" >> "$GITHUB_OUTPUT"
 
+      - name: Package release assets
+        run: ./scripts/package-release-assets.sh "${{ steps.build_dmg.outputs.dmg_path }}" "dist/release-assets"
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: livenotes-macos-dmg
-          path: ${{ steps.build_dmg.outputs.dmg_path }}
+          name: livenotes-macos-release-assets
+          path: dist/release-assets/*
 
       - name: Publish GitHub Release asset
         if: startsWith(github.ref, 'refs/tags/')
@@ -73,13 +79,15 @@ jobs:
             - Audio, transcripts, translations, and topic summaries stay on this Mac.
 
             ## Install
-            1. Download the dmg and drag `LiveNotes.app` to `Applications`.
-            2. Open `Applications`, right-click `LiveNotes`, and choose `Open` on first launch.
-            3. If macOS blocks the app, open `System Settings` -> `Privacy & Security`, scroll to `Security`, click `Open Anyway`, then confirm `Open Anyway`.
-            4. This extra step is usually only needed once.
+            1. If the release has one `.dmg` file, download it directly. If it has `.part-*` files, download every part plus the `restore-*.sh` script, then run `bash restore-LiveNotes-*.dmg.sh` in that folder.
+            2. Open the dmg and drag `LiveNotes.app` to `Applications`.
+            3. Open `Applications`, right-click `LiveNotes`, and choose `Open` on first launch.
+            4. If macOS blocks the app, open `System Settings` -> `Privacy & Security`, scroll to `Security`, click `Open Anyway`, then confirm `Open Anyway`.
+            5. This extra step is usually only needed once.
 
             ## Notes
             - This release is built for Apple Silicon Macs.
             - English-to-Chinese translation is the only translation direction in this version.
             - Model files are included in the dmg, so the first download is large.
-          files: ${{ steps.build_dmg.outputs.dmg_path }}
+            - GitHub limits each release asset to less than 2 GiB, so large offline builds may be published as split parts.
+          files: dist/release-assets/*

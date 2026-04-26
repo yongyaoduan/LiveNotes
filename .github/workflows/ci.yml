@@ -36,3 +36,6 @@ jobs:
 
       - name: Test dmg packaging script
         run: ./scripts/test-build-dmg.sh
+
+      - name: Test release asset packaging
+        run: ./scripts/test-package-release-assets.sh
