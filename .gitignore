@@ -1,0 +1,14 @@
+.DS_Store
+.env
+.env.example
+iShot_*.png
+.pytest_cache/
+DerivedData/
+build/
+dist/
+*.dmg
+*.xcresult
+*.xcuserstate
+xcuserdata/
+LiveNotesCore/.build/
+.cache/

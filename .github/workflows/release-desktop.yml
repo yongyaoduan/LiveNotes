@@ -1,0 +1,85 @@
+name: Release Desktop
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "desktop-v*"
+      - "*.*.*"
+
+jobs:
+  macos-release:
+    runs-on: macos-15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Select Xcode with Swift 6
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Run core tests
+        run: cd LiveNotesCore && swift test
+
+      - name: Build app
+        run: xcodebuild build -project LiveNotes.xcodeproj -scheme LiveNotes -destination 'platform=macOS,arch=arm64'
+
+      - name: Run UI tests
+        run: ./scripts/run-ui-tests.sh
+
+      - name: Upload UI test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: livenotes-ui-test-results
+          path: dist/LiveNotesUITests.xcresult
+          if-no-files-found: ignore
+
+      - name: Test dmg packaging script
+        run: ./scripts/test-build-dmg.sh
+
+      - name: Prepare bundled models
+        run: ./scripts/prepare-bundled-artifacts.sh "$RUNNER_TEMP/livenotes-artifacts"
+
+      - name: Build desktop dmg
+        id: build_dmg
+        env:
+          LIVENOTES_BUNDLED_ARTIFACT_SOURCE_ROOT: ${{ runner.temp }}/livenotes-artifacts
+          LIVENOTES_RELEASE_NAME: LiveNotes-${{ github.ref_name }}
+        run: |
+          log_path="$(mktemp)"
+          ./scripts/build-dmg.sh | tee "$log_path"
+          dmg_path="$(tail -n 1 "$log_path")"
+          echo "dmg_path=$dmg_path" >> "$GITHUB_OUTPUT"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: livenotes-macos-dmg
+          path: ${{ steps.build_dmg.outputs.dmg_path }}
+
+      - name: Publish GitHub Release asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: LiveNotes ${{ github.ref_name }}
+          body: |
+            ## Highlights
+            - Native macOS app for local live recording, transcription, English-to-Chinese translation, and topic notes.
+            - Sidebar sessions are one recording each.
+            - Core models are bundled into the app: Whisper Medium, Qwen3 4B, and Qwen3 1.7B.
+            - Audio, transcripts, translations, and topic summaries stay on this Mac.
+
+            ## Install
+            1. Download the dmg and drag `LiveNotes.app` to `Applications`.
+            2. Open `Applications`, right-click `LiveNotes`, and choose `Open` on first launch.
+            3. If macOS blocks the app, open `System Settings` -> `Privacy & Security`, scroll to `Security`, click `Open Anyway`, then confirm `Open Anyway`.
+            4. This extra step is usually only needed once.
+
+            ## Notes
+            - This release is built for Apple Silicon Macs.
+            - English-to-Chinese translation is the only translation direction in this version.
+            - Model files are included in the dmg, so the first download is large.
+          files: ${{ steps.build_dmg.outputs.dmg_path }}
