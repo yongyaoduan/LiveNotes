@@ -46,6 +46,13 @@ Test the DMG script with fixture artifacts:
 ./scripts/test-build-dmg.sh
 ```
 
+Test release asset splitting and model preparation:
+
+```bash
+./scripts/test-package-release-assets.sh
+./scripts/test-prepare-bundled-artifacts.sh
+```
+
 ## Release
 
 Prepare local model artifacts:
@@ -54,10 +61,12 @@ Prepare local model artifacts:
 ./scripts/prepare-bundled-artifacts.sh .cache
 ```
 
-Build a DMG:
+Build a DMG with bundled models:
 
 ```bash
 LIVENOTES_BUNDLED_ARTIFACT_SOURCE_ROOT=.cache ./scripts/build-dmg.sh
 ```
 
-The release workflow runs on tags matching `*.*.*` or `desktop-v*`. It runs Swift tests, builds the app, runs XCUITest, prepares bundled model artifacts, builds a DMG, uploads the artifact, and publishes a GitHub Release.
+The release workflow runs on tags matching `*.*.*` or `desktop-v*`, and it can also be run manually from GitHub Actions. It runs Swift tests, builds the app, runs XCUITest, verifies the packaging scripts, prepares bundled model artifacts, builds a DMG, packages release assets, and uploads the result.
+
+GitHub Release assets must stay below the per-file size limit, so the workflow can publish the offline DMG as split `.part-*` files with a restore script and SHA-256 checksum. The restored DMG still contains the bundled models.
