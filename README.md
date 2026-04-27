@@ -35,6 +35,18 @@ The cask installs the app, creates the local MLX runtime in `~/Library/Applicati
 
 Preview builds are not signed with Developer ID or notarized by Apple. macOS may block first launch until the app is allowed from System Settings. The same Homebrew cask becomes the production release path after Apple Developer Program signing credentials are configured.
 
+Regular uninstall removes the app, local MLX runtime, downloaded model artifacts, and preferences while preserving saved recordings, transcripts, and exports:
+
+```bash
+brew uninstall --cask yongyaoduan/livenotes/livenotes
+```
+
+Full removal deletes all LiveNotes local data:
+
+```bash
+brew uninstall --zap --cask yongyaoduan/livenotes/livenotes
+```
+
 ## Development
 
 Run core tests:

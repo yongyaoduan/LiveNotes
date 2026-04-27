@@ -39,12 +39,40 @@ grep -q 'failed sha256 verification' "$CASK_PATH"
 grep -q 'LIVENOTES_SUPPORT_ROOT' "$CASK_PATH"
 grep -q 'LIVENOTES_CURL_BIN' "$CASK_PATH"
 grep -q 'app "LiveNotes.app"' "$CASK_PATH"
+grep -q 'uninstall quit:' "$CASK_PATH"
+grep -q 'delete: \[' "$CASK_PATH"
+grep -q '~/Library/Application Support/LiveNotes/LiveNotesArtifacts' "$CASK_PATH"
+grep -q '~/Library/Application Support/LiveNotes/Runtime' "$CASK_PATH"
+grep -q 'trash:  "~/Library/Preferences/app.livenotes.mac.plist"' "$CASK_PATH"
+grep -q 'zap trash:' "$CASK_PATH"
+grep -q '~/Library/Application Support/LiveNotes' "$CASK_PATH"
+python3 - "$CASK_PATH" <<'PYTHON'
+import re
+import sys
+from pathlib import Path
+
+content = Path(sys.argv[1]).read_text(encoding="utf-8")
+match = re.search(r"uninstall\b(?P<body>.*?)\n\n  zap\b", content, re.S)
+if not match:
+    raise SystemExit("Generated cask is missing an uninstall stanza")
+body = match.group("body")
+preserved_paths = [
+    "~/Library/Application Support/LiveNotes/sessions.json",
+    "~/Library/Application Support/LiveNotes/Audio",
+    "~/Library/Application Support/LiveNotes/Exports",
+]
+for path in preserved_paths:
+    if path in body:
+        raise SystemExit(f"Regular uninstall must preserve user content: {path}")
+PYTHON
 grep -q 'LIVENOTES_REQUIRE_SIGNED_APP' "$ROOT_DIR/scripts/build-homebrew-app-zip.sh"
 grep -q 'LIVENOTES_NOTARIZE_APP' "$ROOT_DIR/scripts/build-homebrew-app-zip.sh"
 grep -q 'Developer ID Application' "$ROOT_DIR/scripts/build-homebrew-app-zip.sh"
 grep -q 'xcrun notarytool submit' "$ROOT_DIR/scripts/build-homebrew-app-zip.sh"
 grep -q 'xcrun stapler validate' "$ROOT_DIR/scripts/build-homebrew-app-zip.sh"
 grep -q 'spctl --assess' "$ROOT_DIR/scripts/build-homebrew-app-zip.sh"
+grep -q 'Select Xcode 16.4' "$WORKFLOW_PATH"
+grep -q 'xcode-version: "16.4"' "$WORKFLOW_PATH"
 grep -q 'actions/setup-python@v6' "$WORKFLOW_PATH"
 grep -q 'python-version: "3.12"' "$WORKFLOW_PATH"
 grep -q 'scripts/release-requirements.txt' "$WORKFLOW_PATH"

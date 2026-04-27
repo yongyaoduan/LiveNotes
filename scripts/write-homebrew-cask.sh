@@ -123,7 +123,12 @@ CASK
     end
   end
 
-  uninstall quit: "app.livenotes.mac"
+  uninstall quit:   "app.livenotes.mac",
+            delete: [
+              "~/Library/Application Support/LiveNotes/LiveNotesArtifacts",
+              "~/Library/Application Support/LiveNotes/Runtime",
+            ],
+            trash:  "~/Library/Preferences/app.livenotes.mac.plist"
 
   zap trash: [
     "~/Library/Application Support/LiveNotes",
