@@ -22,10 +22,7 @@ jobs:
         env:
           LIVENOTES_RECORDING_PIPELINE_LIVE: "0"
           LIVENOTES_RECORDING_PIPELINE_CAPTURE_LIVE: "0"
-        run: |
-          cd LiveNotesCore
-          swift --version
-          swift test --disable-sandbox --disable-xctest --verbose
+        run: ./scripts/run-core-tests.sh
 
       - name: Build app
         run: xcodebuild build -project LiveNotes.xcodeproj -scheme LiveNotes -destination 'platform=macOS,arch=arm64'
