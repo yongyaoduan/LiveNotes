@@ -47,7 +47,8 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Mode"].exists)
         attachScreenshot(named: "new-recording-sheet", app: app)
         app.buttons["new-recording-cancel-button"].click()
-        XCTAssertTrue(waitForAbsence(app.textFields["Recording Name"], timeout: 3))
+        XCTAssertTrue(waitForHittable(app.buttons["New Recording"], timeout: 5))
+        XCTAssertFalse(app.textFields["Recording Name"].isHittable)
         attachScreenshot(named: "new-recording-cancelled", app: app)
 
         app.buttons["New Recording"].click()
@@ -381,6 +382,20 @@ final class LiveNotesUITests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.05))
         }
         return element.exists && textValue(of: element) != initialValue
+    }
+
+    private func waitForHittable(
+        _ element: XCUIElement,
+        timeout: TimeInterval
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if element.exists, element.isHittable {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        }
+        return element.exists && element.isHittable
     }
 
     private func textValue(of element: XCUIElement) -> String {

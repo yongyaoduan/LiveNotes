@@ -91,6 +91,7 @@ stop_screen_recording
 
 python3 - "$OUTPUT_DIR" "$SOURCE_ATTACHMENTS_DIR" "$CONTACT_SHEET_PAGE_SIZE" <<'PY'
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -107,6 +108,7 @@ timeline_video_path = output_dir / "LiveNotesUITests-screenshot-timeline.mov"
 screenshots_contact_sheet_path = output_dir / "screenshots-contact-sheet.jpg"
 contact_sheets_dir = output_dir / "contact-sheets"
 page_size = int(sys.argv[3]) if len(sys.argv) > 3 else 9
+min_video_seconds = float(os.environ.get("LIVENOTES_UI_MIN_VIDEO_SECONDS", "1"))
 
 items = sorted(source_dir.glob("*.png"))
 
@@ -264,7 +266,7 @@ if ffprobe:
         text=True,
     )
     duration = float(result.stdout.strip())
-    if duration < 1:
+    if duration < min_video_seconds:
         raise SystemExit("UI evidence video is too short")
 PY
 
