@@ -128,6 +128,9 @@ jobs:
       - name: Test UI evidence recorder
         run: ./scripts/test-record-ui-tests.sh
 
+      - name: Install UI evidence dependencies
+        run: brew install ffmpeg
+
       - name: Run UI evidence tests
         run: ./scripts/record-ui-tests.sh
 

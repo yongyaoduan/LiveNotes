@@ -47,7 +47,7 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["Mode"].exists)
         attachScreenshot(named: "new-recording-sheet", app: app)
         app.buttons["new-recording-cancel-button"].click()
-        XCTAssertTrue(waitForAbsence(app.staticTexts["New Recording"]))
+        XCTAssertTrue(waitForAbsence(app.textFields["Recording Name"], timeout: 3))
         attachScreenshot(named: "new-recording-cancelled", app: app)
 
         app.buttons["New Recording"].click()

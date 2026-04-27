@@ -79,6 +79,7 @@ grep -q 'xcode-version: latest-stable' "$CI_WORKFLOW_PATH"
 grep -q 'timeout-minutes: 8' "$CI_WORKFLOW_PATH"
 grep -q 'LIVENOTES_RECORDING_PIPELINE_LIVE: "0"' "$CI_WORKFLOW_PATH"
 grep -q './scripts/run-core-tests.sh' "$CI_WORKFLOW_PATH"
+grep -q 'brew install ffmpeg' "$CI_WORKFLOW_PATH"
 grep -q 'swift test --disable-sandbox --disable-xctest list' "$ROOT_DIR/scripts/run-core-tests.sh"
 grep -q 'swift test --disable-sandbox --disable-xctest --skip-build --filter' "$ROOT_DIR/scripts/run-core-tests.sh"
 grep -q 'actions/setup-python@v6' "$WORKFLOW_PATH"
@@ -89,6 +90,7 @@ grep -q 'LIVENOTES_PYTHON: python3.12' "$WORKFLOW_PATH"
 grep -q 'timeout-minutes: 8' "$WORKFLOW_PATH"
 grep -q 'LIVENOTES_RECORDING_PIPELINE_LIVE: "0"' "$WORKFLOW_PATH"
 grep -q './scripts/run-core-tests.sh' "$WORKFLOW_PATH"
+grep -q 'brew install ffmpeg' "$WORKFLOW_PATH"
 if grep -q 'scripts/benchmark-requirements.txt' "$WORKFLOW_PATH"; then
   echo "Release workflow must not install benchmark-only dependencies" >&2
   exit 1
