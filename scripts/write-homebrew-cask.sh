@@ -123,12 +123,18 @@ CASK
     end
   end
 
-  uninstall quit:   "app.livenotes.mac",
-            delete: [
-              "~/Library/Application Support/LiveNotes/LiveNotesArtifacts",
-              "~/Library/Application Support/LiveNotes/Runtime",
-            ],
-            trash:  "~/Library/Preferences/app.livenotes.mac.plist"
+  uninstall_postflight do
+    require "fileutils"
+
+    support_root = ENV.fetch("LIVENOTES_SUPPORT_ROOT", File.expand_path("~/Library/Application Support/LiveNotes"))
+    [
+      File.join(support_root, "LiveNotesArtifacts"),
+      File.join(support_root, "Runtime"),
+      File.expand_path("~/Library/Preferences/app.livenotes.mac.plist"),
+    ].each { |path| FileUtils.rm_rf(path) }
+  end
+
+  uninstall quit: "app.livenotes.mac"
 
   zap trash: [
     "~/Library/Application Support/LiveNotes",
