@@ -125,7 +125,7 @@ rm -f "$REPORT_PATH"
   LIVENOTES_MLX_HELPER="$HELPER_FILE" \
   LIVENOTES_RECORDING_PIPELINE_REPORT="$REPORT_PATH" \
   LIVENOTES_PYTHON="$PYTHON_BIN" \
-    swift test --disable-sandbox --filter RecordingPipelineIntegrationTests
+    swift test --disable-sandbox --disable-xctest --filter RecordingPipelineIntegrationTests
 )
 
 "$PYTHON_BIN" - "$REPORT_PATH" <<'PY'

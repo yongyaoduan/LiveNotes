@@ -123,7 +123,7 @@ jobs:
         run: |
           cd LiveNotesCore
           swift --version
-          swift test --disable-sandbox --verbose
+          swift test --disable-sandbox --disable-xctest --verbose
 
       - name: Build app
         run: xcodebuild build -project LiveNotes.xcodeproj -scheme LiveNotes -destination 'platform=macOS,arch=arm64'

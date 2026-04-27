@@ -78,7 +78,7 @@ grep -q 'Select Xcode with Swift 6' "$CI_WORKFLOW_PATH"
 grep -q 'xcode-version: latest-stable' "$CI_WORKFLOW_PATH"
 grep -q 'timeout-minutes: 8' "$CI_WORKFLOW_PATH"
 grep -q 'LIVENOTES_RECORDING_PIPELINE_LIVE: "0"' "$CI_WORKFLOW_PATH"
-grep -q 'swift test --disable-sandbox --verbose' "$CI_WORKFLOW_PATH"
+grep -q 'swift test --disable-sandbox --disable-xctest --verbose' "$CI_WORKFLOW_PATH"
 grep -q 'actions/setup-python@v6' "$WORKFLOW_PATH"
 grep -q 'python-version: "3.12"' "$WORKFLOW_PATH"
 grep -q 'scripts/release-requirements.txt' "$WORKFLOW_PATH"
@@ -87,7 +87,7 @@ grep -q 'LIVENOTES_PYTHON: python3.12' "$WORKFLOW_PATH"
 grep -q 'timeout-minutes: 8' "$WORKFLOW_PATH"
 grep -q 'LIVENOTES_RECORDING_PIPELINE_LIVE: "0"' "$WORKFLOW_PATH"
 grep -q 'swift --version' "$WORKFLOW_PATH"
-grep -q 'swift test --disable-sandbox --verbose' "$WORKFLOW_PATH"
+grep -q 'swift test --disable-sandbox --disable-xctest --verbose' "$WORKFLOW_PATH"
 if grep -q 'scripts/benchmark-requirements.txt' "$WORKFLOW_PATH"; then
   echo "Release workflow must not install benchmark-only dependencies" >&2
   exit 1
