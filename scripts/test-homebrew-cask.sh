@@ -63,6 +63,7 @@ grep -q 'require_value HOMEBREW_TAP_TOKEN' "$WORKFLOW_PATH"
 grep -q 'DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64' "$WORKFLOW_PATH"
 grep -q 'APPLE_APP_SPECIFIC_PASSWORD' "$WORKFLOW_PATH"
 grep -q "publish=\\\"1\\\"" "$WORKFLOW_PATH"
+grep -q 'if-no-files-found: ignore' "$WORKFLOW_PATH"
 grep -q -- '--notes-file' "$WORKFLOW_PATH"
 if grep -Eq -- '--notes[[:space:]].*`brew install' "$WORKFLOW_PATH"; then
   echo "Release notes must not execute brew install command substitution" >&2

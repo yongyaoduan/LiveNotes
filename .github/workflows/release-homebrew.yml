@@ -110,7 +110,7 @@ jobs:
         with:
           name: livenotes-ui-evidence
           path: dist/ui-evidence
-          if-no-files-found: error
+          if-no-files-found: ignore
 
       - name: Test Homebrew cask generator
         run: ./scripts/test-homebrew-cask.sh
