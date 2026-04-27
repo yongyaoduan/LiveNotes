@@ -8,6 +8,7 @@ trap 'rm -rf "$WORK_ROOT"' EXIT
 
 CASK_PATH="$WORK_ROOT/livenotes.rb"
 WORKFLOW_PATH="$ROOT_DIR/.github/workflows/release-homebrew.yml"
+CI_WORKFLOW_PATH="$ROOT_DIR/.github/workflows/ci.yml"
 "$ROOT_DIR/scripts/write-homebrew-cask.sh" \
   "0.1.0" \
   "https://github.com/yongyaoduan/LiveNotes/releases/download/v0.1.0/LiveNotes-0.1.0.zip" \
@@ -73,6 +74,11 @@ grep -q 'xcrun stapler validate' "$ROOT_DIR/scripts/build-homebrew-app-zip.sh"
 grep -q 'spctl --assess' "$ROOT_DIR/scripts/build-homebrew-app-zip.sh"
 grep -q 'Select Xcode 16.4' "$WORKFLOW_PATH"
 grep -q 'xcode-version: "16.4"' "$WORKFLOW_PATH"
+grep -q 'Select Xcode 16.4' "$CI_WORKFLOW_PATH"
+grep -q 'xcode-version: "16.4"' "$CI_WORKFLOW_PATH"
+grep -q 'timeout-minutes: 8' "$CI_WORKFLOW_PATH"
+grep -q 'LIVENOTES_RECORDING_PIPELINE_LIVE: "0"' "$CI_WORKFLOW_PATH"
+grep -q 'swift test --verbose' "$CI_WORKFLOW_PATH"
 grep -q 'actions/setup-python@v6' "$WORKFLOW_PATH"
 grep -q 'python-version: "3.12"' "$WORKFLOW_PATH"
 grep -q 'scripts/release-requirements.txt' "$WORKFLOW_PATH"
