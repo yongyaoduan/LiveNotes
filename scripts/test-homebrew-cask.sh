@@ -41,11 +41,10 @@ grep -q 'LIVENOTES_SUPPORT_ROOT' "$CASK_PATH"
 grep -q 'LIVENOTES_CURL_BIN' "$CASK_PATH"
 grep -q 'app "LiveNotes.app"' "$CASK_PATH"
 grep -q 'uninstall quit:' "$CASK_PATH"
-grep -q 'uninstall_postflight do' "$CASK_PATH"
-grep -q 'FileUtils.rm_rf' "$CASK_PATH"
-grep -q 'File.join(support_root, "LiveNotesArtifacts")' "$CASK_PATH"
-grep -q 'File.join(support_root, "Runtime")' "$CASK_PATH"
-grep -q 'File.expand_path("~/Library/Preferences/app.livenotes.mac.plist")' "$CASK_PATH"
+grep -q 'delete: \[' "$CASK_PATH"
+grep -q '~/Library/Application Support/LiveNotes/LiveNotesArtifacts' "$CASK_PATH"
+grep -q '~/Library/Application Support/LiveNotes/Runtime' "$CASK_PATH"
+grep -q 'trash:  "~/Library/Preferences/app.livenotes.mac.plist"' "$CASK_PATH"
 grep -q 'zap trash:' "$CASK_PATH"
 grep -q '~/Library/Application Support/LiveNotes' "$CASK_PATH"
 python3 - "$CASK_PATH" <<'PYTHON'
@@ -58,8 +57,6 @@ match = re.search(r"uninstall\b(?P<body>.*?)\n\n  zap\b", content, re.S)
 if not match:
     raise SystemExit("Generated cask is missing an uninstall stanza")
 body = match.group("body")
-if "delete:" in body:
-    raise SystemExit("Regular uninstall must not use Homebrew delete because it requires sudo")
 preserved_paths = [
     "~/Library/Application Support/LiveNotes/sessions.json",
     "~/Library/Application Support/LiveNotes/Audio",
@@ -150,8 +147,6 @@ FAKE_SUPPORT="$WORK_ROOT/support"
 FAKE_CURL="$WORK_ROOT/curl.sh"
 POSTFLIGHT_CASK="$WORK_ROOT/livenotes-postflight.rb"
 POSTFLIGHT_SMOKE="$WORK_ROOT/postflight-smoke.rb"
-UNINSTALL_SMOKE="$WORK_ROOT/uninstall-smoke.rb"
-FAKE_HOME="$WORK_ROOT/home"
 FIXTURE_SHA="e80b71cd14d3cbd65f4173abcbfcf01a545dbca32a72d575108b553a648cc96f"
 mkdir -p "$FAKE_PREFIX/bin"
 
@@ -239,7 +234,6 @@ def homepage(*); end
 def depends_on(*); end
 def app(*); end
 def uninstall(*); end
-def uninstall_postflight(*); end
 def zap(*); end
 
 def postflight(&block)
@@ -264,57 +258,6 @@ if [[ ! -f "$FAKE_SUPPORT/Runtime/pip-install-args.txt" ]]; then
 fi
 if [[ "$(cat "$FAKE_SUPPORT/LiveNotesArtifacts/models/fixture.bin")" != "fixture" ]]; then
   echo "Expected postflight to download and verify model artifacts" >&2
-  exit 1
-fi
-
-mkdir -p \
-  "$FAKE_SUPPORT/Runtime" \
-  "$FAKE_SUPPORT/LiveNotesArtifacts" \
-  "$FAKE_SUPPORT/Exports" \
-  "$FAKE_HOME/Library/Preferences"
-printf 'runtime\n' > "$FAKE_SUPPORT/Runtime/file.txt"
-printf 'artifact\n' > "$FAKE_SUPPORT/LiveNotesArtifacts/file.txt"
-printf 'export\n' > "$FAKE_SUPPORT/Exports/note.md"
-printf 'prefs\n' > "$FAKE_HOME/Library/Preferences/app.livenotes.mac.plist"
-
-cat > "$UNINSTALL_SMOKE" <<'RUBY'
-def cask(_name)
-  yield
-end
-
-def version(*); end
-def sha256(*); end
-def url(*); end
-def name(*); end
-def desc(*); end
-def homepage(*); end
-def depends_on(*); end
-def app(*); end
-def uninstall(*); end
-def zap(*); end
-def postflight(*); end
-
-def uninstall_postflight(&block)
-  block.call
-end
-
-load ARGV.fetch(0)
-RUBY
-
-HOME="$FAKE_HOME" \
-LIVENOTES_SUPPORT_ROOT="$FAKE_SUPPORT" \
-  ruby "$UNINSTALL_SMOKE" "$CASK_PATH"
-
-if [[ -e "$FAKE_SUPPORT/Runtime" || -e "$FAKE_SUPPORT/LiveNotesArtifacts" ]]; then
-  echo "Expected regular uninstall to remove runtime and model artifacts without sudo" >&2
-  exit 1
-fi
-if [[ ! -f "$FAKE_SUPPORT/Exports/note.md" ]]; then
-  echo "Expected regular uninstall to preserve user exports" >&2
-  exit 1
-fi
-if [[ -e "$FAKE_HOME/Library/Preferences/app.livenotes.mac.plist" ]]; then
-  echo "Expected regular uninstall to remove LiveNotes preferences" >&2
   exit 1
 fi
 
