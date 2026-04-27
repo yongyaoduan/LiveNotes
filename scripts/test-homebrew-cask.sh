@@ -50,6 +50,10 @@ grep -q 'python-version: "3.12"' "$WORKFLOW_PATH"
 grep -q 'scripts/release-requirements.txt' "$WORKFLOW_PATH"
 grep -q 'python3.12 -m pip install -r scripts/release-requirements.txt' "$WORKFLOW_PATH"
 grep -q 'LIVENOTES_PYTHON: python3.12' "$WORKFLOW_PATH"
+grep -q 'timeout-minutes: 8' "$WORKFLOW_PATH"
+grep -q 'LIVENOTES_RECORDING_PIPELINE_LIVE: "0"' "$WORKFLOW_PATH"
+grep -q 'swift --version' "$WORKFLOW_PATH"
+grep -q 'swift test --verbose' "$WORKFLOW_PATH"
 if grep -q 'scripts/benchmark-requirements.txt' "$WORKFLOW_PATH"; then
   echo "Release workflow must not install benchmark-only dependencies" >&2
   exit 1

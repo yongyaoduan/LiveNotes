@@ -116,7 +116,14 @@ jobs:
           fi
 
       - name: Run core tests
-        run: cd LiveNotesCore && swift test
+        timeout-minutes: 8
+        env:
+          LIVENOTES_RECORDING_PIPELINE_LIVE: "0"
+          LIVENOTES_RECORDING_PIPELINE_CAPTURE_LIVE: "0"
+        run: |
+          cd LiveNotesCore
+          swift --version
+          swift test --verbose
 
       - name: Build app
         run: xcodebuild build -project LiveNotes.xcodeproj -scheme LiveNotes -destination 'platform=macOS,arch=arm64'
