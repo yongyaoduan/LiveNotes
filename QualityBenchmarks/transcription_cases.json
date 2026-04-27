@@ -1,0 +1,23 @@
+[
+  {
+    "id": "ml_lecture_short",
+    "voice": "Samantha",
+    "text": "Activation functions turn linear model outputs into useful nonlinear signals. Now we move to gradient clipping, which makes training more stable.",
+    "max_wer": 0.18,
+    "required_terms": ["activation functions", "linear model", "nonlinear signals", "gradient clipping", "training"]
+  },
+  {
+    "id": "product_meeting_short",
+    "voice": "Daniel",
+    "text": "The release branch is frozen today. We still need the benchmark report and the support handoff before launch.",
+    "max_wer": 0.18,
+    "required_terms": ["release branch", "benchmark report", "support handoff", "launch"]
+  },
+  {
+    "id": "tutorial_instruction_short",
+    "voice": "Samantha",
+    "text": "Open the notebook, run the preprocessing cell, and compare the validation accuracy before changing the learning rate.",
+    "max_wer": 0.18,
+    "required_terms": ["notebook", "preprocessing", "validation accuracy", "learning rate"]
+  }
+]

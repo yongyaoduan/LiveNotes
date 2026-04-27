@@ -18,12 +18,6 @@ struct ContentView: View {
         .sheet(isPresented: $model.consentSheetVisible) {
             ConsentSheet()
         }
-        .sheet(isPresented: $model.exportSheetVisible) {
-            ExportSheet()
-        }
-        .sheet(isPresented: $model.settingsSheetVisible) {
-            SettingsSheet()
-        }
         .sheet(isPresented: $model.stopConfirmationVisible) {
             StopRecordingSheet()
         }
@@ -35,62 +29,91 @@ private struct SessionSidebar: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Live Notes")
+            Text("LiveNotes")
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(LiveNotesStyle.graphite)
 
-            Button {
-                model.showNewRecording()
-            } label: {
-                Label("New Recording", systemImage: "record.circle")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            if model.canShowNewRecording {
+                Button {
+                    model.showNewRecording()
+                } label: {
+                    Label("New Recording", systemImage: "record.circle")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.accentColor)
+                .help("Start a new local recording.")
+            } else {
+                Button {
+                    model.showNewRecording()
+                } label: {
+                    Label("New Recording", systemImage: "record.circle")
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .buttonStyle(.bordered)
+                .disabled(true)
+                if let reason = model.newRecordingUnavailableReason {
+                    Text(reason)
+                        .font(.system(size: 11))
+                        .foregroundStyle(LiveNotesStyle.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             }
-            .buttonStyle(.borderedProminent)
-            .tint(LiveNotesStyle.recording)
 
             Text("Recordings")
                 .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(LiveNotesStyle.secondary)
                 .padding(.top, 4)
 
-            ScrollView {
-                VStack(spacing: 6) {
-                    ForEach(model.store.sessions) { session in
-                        Button {
-                            model.select(session)
-                        } label: {
-                            SessionRow(
-                                session: session,
-                                selected: session.id == model.store.selectedSessionID
-                            )
+            if model.store.sessions.isEmpty {
+                EmptyRecordingsList()
+            } else {
+                ScrollView {
+                    VStack(spacing: 6) {
+                        ForEach(model.store.sessions) { session in
+                            Button {
+                                model.select(session)
+                            } label: {
+                                SessionRow(
+                                    session: session,
+                                    selected: session.id == model.store.selectedSessionID
+                                )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityIdentifier("session-\(session.title)")
+                            .accessibilityLabel("\(session.title), \(session.status.label)")
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityIdentifier("session-\(session.title)")
-                        .accessibilityLabel("\(session.title), \(session.status.label)")
                     }
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
                 }
+                .accessibilityElement(children: .contain)
             }
-            .accessibilityElement(children: .contain)
 
             Spacer()
 
-            TextField("Search", text: .constant(""))
-                .textFieldStyle(.roundedBorder)
-
-            Button {
-                model.settingsSheetVisible = true
-            } label: {
-                Label("Settings", systemImage: "gearshape")
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            if let persistenceStatus = model.persistenceStatus {
+                Text(persistenceStatus)
+                    .font(.system(size: 11))
+                    .foregroundStyle(LiveNotesStyle.recording)
             }
-            .buttonStyle(.plain)
-
-            Text("Auto-save on")
-                .font(.system(size: 11))
-                .foregroundStyle(LiveNotesStyle.secondary)
         }
         .padding(18)
         .background(LiveNotesStyle.sidebar)
+    }
+}
+
+private struct EmptyRecordingsList: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("No recordings yet")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(LiveNotesStyle.graphite)
+            Text("Start a recording to build your local library.")
+                .font(.system(size: 12))
+                .foregroundStyle(LiveNotesStyle.secondary)
+        }
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -118,6 +141,8 @@ private struct SessionRow: View {
         }
         .padding(.vertical, 9)
         .padding(.horizontal, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .contentShape(Rectangle())
         .background(selected ? Color.white.opacity(0.70) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
@@ -147,12 +172,16 @@ private struct MainSurface: View {
 
             if let session = model.selectedSession {
                 switch session.status {
+                case .preparing:
+                    PreparingView(session: session)
                 case .finalizing:
                     FinalizingView(session: session)
                 case .saved:
                     SavedReview(session: session)
                 case .recovered:
                     RecoveryView(session: session)
+                case let .failed(message):
+                    FailedView(session: session, message: message)
                 default:
                     LiveRecordingView(session: session)
                 }
@@ -182,35 +211,20 @@ private struct LiveRecordingView: View {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            RecordingBar()
+            RecordingBar(session: session)
                 .padding(.bottom, 22)
         }
     }
 }
 
 private struct TopBar: View {
-    @EnvironmentObject private var model: AppModel
     var session: RecordingSession
 
     var body: some View {
         HStack(spacing: 10) {
             Text(session.title)
                 .font(.system(size: 18, weight: .semibold))
-            Chip("English → Chinese")
-            Chip("Local Only")
-            Chip("Saved 2 sec ago")
             Spacer()
-            Button("Export") {
-                model.exportSheetVisible = true
-            }
-            .accessibilityIdentifier("topbar-export-button")
-            .disabled(!isSaved)
-            Button("Stop") {
-                model.confirmStop()
-            }
-            .accessibilityIdentifier("topbar-stop-button")
-            .buttonStyle(.borderedProminent)
-            .tint(LiveNotesStyle.recording)
         }
         .padding(.horizontal, 24)
         .padding(.vertical, 14)
@@ -220,12 +234,6 @@ private struct TopBar: View {
         }
     }
 
-    private var isSaved: Bool {
-        if case .saved = session.status {
-            return true
-        }
-        return false
-    }
 }
 
 private struct TranscriptColumn: View {
@@ -251,13 +259,7 @@ private struct TranscriptColumn: View {
                                 .font(.system(size: 12, weight: .medium))
                                 .foregroundStyle(LiveNotesStyle.recording)
                         }
-                        Text("Now we move to optimization and training stability.")
-                            .font(.system(size: 21, weight: .semibold))
-                            .foregroundStyle(LiveNotesStyle.graphite)
-                        Text("Translation")
-                            .font(.system(size: 11, weight: .medium))
-                            .foregroundStyle(LiveNotesStyle.secondary)
-                        Text(DemoTranslation.optimization)
+                        Text(session.transcript.isEmpty ? "Waiting for speech..." : "Listening for the next complete sentence...")
                             .font(.system(size: 15))
                             .foregroundStyle(LiveNotesStyle.secondary)
                     }
@@ -265,10 +267,6 @@ private struct TranscriptColumn: View {
                 }
                 .frame(maxWidth: 780, alignment: .leading)
             }
-
-            Button("Jump to Live") {}
-                .buttonStyle(.bordered)
-                .controlSize(.small)
         }
         .padding(28)
     }
@@ -311,108 +309,157 @@ private struct CurrentTopicPanel: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
-            Text("Current Topic")
-                .font(.system(size: 16, weight: .semibold))
+            HStack {
+                Text("Current Topic")
+                    .font(.system(size: 16, weight: .semibold))
+                Spacer()
+                if canSplitTopic {
+                    Button {
+                        model.createNewTopic()
+                    } label: {
+                        Label("Split Topic", systemImage: "scissors")
+                    }
+                    .buttonStyle(.borderless)
+                    .controlSize(.small)
+                    .accessibilityIdentifier("topic-panel-split-topic-button")
+                }
+            }
 
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Rectangle()
-                        .fill(LiveNotesStyle.liveBlue)
-                        .frame(width: 3)
-                    VStack(alignment: .leading, spacing: 4) {
+            ScrollView {
+                if let topic = currentTopic {
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(alignment: .top, spacing: 10) {
+                            Rectangle()
+                                .fill(LiveNotesStyle.liveBlue)
+                                .frame(width: 3)
+                                .clipShape(Capsule())
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(topic.title)
+                                    .font(.system(size: 17, weight: .semibold))
+                                Text(timeRangeLabel(start: topic.startTime, end: topic.endTime))
+                                    .font(.system(size: 12))
+                                    .foregroundStyle(LiveNotesStyle.secondary)
+                            }
+                        }
+
+                        if topic.hasSummary {
+                            SectionText(title: "Summary", lines: [topic.summary])
+                        }
+                        if !topic.keyPoints.isEmpty {
+                            SectionText(title: "Key Points", lines: topic.keyPoints)
+                        }
+                        if !topic.hasGeneratedNotes {
+                            Text("Notes will appear after more speech is processed.")
+                                .font(.system(size: 13))
+                                .foregroundStyle(LiveNotesStyle.secondary)
+                        }
+                        if !topic.questions.isEmpty {
+                            SectionText(title: "Questions", lines: topic.questions)
+                        }
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .softPanel()
+                } else {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(model.currentTopicTitle)
                             .font(.system(size: 17, weight: .semibold))
-                        Text("14:43 - now")
-                            .font(.system(size: 12))
+                        Text("Topic notes will appear after enough speech is processed.")
+                            .font(.system(size: 13))
                             .foregroundStyle(LiveNotesStyle.secondary)
                     }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .softPanel()
+                    .accessibilityIdentifier("topic-empty-state")
                 }
-
-                SectionText(
-                    title: "Summary",
-                    lines: ["Activation functions add non-linearity so outputs can represent more useful patterns."]
-                )
-                SectionText(
-                    title: "Key Points",
-                    lines: [
-                        "They transform linear outputs.",
-                        "They help deeper models express complex relationships.",
-                        "They affect training behavior."
-                    ]
-                )
-                SectionText(
-                    title: "Questions",
-                    lines: ["Why does non-linearity matter?"]
-                )
             }
-            .padding(14)
-            .softPanel()
-
-            HStack {
-                Button("Rename") {}
-                Button("New Topic") {
-                    model.createNewTopic()
-                }
-                .accessibilityIdentifier("topic-panel-new-topic-button")
-            }
-            .controlSize(.small)
-
-            Text("Previous Topics")
-                .font(.system(size: 13, weight: .medium))
-                .foregroundStyle(LiveNotesStyle.secondary)
-            Text("Model Parameters")
-            Text("Data Preparation")
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .scrollIndicators(.automatic)
 
             Spacer()
         }
         .padding(22)
-        .background(Color.white.opacity(0.28))
+        .background(LiveNotesStyle.background)
+    }
+
+    private var currentTopic: TopicNote? {
+        session.topics.last
+    }
+
+    private var canSplitTopic: Bool {
+        guard let currentTopic else { return false }
+        return currentTopic.title == model.currentTopicTitle
+            && currentTopic.hasGeneratedNotes
     }
 }
 
 private struct RecordingBar: View {
     @EnvironmentObject private var model: AppModel
+    var session: RecordingSession
 
     var body: some View {
         HStack(spacing: 16) {
-            Circle()
-                .fill(model.paused ? LiveNotesStyle.secondary : LiveNotesStyle.recording)
-                .frame(width: 9, height: 9)
-            Text(model.paused ? "Paused" : "15:08")
-                .font(.system(size: 13, weight: .medium))
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(isPaused ? LiveNotesStyle.secondary : LiveNotesStyle.recording)
+                    .frame(width: 8, height: 8)
+                Text(session.status.label)
+                    .font(.system(size: 13, weight: .medium))
+                    .accessibilityIdentifier("recording-duration-label")
+                    .accessibilityLabel("Recording duration")
+                    .accessibilityValue(session.status.label)
+            }
+            .frame(minWidth: 128, alignment: .leading)
 
-            Capsule()
-                .fill(LiveNotesStyle.line)
-                .frame(width: 68, height: 5)
-                .overlay(alignment: .leading) {
-                    Capsule()
-                        .fill(LiveNotesStyle.recording)
-                        .frame(width: 42, height: 5)
-                }
-
-            Button(model.paused ? "Resume" : "Pause") {
+            RecordingControlButton(
+                title: isPaused ? "Resume" : "Pause",
+                systemImage: isPaused ? "play.fill" : "pause.fill"
+            ) {
                 model.togglePause()
             }
             .accessibilityIdentifier("recording-bar-pause-button")
-            Button("New Topic") {
-                model.createNewTopic()
-            }
-            .accessibilityIdentifier("recording-bar-new-topic-button")
-            Button("Bookmark") {}
-            Button("Stop") {
-                model.confirmStop()
-            }
-            .accessibilityIdentifier("recording-bar-stop-button")
 
-            Text(model.paused ? "Paused" : "Recording · AI catching up · Auto-saved")
-                .font(.system(size: 12))
-                .foregroundStyle(LiveNotesStyle.secondary)
+            Button(role: .destructive) {
+                model.confirmStop()
+            } label: {
+                Label("Stop", systemImage: "stop.fill")
+            }
+            .buttonStyle(.borderedProminent)
+            .controlSize(.regular)
+            .tint(LiveNotesStyle.recording)
+            .accessibilityIdentifier("recording-bar-stop-button")
         }
         .padding(.horizontal, 22)
         .padding(.vertical, 14)
         .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
-        .shadow(color: .black.opacity(0.10), radius: 18, y: 8)
+        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .stroke(Color.white.opacity(0.46))
+        )
+        .shadow(color: .black.opacity(0.11), radius: 18, y: 8)
+    }
+
+    private var isPaused: Bool {
+        if case .paused = session.status {
+            return true
+        }
+        return false
+    }
+}
+
+private struct RecordingControlButton: View {
+    var title: String
+    var systemImage: String
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+        }
+        .buttonStyle(.bordered)
+        .controlSize(.regular)
     }
 }
 
@@ -421,23 +468,82 @@ private struct FinalizingView: View {
     var session: RecordingSession
 
     var body: some View {
+        let progress = session.status.finalizingProgress ?? 0
+        let completed = progress >= 1.0
         VStack(spacing: 18) {
-            Text("Finalizing recording")
+            Text(completed ? "Recording saved" : "Finalizing recording")
                 .font(.system(size: 26, weight: .semibold))
-            ChecklistRow(text: "Saving audio", done: true)
-            ChecklistRow(text: "Finalizing transcript", done: false)
-            ChecklistRow(text: "Completing topics", done: false)
-            ChecklistRow(text: "Saving notes", done: false)
-            ProgressView(value: 0.62)
+            ChecklistRow(text: "Saving audio", done: progress >= 0.20)
+            ChecklistRow(text: "Finalizing transcript", done: progress >= 0.50)
+            ChecklistRow(text: "Completing topics", done: progress >= 0.75)
+            ChecklistRow(text: "Saving notes", done: progress >= 1.00)
+            ProgressView(value: progress)
                 .frame(width: 360)
-            Text("You can close this window. Saving continues in the background.")
+            Text(completed ? "Ready to review" : session.status.label)
                 .foregroundStyle(LiveNotesStyle.secondary)
-            HStack {
-                Button("Keep Working") {}
-                Button("Open When Done") {
-                    model.openSavedReview()
+            Button(completed ? "Open Review" : "Open When Done") {
+                model.openSavedReview()
+            }
+            .accessibilityIdentifier("open-when-done-button")
+            .disabled(progress < 1.0)
+            .buttonStyle(.borderedProminent)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct PreparingView: View {
+    var session: RecordingSession
+
+    var body: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .controlSize(.large)
+            Text("Preparing recording")
+                .font(.system(size: 26, weight: .semibold))
+            Text(session.title)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(LiveNotesStyle.secondary)
+            Text("Checking microphone access and local models.")
+                .foregroundStyle(LiveNotesStyle.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct FailedView: View {
+    @EnvironmentObject private var model: AppModel
+    var session: RecordingSession
+    var message: String
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 32))
+                .foregroundStyle(LiveNotesStyle.amber)
+            Text("Recording failed")
+                .font(.system(size: 26, weight: .semibold))
+            Text(session.title)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(LiveNotesStyle.secondary)
+            Text(message)
+                .foregroundStyle(LiveNotesStyle.secondary)
+            HStack(spacing: 10) {
+                Button {
+                    model.showNewRecording()
+                } label: {
+                    Label("New Recording", systemImage: "record.circle")
                 }
                 .buttonStyle(.borderedProminent)
+                .tint(.accentColor)
+                if message.localizedCaseInsensitiveContains("microphone") {
+                    Button {
+                        model.openMicrophoneSettings()
+                    } label: {
+                        Label("Microphone Settings", systemImage: "mic")
+                    }
+                    .buttonStyle(.bordered)
+                }
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -454,84 +560,182 @@ private struct SavedReview: View {
                 VStack(alignment: .leading) {
                     Text(session.title)
                         .font(.system(size: 20, weight: .semibold))
-                    Text("Saved today 10:02")
+                    Text(session.status.label)
                         .font(.system(size: 12))
                         .foregroundStyle(LiveNotesStyle.secondary)
                 }
                 Spacer()
-                Button("Export") {
-                    model.exportSheetVisible = true
+                Button {
+                    model.exportMarkdown(session)
+                } label: {
+                    Label("Export Markdown", systemImage: "square.and.arrow.up")
                 }
                 .accessibilityIdentifier("saved-review-export-button")
             }
             .padding(24)
             .background(LiveNotesStyle.surface)
 
-            HStack(spacing: 0) {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Topics")
-                        .font(.system(size: 15, weight: .semibold))
-                    ForEach(session.topics) { topic in
-                        VStack(alignment: .leading, spacing: 3) {
-                            Text(topic.title)
-                                .font(.system(size: 13, weight: topic.title == "Activation Functions" ? .semibold : .regular))
-                            Text(timeRangeLabel(start: topic.startTime, end: topic.endTime))
-                                .font(.system(size: 11))
-                                .foregroundStyle(LiveNotesStyle.secondary)
-                        }
-                        .padding(.vertical, 8)
+            if let exportStatus = model.exportStatus {
+                Text(exportStatus)
+                    .font(.system(size: 12))
+                    .foregroundStyle(
+                        exportStatus == "Exported Markdown"
+                            ? LiveNotesStyle.saved
+                            : LiveNotesStyle.recording
+                    )
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
+                    .padding(.vertical, 8)
+                    .background(LiveNotesStyle.surface)
+                    .overlay(alignment: .bottom) {
+                        Rectangle().fill(LiveNotesStyle.line).frame(height: 1)
                     }
-                    Spacer()
-                }
-                .padding(20)
-                .frame(width: 260)
-                .background(Color.white.opacity(0.24))
+            }
 
-                Divider()
-
-                VStack(alignment: .leading, spacing: 16) {
-                    HStack {
-                        Text("Activation Functions")
-                            .font(.system(size: 24, weight: .semibold))
-                        Spacer()
-                        Picker("", selection: .constant("Notes")) {
-                            Text("Notes").tag("Notes")
-                            Text("Transcript").tag("Transcript")
+            GeometryReader { geometry in
+                if geometry.size.width < 860 {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 28) {
+                            SavedTranscriptSection(session: session)
+                            Divider()
+                            SavedTopicNotesSection(session: session)
                         }
-                        .pickerStyle(.segmented)
-                        .frame(width: 180)
+                        .padding(28)
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
                     }
+                } else {
+                    HStack(spacing: 0) {
+                        ScrollView {
+                            SavedTranscriptSection(session: session)
+                                .padding(28)
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
+                        }
+                        .frame(minWidth: 360, maxWidth: .infinity, alignment: .leading)
 
-                    SectionText(title: "Summary", lines: [DemoData.activationTopic.summary])
-                    SectionText(title: "Key Points", lines: DemoData.activationTopic.keyPoints)
-                    SectionText(title: "Questions", lines: DemoData.activationTopic.questions)
-                    Text("Transcript Links")
-                        .font(.system(size: 13, weight: .semibold))
-                    Text("14:47 · Jump to audio")
-                        .foregroundStyle(LiveNotesStyle.liveBlue)
-                    Spacer()
-                    AudioStrip()
+                        Divider()
+
+                        ScrollView {
+                            SavedTopicNotesSection(session: session)
+                                .padding(24)
+                                .frame(maxWidth: .infinity, alignment: .topLeading)
+                        }
+                        .frame(width: min(440, max(360, geometry.size.width * 0.42)))
+                    }
                 }
-                .padding(28)
             }
         }
     }
 }
 
+private struct SavedTranscriptSection: View {
+    var session: RecordingSession
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if !session.transcript.isEmpty {
+                Text("Transcript")
+                    .font(.system(size: 13, weight: .semibold))
+                ForEach(session.transcript) { sentence in
+                    TranscriptSentenceView(sentence: sentence)
+                }
+            }
+        }
+    }
+}
+
+private struct SavedTopicNotesSection: View {
+    var session: RecordingSession
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Topic Notes")
+                .font(.system(size: 16, weight: .semibold))
+            if session.topics.isEmpty {
+                Text("No topics yet")
+                    .foregroundStyle(LiveNotesStyle.secondary)
+            } else {
+                ForEach(session.topics) { topic in
+                    SavedTopicCard(topic: topic)
+                }
+            }
+        }
+    }
+}
+
+private struct SavedTopicCard: View {
+    var topic: TopicNote
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(topic.title)
+                .font(.system(size: 16, weight: .semibold))
+            Text(timeRangeLabel(start: topic.startTime, end: topic.endTime))
+                .font(.system(size: 12))
+                .foregroundStyle(LiveNotesStyle.secondary)
+            if topic.hasSummary {
+                SectionText(title: "Summary", lines: [topic.summary])
+            }
+            if !topic.keyPoints.isEmpty {
+                SectionText(title: "Key Points", lines: topic.keyPoints)
+            }
+            if !topic.hasGeneratedNotes {
+                Text("Notes will appear after more speech is processed.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(LiveNotesStyle.secondary)
+            }
+            if !topic.questions.isEmpty {
+                SectionText(title: "Questions", lines: topic.questions)
+            }
+        }
+        .padding(14)
+        .softPanel()
+    }
+}
+
 private struct RecoveryView: View {
+    @EnvironmentObject private var model: AppModel
     var session: RecordingSession
 
     var body: some View {
         VStack(spacing: 14) {
             Text("Recovered Recording")
                 .font(.system(size: 24, weight: .semibold))
-            Text("38 min · Last saved 09:42 · Audio intact")
+            Text(session.status.label)
                 .foregroundStyle(LiveNotesStyle.secondary)
-            Text("Live Notes found an unfinished recording.")
-            HStack {
-                Button("Recover Session") {}
-                Button("Delete Recording", role: .destructive) {}
-                Button("Show in Finder") {}
+            Text(session.audioFileName == nil
+                 ? "LiveNotes found an unfinished recording in the local library."
+                 : "LiveNotes found an unfinished recording with a preserved audio file.")
+                .foregroundStyle(LiveNotesStyle.secondary)
+            HStack(spacing: 10) {
+                Button {
+                    model.processRecoveredAudio(session)
+                } label: {
+                    Label("Process Audio", systemImage: "waveform")
+                }
+                .buttonStyle(.borderedProminent)
+                .disabled(!model.canProcessRecoveredAudio(session))
+                if model.canShowNewRecording {
+                    Button {
+                        model.showNewRecording()
+                    } label: {
+                        Label("New Recording", systemImage: "record.circle")
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("recovered-new-recording-button")
+                } else {
+                    Button {
+                        model.selectActiveRecording()
+                    } label: {
+                        Label("Return to Active Recording", systemImage: "record.circle")
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("return-to-active-recording-button")
+                }
+            }
+            if let reason = model.recoveredProcessingUnavailableReason(session) {
+                Text(reason)
+                    .font(.system(size: 12))
+                    .foregroundStyle(LiveNotesStyle.secondary)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -543,7 +747,7 @@ private struct EmptySelectionView: View {
         VStack(spacing: 12) {
             Text("Select a recording or start a new one")
                 .font(.system(size: 26, weight: .semibold))
-            Text("Live transcription, translation, topic notes, and saved audio.")
+            Text("Transcript, translation, topic notes, and local saves.")
                 .foregroundStyle(LiveNotesStyle.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -557,15 +761,17 @@ private struct StopRecordingSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Stop recording?")
                 .font(.system(size: 22, weight: .semibold))
-            Text("The audio and notes will be saved automatically.")
+            Text("The recording will finish and the local library will be updated.")
             HStack {
                 Spacer()
                 Button("Cancel") {
                     model.stopConfirmationVisible = false
                 }
+                .accessibilityIdentifier("stop-cancel-button")
                 Button("Stop and Save") {
                     model.stopAndFinalize()
                 }
+                .accessibilityIdentifier("stop-save-button")
                 .buttonStyle(.borderedProminent)
                 .tint(LiveNotesStyle.recording)
             }
@@ -585,20 +791,20 @@ private struct NewRecordingSheet: View {
             TextField("Recording Name", text: $model.recordingName)
                 .textFieldStyle(.roundedBorder)
                 .accessibilityLabel("Recording Name")
-            LabeledContent("Spoken Language") {
-                Text(model.spokenLanguage)
-            }
-            LabeledContent("Translate To") {
-                Text(model.translateTo)
-            }
-            LabeledContent("Mode") {
-                Text("Local Only")
-            }
-            LabeledContent("Audio Input") {
-                Text("MacBook Pro Microphone")
-            }
-            LabeledContent("Save To") {
-                Text("Live Notes Library")
+            if let reason = model.newRecordingUnavailableReason {
+                Text(reason)
+                    .font(.system(size: 12))
+                    .foregroundStyle(LiveNotesStyle.recording)
+                    .accessibilityIdentifier("recording-unavailable-reason")
+                if reason.localizedCaseInsensitiveContains("model") {
+                    Button {
+                        model.openModelInstallLocation()
+                    } label: {
+                        Label("Open Install Location", systemImage: "folder")
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("open-model-install-location-button")
+                }
             }
             HStack {
                 Spacer()
@@ -610,8 +816,9 @@ private struct NewRecordingSheet: View {
                     model.requestRecordingConsent()
                 }
                 .accessibilityIdentifier("new-recording-start-button")
+                .disabled(!model.canRequestRecording)
                 .buttonStyle(.borderedProminent)
-                .tint(LiveNotesStyle.recording)
+                .tint(.accentColor)
             }
         }
         .padding(26)
@@ -638,101 +845,18 @@ private struct ConsentSheet: View {
                     model.consentSheetVisible = false
                     model.newRecordingSheetVisible = true
                 }
+                .accessibilityIdentifier("recording-consent-back-button")
                 Button("Start") {
                     model.startRecording()
                 }
-                .disabled(!model.consentAccepted)
+                .accessibilityIdentifier("recording-consent-start-button")
+                .disabled(!model.consentAccepted || !model.canRequestRecording)
                 .buttonStyle(.borderedProminent)
-                .tint(LiveNotesStyle.recording)
+                .tint(.accentColor)
             }
         }
         .padding(26)
         .frame(width: 440)
-    }
-}
-
-private struct ExportSheet: View {
-    @EnvironmentObject private var model: AppModel
-
-    var body: some View {
-        HStack(alignment: .top, spacing: 24) {
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Export")
-                    .font(.system(size: 22, weight: .semibold))
-                Text("Markdown")
-                Text("PDF")
-                Text("TXT")
-                Text("SRT")
-                Text("VTT")
-            }
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Content")
-                    .font(.system(size: 15, weight: .semibold))
-                Toggle("Topic Notes", isOn: .constant(true))
-                Toggle("Transcript", isOn: .constant(true))
-                Toggle("Translation", isOn: .constant(true))
-                Toggle("Audio Timestamps", isOn: .constant(true))
-                Text("Destination is not writable")
-                    .font(.system(size: 12))
-                    .foregroundStyle(LiveNotesStyle.amber)
-                Button("Choose Another Folder") {}
-            }
-            VStack(alignment: .leading, spacing: 10) {
-                Text("Preview")
-                    .font(.system(size: 15, weight: .semibold))
-                Text("# Neural Networks")
-                Text("## Activation Functions")
-                Text("- They transform linear outputs.")
-                Text("[14:43] Activation functions turn linear outputs into useful signals.")
-                    .font(.system(size: 12))
-                    .foregroundStyle(LiveNotesStyle.secondary)
-                Spacer()
-                HStack {
-                Button("Cancel") {
-                    model.exportSheetVisible = false
-                }
-                    .accessibilityIdentifier("export-cancel-button")
-                Button("Export") {
-                    model.exportSheetVisible = false
-                }
-                    .accessibilityIdentifier("export-confirm-button")
-                .buttonStyle(.borderedProminent)
-            }
-            }
-            .frame(width: 300)
-        }
-        .padding(26)
-        .frame(width: 760, height: 420)
-    }
-}
-
-private struct SettingsSheet: View {
-    @EnvironmentObject private var model: AppModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Settings")
-                .font(.system(size: 22, weight: .semibold))
-            SettingsRow("Audio Input", value: "MacBook Pro Microphone")
-            SettingsRow("Recording Quality", value: "Balanced")
-            SettingsRow("Spoken Language", value: "Auto")
-            SettingsRow("Translate To", value: "Chinese")
-            SettingsRow("Mode", value: "Local Only")
-            SettingsRow("Local Models", value: model.localModelStatus)
-            SettingsRow("Save Location", value: "Live Notes Library")
-            SettingsRow("Default Export", value: "Markdown")
-            Text("Audio and notes stay on this Mac in Local Only mode.")
-                .font(.system(size: 12))
-                .foregroundStyle(LiveNotesStyle.secondary)
-            HStack {
-                Spacer()
-                Button("Done") {
-                    model.settingsSheetVisible = false
-                }
-            }
-        }
-        .padding(26)
-        .frame(width: 460)
     }
 }
 
@@ -744,12 +868,36 @@ private struct SectionText: View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.system(size: 13, weight: .semibold))
-            ForEach(lines, id: \.self) { line in
-                Text("• \(line)")
-                    .font(.system(size: 13))
-                    .foregroundStyle(LiveNotesStyle.graphite)
+            ForEach(displayLines, id: \.self) { line in
+                HStack(alignment: .top, spacing: 7) {
+                    Circle()
+                        .fill(LiveNotesStyle.secondary.opacity(0.55))
+                        .frame(width: 4, height: 4)
+                        .padding(.top, 7)
+                    Text(line)
+                        .font(.system(size: 13))
+                        .foregroundStyle(LiveNotesStyle.graphite)
+                }
             }
         }
+    }
+
+    private var displayLines: [String] {
+        lines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+    }
+}
+
+private extension TopicNote {
+    var hasSummary: Bool {
+        !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            && summary != "No summary yet."
+    }
+
+    var hasGeneratedNotes: Bool {
+        hasSummary
+            || !keyPoints.isEmpty
+            || !questions.isEmpty
     }
 }
 
@@ -767,52 +915,10 @@ private struct ChecklistRow: View {
     }
 }
 
-private struct AudioStrip: View {
-    var body: some View {
-        HStack {
-            Button("Play") {}
-            Text("14:43")
-            Capsule()
-                .fill(LiveNotesStyle.line)
-                .frame(height: 5)
-            Text("1.25x")
-        }
-    }
-}
-
-private struct Chip: View {
-    var text: String
-
-    init(_ text: String) {
-        self.text = text
-    }
-
-    var body: some View {
-        Text(text)
-            .font(.system(size: 12, weight: .medium))
-            .padding(.horizontal, 9)
-            .padding(.vertical, 5)
-            .background(Color.white.opacity(0.68))
-            .clipShape(RoundedRectangle(cornerRadius: 7, style: .continuous))
-            .overlay(
-                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                    .stroke(LiveNotesStyle.line)
-            )
-    }
-}
-
-private func SettingsRow(_ title: String, value: String) -> some View {
-    HStack {
-        Text(title)
-        Spacer()
-        Text(value)
-            .foregroundStyle(LiveNotesStyle.secondary)
-    }
-}
-
 private func timeLabel(_ seconds: Int) -> String {
-    let minutes = seconds / 60
-    let remainingSeconds = seconds % 60
+    let safeSeconds = max(0, seconds)
+    let minutes = safeSeconds / 60
+    let remainingSeconds = safeSeconds % 60
     return String(format: "%02d:%02d", minutes, remainingSeconds)
 }
 

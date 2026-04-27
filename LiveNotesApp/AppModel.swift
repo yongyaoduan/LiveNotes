@@ -1,60 +1,137 @@
 import Foundation
+import AppKit
 import SwiftUI
 
+@MainActor
 final class AppModel: ObservableObject {
     @Published var store: SessionStore
     @Published var newRecordingSheetVisible = false
     @Published var consentSheetVisible = false
-    @Published var exportSheetVisible = false
-    @Published var settingsSheetVisible = false
     @Published var stopConfirmationVisible = false
     @Published var consentAccepted = false
     @Published var recordingName = "Untitled Recording"
-    @Published var spokenLanguage = "Auto"
-    @Published var translateTo = "Chinese"
-    @Published var currentTopicTitle = "Activation Functions"
-    @Published var paused = false
+    @Published var currentTopicTitle = "Decision Point"
     @Published var localModelStatus: String
+    @Published var recordingEngineStatus: String
+    @Published var persistenceStatus: String?
+    @Published var exportStatus: String?
 
     private let sessionFileStore: SessionFileStore?
+    private let fixtureRecordingEnabled: Bool
+    private let audioRecorder: AudioRecordingControlling?
+    private let inferenceRunner: (any RecordingInferenceRunning)?
+    private let inferenceArtifactsRootURL: URL?
+    private var cachedReadyArtifactsRootURL: URL?
+    private var finalizingDurations: [UUID: Int] = [:]
+    private var recordingClocks: [UUID: RecordingClock] = [:]
+    private var activeAudioURLs: [UUID: URL] = [:]
+    private var liveDurationTask: Task<Void, Never>?
 
     init(
         store: SessionStore,
         sessionFileStore: SessionFileStore? = nil,
-        localModelStatus: String = "Ready"
+        localModelStatus: String = "Ready",
+        recordingEngineStatus: String = "Ready",
+        fixtureRecordingEnabled: Bool = false,
+        audioRecorder: AudioRecordingControlling? = nil,
+        inferenceRunner: (any RecordingInferenceRunning)? = nil,
+        inferenceArtifactsRootURL: URL? = nil
     ) {
         self.store = store
         self.sessionFileStore = sessionFileStore
         self.localModelStatus = localModelStatus
+        self.recordingEngineStatus = recordingEngineStatus
+        self.fixtureRecordingEnabled = fixtureRecordingEnabled
+        self.audioRecorder = audioRecorder
+        self.inferenceRunner = inferenceRunner
+        self.inferenceArtifactsRootURL = inferenceArtifactsRootURL
+        resumeRecordingClocksForLoadedSessions()
+        startLiveDurationUpdates()
     }
 
     static func launchModel(arguments: [String]) -> AppModel {
         if arguments.contains("--ui-test") {
             return uiTestModel(arguments: arguments)
         }
-        let fileStore = SessionFileStore(url: defaultSessionStoreURL())
-        let sessions = (try? fileStore.load()) ?? []
-        let selectedSessionID = sessions.first?.id
-        return AppModel(
-            store: SessionStore(sessions: sessions, selectedSessionID: selectedSessionID),
-            sessionFileStore: fileStore,
-            localModelStatus: bundledModelStatus()
+        let fileStore = SessionFileStore(url: sessionStoreURL(arguments: arguments))
+        let loadResult = fileStore.loadPreservingCorruptFile()
+        var store = SessionStore(
+            sessions: loadResult.sessions,
+            selectedSessionID: loadResult.sessions.first?.id
         )
+        let recoveredCount = store.recoverInterruptedSessions()
+        let helperURL = recordingPipelineHelperURL()
+        let pythonExecutable = productionPythonExecutable()
+        let modelReadiness = bundledModelReadiness()
+        let model = AppModel(
+            store: store,
+            sessionFileStore: fileStore,
+            localModelStatus: modelReadiness.userFacingStatus,
+            recordingEngineStatus: productionRecordingEngineStatus(
+                helperURL: helperURL,
+                pythonExecutable: pythonExecutable
+            ),
+            audioRecorder: AVAudioRecordingEngine(),
+            inferenceRunner: helperURL.map {
+                LocalMLXInferenceRunner(
+                    pythonExecutable: pythonExecutable,
+                    helperScriptURL: $0
+                )
+            }
+        )
+        model.cachedReadyArtifactsRootURL = modelReadiness.readyRoot
+        if recoveredCount > 0 {
+            try? fileStore.save(store.sessions)
+            model.persistenceStatus = "Recovered unfinished recordings."
+            model.retryRecoveredInferenceIfReady()
+        } else {
+            model.persistenceStatus = loadResult.recovery?.message
+        }
+        return model
     }
 
     private static func uiTestModel(arguments: [String]) -> AppModel {
-        if let stateIndex = arguments.firstIndex(of: "--ui-state"),
-           arguments.indices.contains(stateIndex + 1) {
-            switch arguments[stateIndex + 1] {
-            case "saved":
-                return AppModel(store: DemoData.savedStore())
-            case "live":
-                return AppModel(store: DemoData.liveStore())
-            default:
-                return AppModel(store: DemoData.homeStore())
-            }
+        let localModelStatus = uiModelStatus(arguments: arguments)
+        let store: SessionStore
+        switch argumentValue("--ui-state", in: arguments) {
+        case "saved":
+            store = DemoData.savedStore()
+        case "live":
+            store = DemoData.liveStore()
+        case "paused":
+            store = DemoData.pausedStore()
+        case "preparing":
+            store = DemoData.preparingStore()
+        case "failed":
+            store = DemoData.failedStore()
+        case "finalizing-complete":
+            store = DemoData.finalizingCompleteStore()
+        case "recovered":
+            store = DemoData.recoveredStore()
+        case "empty":
+            store = DemoData.emptyStore()
+        default:
+            store = DemoData.homeStore()
         }
-        return AppModel(store: DemoData.homeStore())
+        let fileStore = uiTestSessionFileStore(arguments: arguments)
+        let simulatedRuntime = argumentValue("--ui-recording-runtime", in: arguments) == "simulated"
+        try? fileStore?.save(store.sessions)
+        let model = AppModel(
+            store: store,
+            sessionFileStore: fileStore,
+            localModelStatus: localModelStatus,
+            fixtureRecordingEnabled: !simulatedRuntime,
+            audioRecorder: simulatedRuntime ? UITestAudioRecorder() : nil,
+            inferenceRunner: simulatedRuntime ? UITestInferenceRunner() : nil,
+            inferenceArtifactsRootURL: simulatedRuntime ? FileManager.default.temporaryDirectory : nil
+        )
+        if simulatedRuntime {
+            model.createRecoveredAudioFixtures()
+        }
+        if simulatedRuntime, argumentValue("--ui-retry-recovered", in: arguments) == "true" {
+            model.retryRecoveredInferenceIfReady()
+        }
+        return model
     }
 
     var selectedSession: RecordingSession? {
@@ -68,59 +145,220 @@ final class AppModel: ObservableObject {
         selectedSession?.title ?? "Select a recording"
     }
 
+    var canRequestRecording: Bool {
+        activeRecordingReason == nil && recordingUnavailableReason == nil
+    }
+
+    var canShowNewRecording: Bool {
+        activeRecordingReason == nil
+    }
+
+    var newRecordingUnavailableReason: String? {
+        activeRecordingReason ?? recordingUnavailableReason
+    }
+
+    var recordingUnavailableReason: String? {
+        if localModelStatus != "Ready" {
+            return "Required local models are not ready: whisper-large-v3-turbo and Qwen3-4B-4bit."
+        }
+        if recordingEngineStatus != "Ready" {
+            return recordingEngineStatus
+        }
+        if persistenceStatus == "Could not save library." {
+            return persistenceStatus
+        }
+        return nil
+    }
+
+    private var activeRecordingReason: String? {
+        store.sessions.contains { $0.status.blocksNewRecording }
+            ? "Finish the current recording before starting another."
+            : nil
+    }
+
     func select(_ session: RecordingSession) {
-        try? store.selectSession(session.id)
+        var updatedStore = store
+        try? updatedStore.selectSession(session.id)
+        store = updatedStore
+    }
+
+    func selectActiveRecording() {
+        guard let session = store.sessions.first(where: { $0.status.blocksNewRecording }) else {
+            return
+        }
+        select(session)
     }
 
     func showNewRecording() {
+        guard canShowNewRecording else { return }
         recordingName = "Untitled Recording"
         consentAccepted = false
         newRecordingSheetVisible = true
     }
 
     func requestRecordingConsent() {
+        guard canRequestRecording else { return }
         newRecordingSheetVisible = false
-        consentSheetVisible = true
+        Task { @MainActor [weak self] in
+            self?.consentSheetVisible = true
+        }
     }
 
     func startRecording() {
-        let session = store.createRecording(named: recordingName.isEmpty ? "Untitled Recording" : recordingName)
-        try? store.startRecording(session.id)
-        appendDemoContent(to: session.id)
+        guard canRequestRecording else { return }
+        let title = recordingName.isEmpty ? "Untitled Recording" : recordingName
+        let id = UUID()
+        let audioFileName = audioFileName(for: id)
+        let audioURL = sessionFileStore?.localFileURL(relativePath: audioFileName)
+        var updatedStore = store
+        let session = updatedStore.createRecording(
+            id: id,
+            named: title,
+            audioFileName: audioFileName
+        )
+        if !fixtureRecordingEnabled, let audioURL {
+            do {
+                try audioRecorder?.startRecording(to: audioURL)
+                activeAudioURLs[id] = audioURL
+            } catch {
+                try? updatedStore.failRecording(session.id, message: userFacingMessage(error))
+                store = updatedStore
+                consentSheetVisible = false
+                consentAccepted = false
+                persist()
+                return
+            }
+        }
+        recordingClocks[id] = RecordingClock(baseElapsedSeconds: 0, startedAt: Date())
+        try? updatedStore.startRecording(session.id, elapsedSeconds: 0)
+        store = updatedStore
         consentSheetVisible = false
         consentAccepted = false
-        currentTopicTitle = "Activation Functions"
-        paused = false
+        currentTopicTitle = "Listening"
         persist()
     }
 
     func togglePause() {
-        guard let id = store.selectedSessionID else { return }
-        if paused {
-            try? store.startRecording(id)
-            paused = false
+        guard let session = selectedSession,
+              let id = store.selectedSessionID else { return }
+        let elapsedSeconds = elapsedSeconds(
+            for: id,
+            fallback: selectedSession?.status.elapsedSeconds ?? 0
+        )
+        if case .paused = session.status {
+            if !fixtureRecordingEnabled {
+                do {
+                    try audioRecorder?.resumeRecording()
+                } catch {
+                    markFailed(id, error: error)
+                    return
+                }
+            }
+            recordingClocks[id] = RecordingClock(
+                baseElapsedSeconds: elapsedSeconds,
+                startedAt: Date()
+            )
+            var updatedStore = store
+            try? updatedStore.startRecording(id, elapsedSeconds: elapsedSeconds)
+            store = updatedStore
         } else {
-            try? store.pauseRecording(id, elapsedSeconds: 908)
-            paused = true
+            if !fixtureRecordingEnabled {
+                audioRecorder?.pauseRecording()
+            }
+            recordingClocks[id] = RecordingClock(
+                baseElapsedSeconds: elapsedSeconds,
+                startedAt: nil
+            )
+            var updatedStore = store
+            try? updatedStore.pauseRecording(id, elapsedSeconds: elapsedSeconds)
+            store = updatedStore
         }
         persist()
     }
 
     func createNewTopic() {
-        currentTopicTitle = "Optimization"
-        guard let id = store.selectedSessionID else { return }
-        try? store.upsertTopic(
+        guard let session = selectedSession,
+              let id = store.selectedSessionID else { return }
+        let elapsedSeconds = elapsedSeconds(
+            for: id,
+            fallback: session.status.elapsedSeconds ?? session.transcript.last?.endTime ?? 0
+        )
+        var updatedStore = store
+        if var activeTopic = session.topics.last, activeTopic.endTime == nil {
+            activeTopic.endTime = elapsedSeconds
+            try? updatedStore.upsertTopic(in: id, topic: activeTopic)
+        }
+        let nextTitle = "Topic \(session.topics.count + 1)"
+        currentTopicTitle = nextTitle
+        try? updatedStore.upsertTopic(
             in: id,
             topic: TopicNote(
-                title: "Optimization",
-                startTime: 908,
+                title: nextTitle,
+                startTime: elapsedSeconds,
                 endTime: nil,
-                summary: "Listening for key points...",
+                summary: "No summary yet.",
                 keyPoints: [],
                 questions: []
             )
         )
+        store = updatedStore
         persist()
+    }
+
+    func canProcessRecoveredAudio(_ session: RecordingSession) -> Bool {
+        recoveredProcessingUnavailableReason(session) == nil
+    }
+
+    func recoveredProcessingUnavailableReason(_ session: RecordingSession) -> String? {
+        guard case .recovered = session.status else {
+            return "Preserved audio is not available."
+        }
+        if store.sessions.contains(where: { $0.id != session.id && $0.status.blocksNewRecording }) {
+            return "Finish the current recording before processing recovered audio."
+        }
+        guard let audioFileName = session.audioFileName,
+              let audioURL = sessionFileStore?.localFileURL(relativePath: audioFileName) else {
+            return "Preserved audio is not available."
+        }
+        if !FileManager.default.fileExists(atPath: audioURL.path) {
+            return "Preserved audio is not available."
+        }
+        if inferenceRunner == nil {
+            return "Local MLX runtime is not ready."
+        }
+        if (inferenceArtifactsRootURL ?? readyArtifactsURL()) == nil {
+            return "Required local models are not ready."
+        }
+        return nil
+    }
+
+    func processRecoveredAudio(_ session: RecordingSession) {
+        guard case let .recovered(durationSeconds) = session.status,
+              let audioFileName = session.audioFileName,
+              let audioURL = sessionFileStore?.localFileURL(relativePath: audioFileName),
+              FileManager.default.fileExists(atPath: audioURL.path),
+              let artifactsURL = inferenceArtifactsRootURL ?? readyArtifactsURL() else {
+            return
+        }
+        finalizingDurations[session.id] = durationSeconds
+        var updatedStore = store
+        try? updatedStore.finalizeRecording(session.id, progress: 0.25)
+        store = updatedStore
+        persist()
+        runInference(for: session.id, audioURL: audioURL, artifactsURL: artifactsURL)
+    }
+
+    func openMicrophoneSettings() {
+        guard let url = URL(
+            string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Microphone"
+        ) else { return }
+        NSWorkspace.shared.open(url)
+    }
+
+    func openModelInstallLocation() {
+        let url = LocalModelBundleLocator().applicationSupportArtifactsURL()
+        try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+        NSWorkspace.shared.activateFileViewerSelecting([url])
     }
 
     func confirmStop() {
@@ -128,38 +366,329 @@ final class AppModel: ObservableObject {
     }
 
     func stopAndFinalize() {
-        guard let id = store.selectedSessionID else { return }
-        try? store.finalizeRecording(id, progress: 0.62)
+        guard let session = selectedSession,
+              let id = store.selectedSessionID else { return }
+        let durationSeconds = elapsedSeconds(
+            for: id,
+            fallback: session.status.elapsedSeconds
+                ?? session.transcript.map(\.endTime).max()
+                ?? session.topics.compactMap(\.endTime).max()
+                ?? 0
+        )
+        finalizingDurations[id] = durationSeconds
+        recordingClocks[id] = nil
+        let audioURL: URL?
+        if fixtureRecordingEnabled {
+            audioURL = nil
+        } else {
+            do {
+                let capturedDuration = try audioRecorder?.stopRecording() ?? durationSeconds
+                finalizingDurations[id] = max(durationSeconds, capturedDuration)
+                audioURL = activeAudioURLs[id] ?? session.audioFileName.map {
+                    sessionFileStore?.localFileURL(relativePath: $0)
+                } ?? nil
+            } catch {
+                markFailed(id, error: error)
+                stopConfirmationVisible = false
+                return
+            }
+        }
+        var updatedStore = store
+        try? updatedStore.finalizeRecording(id, progress: 0.25)
+        store = updatedStore
         stopConfirmationVisible = false
-        paused = false
         persist()
+        if fixtureRecordingEnabled {
+            Task { @MainActor [weak self] in
+                try? await Task.sleep(nanoseconds: 1_500_000_000)
+                self?.completeFinalizing(id)
+            }
+        } else if let audioURL {
+            runInference(for: id, audioURL: audioURL)
+        }
     }
 
     func openSavedReview() {
-        guard let id = store.selectedSessionID else { return }
-        try? store.saveRecording(id, durationSeconds: 3_120)
+        guard let session = selectedSession,
+              let id = store.selectedSessionID else { return }
+        let durationSeconds = finalizingDurations[id]
+            ?? session.status.elapsedSeconds
+            ?? session.transcript.last?.endTime
+            ?? session.topics.compactMap(\.endTime).max()
+            ?? 0
+        var updatedStore = store
+        try? updatedStore.saveRecording(
+            id,
+            durationSeconds: durationSeconds,
+            audioFileName: session.audioFileName ?? audioFileName(for: id)
+        )
+        store = updatedStore
         persist()
     }
 
-    private func appendDemoContent(to sessionID: UUID) {
-        try? store.appendTranscript(
-            to: sessionID,
-            sentence: TranscriptSentence(
-                startTime: 883,
-                endTime: 895,
-                text: "Activation functions turn linear outputs into useful signals.",
-                translation: DemoTranslation.activationFunctions,
-                confidence: .high
+    func exportMarkdown(_ session: RecordingSession) {
+        guard let sessionFileStore else {
+            exportStatus = "Could not export Markdown."
+            return
+        }
+        let exportURL = sessionFileStore.localFileURL(
+            relativePath: "Exports/\(exportFileName(for: session.title))"
+        )
+        do {
+            try FileManager.default.createDirectory(
+                at: exportURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
             )
+            try MarkdownExporter()
+                .export(session)
+                .write(to: exportURL, atomically: true, encoding: .utf8)
+            exportStatus = "Exported Markdown"
+        } catch {
+            exportStatus = "Could not export Markdown."
+        }
+    }
+
+    func completeFinalizing(_ id: UUID) {
+        var updatedStore = store
+        try? updatedStore.finalizeRecording(id, progress: 1.0)
+        store = updatedStore
+        persist()
+    }
+
+    private func runInference(for id: UUID, audioURL: URL) {
+        let runner = inferenceRunner
+        let artifactsURL = inferenceArtifactsRootURL ?? readyArtifactsURL()
+        guard let runner, let artifactsURL else {
+            markFailed(id, error: RecordingPipelineError.runtimeFailed("Local MLX runtime is not ready."))
+            return
+        }
+
+        Task.detached { [runner, artifactsURL] in
+            do {
+                let output = try runner.process(audioURL: audioURL, artifactsRootURL: artifactsURL)
+                await MainActor.run {
+                    self.applyInferenceOutput(id: id, output: output)
+                }
+            } catch {
+                await MainActor.run {
+                    self.markFailed(id, error: error)
+                }
+            }
+        }
+    }
+
+    private func retryRecoveredInferenceIfReady() {
+        guard inferenceRunner != nil else { return }
+        guard let artifactsURL = inferenceArtifactsRootURL ?? readyArtifactsURL() else { return }
+        var updatedStore = store
+        var retries: [(UUID, URL)] = []
+        for session in store.sessions {
+            guard case let .recovered(durationSeconds) = session.status,
+                  session.transcript.isEmpty,
+                  let audioFileName = session.audioFileName,
+                  let audioURL = sessionFileStore?.localFileURL(relativePath: audioFileName),
+                  FileManager.default.fileExists(atPath: audioURL.path) else {
+                continue
+            }
+            finalizingDurations[session.id] = durationSeconds
+            try? updatedStore.finalizeRecording(session.id, progress: 0.25)
+            retries.append((session.id, audioURL))
+        }
+        guard !retries.isEmpty else { return }
+        store = updatedStore
+        persist()
+        for retry in retries {
+            runInference(for: retry.0, audioURL: retry.1, artifactsURL: artifactsURL)
+        }
+    }
+
+    private func createRecoveredAudioFixtures() {
+        guard let sessionFileStore else { return }
+        for session in store.sessions {
+            guard case .recovered = session.status,
+                  let audioFileName = session.audioFileName else {
+                continue
+            }
+            let audioURL = sessionFileStore.localFileURL(relativePath: audioFileName)
+            try? FileManager.default.createDirectory(
+                at: audioURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            if !FileManager.default.fileExists(atPath: audioURL.path) {
+                try? Data("audio\n".utf8).write(to: audioURL)
+            }
+        }
+    }
+
+    private func runInference(for id: UUID, audioURL: URL, artifactsURL: URL) {
+        let runner = inferenceRunner
+        guard let runner else {
+            markFailed(id, error: RecordingPipelineError.runtimeFailed("Local MLX runtime is not ready."))
+            return
+        }
+
+        Task.detached { [runner, artifactsURL] in
+            do {
+                let output = try runner.process(audioURL: audioURL, artifactsRootURL: artifactsURL)
+                await MainActor.run {
+                    self.applyInferenceOutput(id: id, output: output)
+                }
+            } catch {
+                await MainActor.run {
+                    self.markFailed(id, error: error)
+                }
+            }
+        }
+    }
+
+    private func applyInferenceOutput(id: UUID, output: RecordingPipelineOutput) {
+        var updatedStore = store
+        let audioFileName = store.session(id: id)?.audioFileName ?? audioFileName(for: id)
+        let durationSeconds = max(
+            finalizingDurations[id] ?? 0,
+            Int(output.metrics.audioDurationSeconds.rounded())
         )
-        try? store.upsertTopic(
-            in: sessionID,
-            topic: DemoData.activationTopic
+        try? updatedStore.replaceGeneratedContent(
+            in: id,
+            transcript: output.transcript,
+            topics: output.topics
         )
+        try? updatedStore.saveRecording(
+            id,
+            durationSeconds: durationSeconds,
+            audioFileName: audioFileName
+        )
+        store = updatedStore
+        finalizingDurations[id] = nil
+        recordingClocks[id] = nil
+        activeAudioURLs[id] = nil
+        persist()
+    }
+
+    private func markFailed(_ id: UUID, error: Error) {
+        var updatedStore = store
+        try? updatedStore.failRecording(id, message: userFacingMessage(error))
+        store = updatedStore
+        finalizingDurations[id] = nil
+        recordingClocks[id] = nil
+        activeAudioURLs[id] = nil
+        persist()
+    }
+
+    private func readyArtifactsURL() -> URL? {
+        if let inferenceArtifactsRootURL {
+            return inferenceArtifactsRootURL
+        }
+        if let cachedReadyArtifactsRootURL {
+            return cachedReadyArtifactsRootURL
+        }
+        let locator = LocalModelBundleLocator()
+        let url = locator.firstReadyRoot(
+            bundleResourceURL: Bundle.main.resourceURL,
+            applicationSupportArtifactsURL: locator.applicationSupportArtifactsURL()
+        )
+        if let url {
+            cachedReadyArtifactsRootURL = url
+        }
+        return url
     }
 
     private func persist() {
-        try? sessionFileStore?.save(store.sessions)
+        do {
+            try sessionFileStore?.save(store.sessions)
+            if persistenceStatus == "Could not save library." {
+                persistenceStatus = nil
+            }
+        } catch {
+            persistenceStatus = "Could not save library."
+        }
+    }
+
+    private func audioFileName(for id: UUID) -> String {
+        "Audio/\(id.uuidString).m4a"
+    }
+
+    private func exportFileName(for title: String) -> String {
+        let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: " -_"))
+        let fileStem = title.unicodeScalars.map { scalar in
+            allowed.contains(scalar) ? String(scalar) : "-"
+        }
+        .joined()
+        .trimmingCharacters(in: .whitespacesAndNewlines)
+        return "\((fileStem.isEmpty ? "Recording" : fileStem)).md"
+    }
+
+    private func elapsedSeconds(for id: UUID, fallback: Int) -> Int {
+        guard let clock = recordingClocks[id] else {
+            return fallback
+        }
+        guard let startedAt = clock.startedAt else {
+            return clock.baseElapsedSeconds
+        }
+        return clock.baseElapsedSeconds + max(0, Int(Date().timeIntervalSince(startedAt)))
+    }
+
+    private func resumeRecordingClocksForLoadedSessions() {
+        let now = Date()
+        for session in store.sessions {
+            switch session.status {
+            case let .recording(elapsedSeconds):
+                recordingClocks[session.id] = RecordingClock(
+                    baseElapsedSeconds: elapsedSeconds,
+                    startedAt: now
+                )
+            case let .paused(elapsedSeconds):
+                recordingClocks[session.id] = RecordingClock(
+                    baseElapsedSeconds: elapsedSeconds,
+                    startedAt: nil
+                )
+            default:
+                continue
+            }
+        }
+    }
+
+    private func startLiveDurationUpdates() {
+        liveDurationTask = Task { @MainActor [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                self?.refreshRecordingDurations()
+            }
+        }
+    }
+
+    private func refreshRecordingDurations() {
+        var updatedStore = store
+        var changed = false
+        for session in store.sessions {
+            guard case let .recording(currentElapsedSeconds) = session.status else {
+                continue
+            }
+            let nextElapsedSeconds = elapsedSeconds(
+                for: session.id,
+                fallback: currentElapsedSeconds
+            )
+            guard nextElapsedSeconds != currentElapsedSeconds else {
+                continue
+            }
+            try? updatedStore.startRecording(
+                session.id,
+                elapsedSeconds: nextElapsedSeconds
+            )
+            changed = true
+        }
+        if changed {
+            store = updatedStore
+            persist()
+        }
+    }
+
+    private static func sessionStoreURL(arguments: [String]) -> URL {
+        if let index = arguments.firstIndex(of: "--session-store"),
+           arguments.indices.contains(index + 1) {
+            return URL(fileURLWithPath: arguments[index + 1])
+        }
+        return defaultSessionStoreURL()
     }
 
     private static func defaultSessionStoreURL() -> URL {
@@ -172,30 +701,200 @@ final class AppModel: ObservableObject {
             .appendingPathComponent("sessions.json")
     }
 
-    private static func bundledModelStatus() -> String {
+    private static func bundledModelReadiness() -> LocalModelBundleReadiness {
         let locator = LocalModelBundleLocator()
         return locator
-            .validateFirstReadyRoot(
+            .resolveFirstReadyRoot(
                 bundleResourceURL: Bundle.main.resourceURL,
                 applicationSupportArtifactsURL: locator.applicationSupportArtifactsURL()
             )
-            .userFacingStatus
+    }
+
+    private static func productionRecordingEngineStatus(
+        helperURL: URL?,
+        pythonExecutable: String
+    ) -> String {
+        guard helperURL != nil, pythonCanImportMLXRuntime(pythonExecutable) else {
+            return "Local MLX runtime is not available."
+        }
+        return "Ready"
+    }
+
+    private static func productionPythonExecutable() -> String {
+        if let override = ProcessInfo.processInfo.environment["LIVENOTES_PYTHON"], !override.isEmpty {
+            return override
+        }
+        let runtimePython = defaultSessionStoreURL()
+            .deletingLastPathComponent()
+            .appendingPathComponent("Runtime/bin/python3")
+        if FileManager.default.fileExists(atPath: runtimePython.path) {
+            return runtimePython.path
+        }
+        return "python3"
+    }
+
+    private static func recordingPipelineHelperURL() -> URL? {
+        if let override = ProcessInfo.processInfo.environment["LIVENOTES_MLX_HELPER"] {
+            let url = URL(fileURLWithPath: override)
+            if FileManager.default.fileExists(atPath: url.path) {
+                return url
+            }
+        }
+        if let resourceURL = Bundle.main.resourceURL?
+            .appendingPathComponent("livenotes_mlx_pipeline.py"),
+           FileManager.default.fileExists(atPath: resourceURL.path) {
+            return resourceURL
+        }
+        let sourceURL = URL(fileURLWithPath: #filePath)
+            .deletingLastPathComponent()
+            .deletingLastPathComponent()
+            .appendingPathComponent("scripts/livenotes_mlx_pipeline.py")
+        return FileManager.default.fileExists(atPath: sourceURL.path) ? sourceURL : nil
+    }
+
+    private static func pythonCanImportMLXRuntime(_ pythonExecutable: String) -> Bool {
+        let process = Process()
+        process.executableURL = URL(fileURLWithPath: "/usr/bin/env")
+        process.arguments = [
+            pythonExecutable,
+            "-c",
+            "import mlx; import mlx_whisper; import mlx_lm"
+        ]
+        process.standardOutput = Pipe()
+        process.standardError = Pipe()
+        do {
+            try process.run()
+        } catch {
+            return false
+        }
+        let group = DispatchGroup()
+        group.enter()
+        DispatchQueue.global(qos: .userInitiated).async {
+            process.waitUntilExit()
+            group.leave()
+        }
+        if group.wait(timeout: .now() + 5) == .timedOut {
+            process.terminate()
+            return false
+        }
+        return process.terminationStatus == 0
+    }
+
+    private func userFacingMessage(_ error: Error) -> String {
+        if let pipelineError = error as? RecordingPipelineError,
+           case .runtimeFailed = pipelineError {
+            return "Local MLX inference failed."
+        }
+        if let localized = (error as? LocalizedError)?.errorDescription, !localized.isEmpty {
+            return localized
+        }
+        return error.localizedDescription
+    }
+
+    private static func uiModelStatus(arguments: [String]) -> String {
+        if argumentValue("--ui-model-status", in: arguments) == "missing" {
+            return "Missing Files"
+        }
+        return "Ready"
+    }
+
+    private static func uiTestSessionFileStore(arguments: [String]) -> SessionFileStore? {
+        guard let storePath = argumentValue("--session-store", in: arguments) else {
+            return nil
+        }
+        return SessionFileStore(url: URL(fileURLWithPath: storePath))
+    }
+
+    private static func argumentValue(_ name: String, in arguments: [String]) -> String? {
+        guard let index = arguments.firstIndex(of: name),
+              arguments.indices.contains(index + 1) else {
+            return nil
+        }
+        return arguments[index + 1]
+    }
+}
+
+private struct RecordingClock {
+    var baseElapsedSeconds: Int
+    var startedAt: Date?
+}
+
+private extension RecordingStatus {
+    var blocksNewRecording: Bool {
+        switch self {
+        case .preparing, .recording, .paused:
+            return true
+        case let .finalizing(progress):
+            return progress < 1
+        case .saved, .recovered, .failed:
+            return false
+        }
+    }
+}
+
+private final class UITestAudioRecorder: AudioRecordingControlling {
+    func startRecording(to url: URL) throws {
+        try FileManager.default.createDirectory(
+            at: url.deletingLastPathComponent(),
+            withIntermediateDirectories: true
+        )
+        try Data().write(to: url)
+    }
+
+    func pauseRecording() {}
+
+    func resumeRecording() throws {}
+
+    func stopRecording() throws -> Int {
+        965
+    }
+}
+
+private struct UITestInferenceRunner: RecordingInferenceRunning {
+    func process(audioURL: URL, artifactsRootURL: URL) throws -> RecordingPipelineOutput {
+        RecordingPipelineOutput(
+            transcript: [
+                TranscriptSentence(
+                    startTime: 0,
+                    endTime: 7,
+                    text: "We should follow up with the customer before Friday.",
+                    translation: "我们应该在周五之前跟进客户。",
+                    confidence: .high
+                )
+            ],
+            topics: [
+                TopicNote(
+                    title: "Customer Follow-up",
+                    startTime: 0,
+                    endTime: 965,
+                    summary: "The session confirms a customer follow-up before Friday.",
+                    keyPoints: ["Follow up with the customer before Friday."],
+                    questions: []
+                )
+            ],
+            metrics: RecordingPipelineMetrics(
+                audioDurationSeconds: 965,
+                transcriptSegments: 1,
+                translationSegments: 1,
+                topicCount: 1
+            )
+        )
     }
 }
 
 enum DemoData {
-    static let activationTopic = TopicNote(
-        title: "Activation Functions",
+    static let decisionTopic = TopicNote(
+        title: "Decision Point",
         startTime: 883,
         endTime: 1_289,
-        summary: "Activation functions add non-linearity so model outputs can represent more useful patterns.",
+        summary: "The team identifies the decision, tradeoffs, and next steps.",
         keyPoints: [
-            "They transform linear outputs.",
-            "They help deeper models express complex relationships.",
-            "They are part of the model design."
+            "The decision depends on customer impact.",
+            "Risks are captured before the follow-up.",
+            "Next steps stay attached to the topic."
         ],
         questions: [
-            "Why does non-linearity matter?"
+            "What tradeoff needs a decision?"
         ]
     )
 
@@ -203,8 +902,8 @@ enum DemoData {
         SessionStore(
             sessions: [
                 liveSession(),
-                savedSession(title: "Product Sync", duration: 1_860),
-                savedSession(title: "Week 6 Notes", duration: 2_820),
+                savedSession(title: "Customer Call", duration: 1_860),
+                savedSession(title: "Research Notes", duration: 2_820),
                 RecordingSession(
                     title: "Design Review",
                     createdAt: Date(timeIntervalSince1970: 1_700),
@@ -213,7 +912,8 @@ enum DemoData {
                 RecordingSession(
                     title: "Recovered Audio",
                     createdAt: Date(timeIntervalSince1970: 1_600),
-                    status: .recovered(durationSeconds: 2_280)
+                    status: .recovered(durationSeconds: 2_280),
+                    audioFileName: "Audio/recovered-audio.m4a"
                 )
             ],
             selectedSessionID: liveSessionID
@@ -224,23 +924,98 @@ enum DemoData {
         SessionStore(
             sessions: [
                 liveSession(),
-                savedSession(title: "Product Sync", duration: 1_860),
-                savedSession(title: "Week 6 Notes", duration: 2_820)
+                savedSession(title: "Customer Call", duration: 1_860),
+                savedSession(title: "Research Notes", duration: 2_820)
+            ],
+            selectedSessionID: liveSessionID
+        )
+    }
+
+    static func pausedStore() -> SessionStore {
+        var session = liveSession()
+        session.status = .paused(elapsedSeconds: 908)
+        return SessionStore(
+            sessions: [
+                session,
+                savedSession(title: "Customer Call", duration: 1_860),
+                savedSession(title: "Research Notes", duration: 2_820)
             ],
             selectedSessionID: liveSessionID
         )
     }
 
     static func savedStore() -> SessionStore {
-        let saved = savedSession(title: "Neural Networks", duration: 3_120)
+        let saved = savedSession(title: "Product Review", duration: 3_120)
         return SessionStore(
             sessions: [
                 saved,
-                savedSession(title: "Product Sync", duration: 1_860),
-                savedSession(title: "Week 6 Notes", duration: 2_820)
+                savedSession(title: "Customer Call", duration: 1_860),
+                savedSession(title: "Research Notes", duration: 2_820)
             ],
             selectedSessionID: saved.id
         )
+    }
+
+    static func preparingStore() -> SessionStore {
+        let preparing = RecordingSession(
+            title: "Preparing Recording",
+            createdAt: Date(timeIntervalSince1970: 1_900),
+            status: .preparing
+        )
+        return SessionStore(
+            sessions: [
+                preparing,
+                savedSession(title: "Customer Call", duration: 1_860)
+            ],
+            selectedSessionID: preparing.id
+        )
+    }
+
+    static func failedStore() -> SessionStore {
+        let failed = RecordingSession(
+            title: "Audio Device Error",
+            createdAt: Date(timeIntervalSince1970: 1_950),
+            status: .failed(message: "Microphone access was interrupted.")
+        )
+        return SessionStore(
+            sessions: [
+                failed,
+                savedSession(title: "Customer Call", duration: 1_860)
+            ],
+            selectedSessionID: failed.id
+        )
+    }
+
+    static func finalizingCompleteStore() -> SessionStore {
+        var finalizing = savedSession(title: "Product Review", duration: 3_120)
+        finalizing.status = .finalizing(progress: 1.0)
+        return SessionStore(
+            sessions: [
+                finalizing,
+                savedSession(title: "Customer Call", duration: 1_860)
+            ],
+            selectedSessionID: finalizing.id
+        )
+    }
+
+    static func recoveredStore() -> SessionStore {
+        let recovered = RecordingSession(
+            title: "Recovered Audio",
+            createdAt: Date(timeIntervalSince1970: 1_600),
+            status: .recovered(durationSeconds: 2_280),
+            audioFileName: "Audio/recovered-audio.m4a"
+        )
+        return SessionStore(
+            sessions: [
+                recovered,
+                savedSession(title: "Customer Call", duration: 1_860)
+            ],
+            selectedSessionID: recovered.id
+        )
+    }
+
+    static func emptyStore() -> SessionStore {
+        SessionStore(sessions: [], selectedSessionID: nil)
     }
 
     private static let liveSessionID = UUID(uuidString: "11111111-2222-3333-4444-555555555555")!
@@ -248,26 +1023,27 @@ enum DemoData {
     private static func liveSession() -> RecordingSession {
         RecordingSession(
             id: liveSessionID,
-            title: "Neural Networks",
+            title: "Product Review",
             createdAt: Date(timeIntervalSince1970: 1_800),
             status: .recording(elapsedSeconds: 908),
+            audioFileName: "Audio/neural-networks-live.m4a",
             transcript: [
                 TranscriptSentence(
                     startTime: 842,
                     endTime: 851,
-                    text: "We start with model parameters.",
-                    translation: DemoTranslation.parameters,
+                    text: "We start with the customer problem.",
+                    translation: DemoTranslation.customerProblem,
                     confidence: .high
                 ),
                 TranscriptSentence(
                     startTime: 883,
                     endTime: 895,
-                    text: "Activation functions turn linear outputs into useful signals.",
-                    translation: DemoTranslation.activationFunctions,
+                    text: "The main tradeoff is speed versus accuracy.",
+                    translation: DemoTranslation.tradeoff,
                     confidence: .low
                 )
             ],
-            topics: [activationTopic]
+            topics: [decisionTopic]
         )
     }
 
@@ -276,39 +1052,40 @@ enum DemoData {
             title: title,
             createdAt: Date(timeIntervalSince1970: 1_500),
             status: .saved(durationSeconds: duration),
+            audioFileName: "Audio/\(title.lowercased().replacingOccurrences(of: " ", with: "-")).m4a",
             transcript: [
                 TranscriptSentence(
                     startTime: 883,
                     endTime: 895,
-                    text: "Activation functions turn linear outputs into useful signals.",
-                    translation: DemoTranslation.activationFunctions,
+                    text: "The main tradeoff is speed versus accuracy.",
+                    translation: DemoTranslation.tradeoff,
                     confidence: .high
                 )
             ],
             topics: [
                 TopicNote(
-                    title: "Course Practice",
+                    title: "Opening Context",
                     startTime: 0,
                     endTime: 491,
-                    summary: "Practice steps and expectations are introduced.",
-                    keyPoints: ["Review the practice steps."],
+                    summary: "The session starts by identifying the customer problem.",
+                    keyPoints: ["Customer impact sets the priority."],
                     questions: []
                 ),
                 TopicNote(
-                    title: "CNN Training Task",
+                    title: "Tradeoff Review",
                     startTime: 492,
                     endTime: 882,
-                    summary: "The task setup and training goal are explained.",
-                    keyPoints: ["Inputs are normalized before training."],
+                    summary: "The team compares speed, accuracy, and follow-up cost.",
+                    keyPoints: ["The fastest path still needs quality checks."],
                     questions: []
                 ),
-                activationTopic,
+                decisionTopic,
                 TopicNote(
-                    title: "Model Parameters",
+                    title: "Next Steps",
                     startTime: 1_290,
                     endTime: 2_046,
-                    summary: "Parameters and learned values are compared.",
-                    keyPoints: ["Parameters are updated during training."],
+                    summary: "Owners and next steps are captured before the session ends.",
+                    keyPoints: ["Each owner has one follow-up item."],
                     questions: []
                 )
             ]
@@ -317,19 +1094,14 @@ enum DemoData {
 }
 
 enum DemoTranslation {
-    static let parameters = text([
-        0x53C2, 0x6570, 0x662F, 0x4ECE, 0x6570, 0x636E, 0x4E2D,
-        0x5B66, 0x4E60, 0x5230, 0x7684, 0x503C, 0x3002
+    static let customerProblem = text([
+        0x6211, 0x4EEC, 0x5148, 0x786E, 0x8BA4, 0x5BA2, 0x6237,
+        0x95EE, 0x9898, 0x3002
     ])
 
-    static let activationFunctions = text([
-        0x6FC0, 0x6D3B, 0x51FD, 0x6570, 0x5E2E, 0x52A9, 0x6A21, 0x578B,
-        0x5B66, 0x4E60, 0x975E, 0x7EBF, 0x6027, 0x6A21, 0x5F0F, 0x3002
-    ])
-
-    static let optimization = text([
-        0x4F18, 0x5316, 0x4F1A, 0x8C03, 0x6574, 0x6A21, 0x578B, 0x53C2,
-        0x6570, 0x4EE5, 0x51CF, 0x5C11, 0x8BEF, 0x5DEE, 0x3002
+    static let tradeoff = text([
+        0x4E3B, 0x8981, 0x53D6, 0x820D, 0x662F, 0x901F, 0x5EA6,
+        0x548C, 0x51C6, 0x786E, 0x6027, 0x3002
     ])
 
     private static func text(_ scalars: [UInt32]) -> String {

@@ -25,11 +25,17 @@ public struct SessionStore: Sendable {
     }
 
     @discardableResult
-    public mutating func createRecording(named title: String) -> RecordingSession {
+    public mutating func createRecording(
+        id: UUID = UUID(),
+        named title: String,
+        audioFileName: String? = nil
+    ) -> RecordingSession {
         let session = RecordingSession(
+            id: id,
             title: title,
             createdAt: now(),
-            status: .preparing
+            status: .preparing,
+            audioFileName: audioFileName
         )
         sessions.insert(session, at: 0)
         selectedSessionID = session.id
@@ -40,12 +46,14 @@ public struct SessionStore: Sendable {
     public mutating func recoverAudio(
         title: String,
         durationSeconds: Int,
-        lastSavedAt: Date
+        lastSavedAt: Date,
+        audioFileName: String? = nil
     ) -> RecordingSession {
         let session = RecordingSession(
             title: title,
             createdAt: lastSavedAt,
-            status: .recovered(durationSeconds: durationSeconds)
+            status: .recovered(durationSeconds: durationSeconds),
+            audioFileName: audioFileName
         )
         sessions.insert(session, at: 0)
         selectedSessionID = session.id
@@ -63,9 +71,9 @@ public struct SessionStore: Sendable {
         selectedSessionID = id
     }
 
-    public mutating func startRecording(_ id: UUID) throws {
+    public mutating func startRecording(_ id: UUID, elapsedSeconds: Int = 0) throws {
         try updateSession(id) { session in
-            session.status = .recording(elapsedSeconds: 0)
+            session.status = .recording(elapsedSeconds: elapsedSeconds)
         }
     }
 
@@ -81,9 +89,46 @@ public struct SessionStore: Sendable {
         }
     }
 
-    public mutating func saveRecording(_ id: UUID, durationSeconds: Int) throws {
+    public mutating func saveRecording(
+        _ id: UUID,
+        durationSeconds: Int,
+        audioFileName: String? = nil
+    ) throws {
         try updateSession(id) { session in
             session.status = .saved(durationSeconds: durationSeconds)
+            if let audioFileName {
+                session.audioFileName = audioFileName
+            }
+        }
+    }
+
+    public mutating func failRecording(_ id: UUID, message: String) throws {
+        try updateSession(id) { session in
+            session.status = .failed(message: message)
+        }
+    }
+
+    @discardableResult
+    public mutating func recoverInterruptedSessions() -> Int {
+        var recoveredCount = 0
+        for index in sessions.indices {
+            guard let durationSeconds = recoveryDuration(for: sessions[index]) else {
+                continue
+            }
+            sessions[index].status = .recovered(durationSeconds: durationSeconds)
+            recoveredCount += 1
+        }
+        return recoveredCount
+    }
+
+    public mutating func replaceGeneratedContent(
+        in id: UUID,
+        transcript: [TranscriptSentence],
+        topics: [TopicNote]
+    ) throws {
+        try updateSession(id) { session in
+            session.transcript = transcript
+            session.topics = topics
         }
     }
 
@@ -117,5 +162,26 @@ public struct SessionStore: Sendable {
             throw SessionStoreError.sessionNotFound
         }
         update(&sessions[index])
+    }
+
+    private func recoveryDuration(for session: RecordingSession) -> Int? {
+        switch session.status {
+        case .preparing:
+            return maxRecoveredDuration(session)
+        case let .recording(elapsedSeconds),
+             let .paused(elapsedSeconds):
+            return max(elapsedSeconds, maxRecoveredDuration(session))
+        case .finalizing:
+            return maxRecoveredDuration(session)
+        case .saved, .recovered, .failed:
+            return nil
+        }
+    }
+
+    private func maxRecoveredDuration(_ session: RecordingSession) -> Int {
+        max(
+            session.transcript.map(\.endTime).max() ?? 0,
+            session.topics.compactMap(\.endTime).max() ?? 0
+        )
     }
 }

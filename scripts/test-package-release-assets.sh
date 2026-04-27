@@ -57,4 +57,24 @@ if [[ ! -f "$FULL_ASSETS/LiveNotes-small.dmg.sha256" ]]; then
   exit 1
 fi
 
+ANCESTOR_ROOT="$WORK_ROOT/ancestor-case"
+mkdir -p "$ANCESTOR_ROOT/source"
+ANCESTOR_DMG="$ANCESTOR_ROOT/source/LiveNotes-ancestor.dmg"
+printf 'ancestor' > "$ANCESTOR_DMG"
+
+if "$ROOT_DIR/scripts/package-release-assets.sh" "$ANCESTOR_DMG" "$ANCESTOR_ROOT" >/dev/null 2>"$WORK_ROOT/ancestor-error.log"; then
+  echo "Expected ancestor asset directory to be rejected" >&2
+  exit 1
+fi
+
+if [[ ! -f "$ANCESTOR_DMG" ]]; then
+  echo "Source dmg was removed after rejected ancestor asset directory" >&2
+  exit 1
+fi
+
+if ! grep -q "must not contain the source dmg" "$WORK_ROOT/ancestor-error.log"; then
+  echo "Expected ancestor rejection message" >&2
+  exit 1
+fi
+
 printf '%s\n' "$SPLIT_ASSETS"

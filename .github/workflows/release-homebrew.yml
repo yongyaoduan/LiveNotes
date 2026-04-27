@@ -29,27 +29,68 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      - name: Select Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
       - name: Resolve version
         id: version
         run: |
           input_version="${{ inputs.version }}"
           if [[ -n "$input_version" ]]; then
             version="$input_version"
-          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            version="${GITHUB_REF_NAME#desktop-v}"
+            version="${version#desktop-v}"
             version="${version#v}"
+            tag="v$version"
+            publish="1"
+          elif [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            tag="$GITHUB_REF_NAME"
+            version="${tag#desktop-v}"
+            version="${version#v}"
+            publish="1"
           else
             version="$(
               xcodebuild -project LiveNotes.xcodeproj -scheme LiveNotes -configuration Release -showBuildSettings 2>/dev/null |
                 awk -F= '/ MARKETING_VERSION / { gsub(/[[:space:]]/, "", $2); print $2; exit }'
             )"
+            tag="v$version"
+            publish="0"
           fi
           if [[ -z "$version" ]]; then
             echo "Unable to resolve release version" >&2
             exit 65
           fi
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+
+      - name: Validate publish credentials
+        if: steps.version.outputs.publish == '1'
+        env:
+          DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64 }}
+          DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: |
+          missing=0
+          require_value() {
+            local name="$1"
+            if [[ -z "${!name:-}" ]]; then
+              echo "$name is required for Homebrew publishing" >&2
+              missing=1
+            fi
+          }
+          require_value HOMEBREW_TAP_TOKEN
+          require_value DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64
+          require_value DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD
+          require_value APPLE_ID
+          require_value APPLE_TEAM_ID
+          require_value APPLE_APP_SPECIFIC_PASSWORD
+          if [[ "$missing" == "1" ]]; then
+            exit 65
+          fi
 
       - name: Run core tests
         run: cd LiveNotesCore && swift test
@@ -57,16 +98,19 @@ jobs:
       - name: Build app
         run: xcodebuild build -project LiveNotes.xcodeproj -scheme LiveNotes -destination 'platform=macOS,arch=arm64'
 
-      - name: Run UI tests
-        run: ./scripts/run-ui-tests.sh
+      - name: Test UI evidence recorder
+        run: ./scripts/test-record-ui-tests.sh
 
-      - name: Upload UI test results
+      - name: Run UI evidence tests
+        run: ./scripts/record-ui-tests.sh
+
+      - name: Upload UI evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: livenotes-ui-test-results
-          path: dist/LiveNotesUITests.xcresult
-          if-no-files-found: ignore
+          name: livenotes-ui-evidence
+          path: dist/ui-evidence
+          if-no-files-found: error
 
       - name: Test Homebrew cask generator
         run: ./scripts/test-homebrew-cask.sh
@@ -74,47 +118,102 @@ jobs:
       - name: Test bundled artifact preparation script
         run: ./scripts/test-prepare-bundled-artifacts.sh
 
+      - name: Test model artifact verifier
+        run: ./scripts/test-model-artifact-verifier.sh
+
+      - name: Test MLX pipeline helper
+        run: ./scripts/test-mlx-pipeline-helper.sh
+
+      - name: Install release dependencies
+        run: |
+          python3.12 -m pip install --upgrade pip==25.0.1
+          python3.12 -m pip install -r scripts/release-requirements.txt
+
+      - name: Check release readiness
+        env:
+          LIVENOTES_PYTHON: python3.12
+        run: ./scripts/check-release-readiness.sh
+
+      - name: Import Developer ID certificate
+        if: steps.version.outputs.publish == '1'
+        env:
+          DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64 }}
+          DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD }}
+        run: |
+          keychain_password="$(openssl rand -hex 24)"
+          keychain_path="$RUNNER_TEMP/livenotes-signing.keychain-db"
+          certificate_path="$RUNNER_TEMP/developer-id-application.p12"
+          echo "$DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64" | base64 --decode > "$certificate_path"
+          security create-keychain -p "$keychain_password" "$keychain_path"
+          security set-keychain-settings -lut 21600 "$keychain_path"
+          security unlock-keychain -p "$keychain_password" "$keychain_path"
+          security import "$certificate_path" \
+            -k "$keychain_path" \
+            -P "$DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD" \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security
+          security list-keychains -d user -s "$keychain_path" $(security list-keychains -d user | tr -d '"')
+          security set-key-partition-list \
+            -S apple-tool:,apple:,codesign: \
+            -s \
+            -k "$keychain_password" \
+            "$keychain_path"
+          security find-identity -v -p codesigning "$keychain_path"
+
       - name: Build Homebrew app zip
         id: app_zip
         env:
           LIVENOTES_RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          LIVENOTES_REQUIRE_SIGNED_APP: ${{ steps.version.outputs.publish == '1' && '1' || '0' }}
+          LIVENOTES_NOTARIZE_APP: ${{ steps.version.outputs.publish == '1' && '1' || '0' }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
         run: |
           zip_path="$(./scripts/build-homebrew-app-zip.sh | tail -n 1)"
           sha256="$(shasum -a 256 "$zip_path" | awk '{print $1}')"
           echo "zip_path=$zip_path" >> "$GITHUB_OUTPUT"
           echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
 
+      - name: Upload Homebrew app zip artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: livenotes-homebrew-app-zip
+          path: |
+            ${{ steps.app_zip.outputs.zip_path }}
+
+      - name: Publish app zip to tap release
+        if: steps.version.outputs.publish == '1'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_tag="${{ steps.version.outputs.tag }}"
+          notes_path="$RUNNER_TEMP/livenotes-homebrew-release-notes.md"
+          cat > "$notes_path" <<'NOTES'
+          Install with:
+
+          ```bash
+          brew install yongyaoduan/livenotes/livenotes
+          ```
+          NOTES
+          if ! gh release view "$release_tag" --repo "${{ github.repository }}" >/dev/null 2>&1; then
+            gh release create "$release_tag" \
+              --repo "${{ github.repository }}" \
+              --title "LiveNotes ${{ steps.version.outputs.version }}" \
+              --notes-file "$notes_path"
+          fi
+          gh release upload "$release_tag" "${{ steps.app_zip.outputs.zip_path }}" --repo "${{ github.repository }}" --clobber
+
       - name: Generate Homebrew cask
         id: cask
+        if: steps.version.outputs.publish == '1'
         run: |
           zip_url="https://github.com/${{ github.repository }}/releases/download/${{ steps.version.outputs.tag }}/LiveNotes-${{ steps.version.outputs.version }}.zip"
           cask_path="$(./scripts/write-homebrew-cask.sh "${{ steps.version.outputs.version }}" "$zip_url" "${{ steps.app_zip.outputs.sha256 }}" | tail -n 1)"
           echo "cask_path=$cask_path" >> "$GITHUB_OUTPUT"
 
-      - name: Upload Homebrew release draft artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: livenotes-homebrew-release
-          path: |
-            ${{ steps.app_zip.outputs.zip_path }}
-            ${{ steps.cask.outputs.cask_path }}
-
-      - name: Publish app zip to tap release
-        if: startsWith(github.ref, 'refs/tags/')
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          release_tag="${{ steps.version.outputs.tag }}"
-          if ! gh release view "$release_tag" --repo "${{ github.repository }}" >/dev/null 2>&1; then
-            gh release create "$release_tag" \
-              --repo "${{ github.repository }}" \
-              --title "LiveNotes ${{ steps.version.outputs.version }}" \
-              --notes "Install with `brew install yongyaoduan/livenotes/livenotes`."
-          fi
-          gh release upload "$release_tag" "${{ steps.app_zip.outputs.zip_path }}" --repo "${{ github.repository }}" --clobber
-
       - name: Update tap cask
-        if: startsWith(github.ref, 'refs/tags/') && env.HOMEBREW_TAP_TOKEN != ''
+        if: steps.version.outputs.publish == '1'
         env:
           GH_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
         run: |

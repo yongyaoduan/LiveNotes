@@ -1,0 +1,82 @@
+[
+  {
+    "id": "two_topic_lecture",
+    "sentences": [
+      {
+        "start": 0,
+        "end": 8,
+        "text": "Activation functions add non-linearity to neural networks.",
+        "translation": "激活函数为神经网络加入非线性。"
+      },
+      {
+        "start": 8,
+        "end": 18,
+        "text": "Without non-linearity, stacked layers collapse into a single linear transformation.",
+        "translation": "如果没有非线性，多层网络会退化成一个线性变换。"
+      },
+      {
+        "start": 18,
+        "end": 29,
+        "text": "Now we move to gradient clipping, which limits large updates during training.",
+        "translation": "现在我们转到梯度裁剪，它会限制训练中的大更新。"
+      },
+      {
+        "start": 29,
+        "end": 40,
+        "text": "Gradient clipping helps prevent unstable training when gradients become unusually large.",
+        "translation": "当梯度异常变大时，梯度裁剪有助于避免训练不稳定。"
+      }
+    ],
+    "expected_topics": [
+      {
+        "title_terms": ["Activation", "Non-linearity"],
+        "required_points": ["activation functions", "non-linearity", "linear transformation"]
+      },
+      {
+        "title_terms": ["Gradient", "Clipping"],
+        "required_points": ["gradient clipping", "large updates", "stable training"]
+      }
+    ],
+    "forbidden_terms": ["dropout", "attention", "batch normalization"]
+  },
+  {
+    "id": "two_topic_product_meeting",
+    "sentences": [
+      {
+        "start": 0,
+        "end": 9,
+        "text": "The first issue is release readiness, including signing, benchmarks, and the Homebrew cask.",
+        "translation": "第一个问题是发布就绪，包括签名、基准测试和 Homebrew cask。"
+      },
+      {
+        "start": 9,
+        "end": 18,
+        "text": "The release should stay blocked until the recording pipeline passes the integration test.",
+        "translation": "在录音管线通过集成测试之前，发布应该保持阻断。"
+      },
+      {
+        "start": 18,
+        "end": 29,
+        "text": "The second issue is user trust, because a live transcript must show confidence and avoid fake saved states.",
+        "translation": "第二个问题是用户信任，因为实时逐字稿必须显示置信度并避免虚假的保存状态。"
+      },
+      {
+        "start": 29,
+        "end": 40,
+        "text": "If the app cannot process audio, the start button should remain disabled with a clear reason.",
+        "translation": "如果应用无法处理音频，开始按钮应该保持禁用并给出明确原因。"
+      }
+    ],
+    "expected_topics": [
+      {
+        "title_terms": ["Release", "Readiness"],
+        "required_points": ["release readiness", "Homebrew cask", "integration test"]
+      },
+      {
+        "title_terms": ["User", "Trust"],
+        "required_points": ["user trust", "live transcript", "start button"]
+      }
+    ],
+    "forbidden_terms": ["pricing", "social sharing", "calendar"]
+  }
+]

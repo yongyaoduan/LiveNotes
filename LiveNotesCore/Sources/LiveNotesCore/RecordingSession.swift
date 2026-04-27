@@ -5,6 +5,7 @@ public struct RecordingSession: Codable, Identifiable, Equatable, Sendable {
     public var title: String
     public var createdAt: Date
     public var status: RecordingStatus
+    public var audioFileName: String?
     public var transcript: [TranscriptSentence]
     public var topics: [TopicNote]
 
@@ -13,6 +14,7 @@ public struct RecordingSession: Codable, Identifiable, Equatable, Sendable {
         title: String,
         createdAt: Date,
         status: RecordingStatus,
+        audioFileName: String? = nil,
         transcript: [TranscriptSentence] = [],
         topics: [TopicNote] = []
     ) {
@@ -20,6 +22,7 @@ public struct RecordingSession: Codable, Identifiable, Equatable, Sendable {
         self.title = title
         self.createdAt = createdAt
         self.status = status
+        self.audioFileName = audioFileName
         self.transcript = transcript
         self.topics = topics
     }
@@ -43,6 +46,9 @@ public enum RecordingStatus: Codable, Equatable, Sendable {
         case let .paused(elapsedSeconds):
             return "Paused · \(Self.clockLabel(elapsedSeconds))"
         case let .finalizing(progress):
+            if progress >= 1 {
+                return "Ready to review"
+            }
             return "Finalizing · \(Int((progress * 100).rounded()))%"
         case let .saved(durationSeconds):
             return "Saved · \(Self.durationLabel(durationSeconds))"
@@ -51,6 +57,25 @@ public enum RecordingStatus: Codable, Equatable, Sendable {
         case .failed:
             return "Failed"
         }
+    }
+
+    public var elapsedSeconds: Int? {
+        switch self {
+        case let .recording(elapsedSeconds),
+             let .paused(elapsedSeconds),
+             let .saved(elapsedSeconds),
+             let .recovered(elapsedSeconds):
+            return elapsedSeconds
+        case .preparing, .finalizing, .failed:
+            return nil
+        }
+    }
+
+    public var finalizingProgress: Double? {
+        if case let .finalizing(progress) = self {
+            return progress
+        }
+        return nil
     }
 
     private static func clockLabel(_ seconds: Int) -> String {
@@ -90,7 +115,7 @@ public struct TranscriptSentence: Codable, Identifiable, Equatable, Sendable {
     }
 }
 
-public enum TranscriptConfidence: Codable, Equatable, Sendable {
+public enum TranscriptConfidence: String, Codable, Equatable, Sendable {
     case high
     case medium
     case low

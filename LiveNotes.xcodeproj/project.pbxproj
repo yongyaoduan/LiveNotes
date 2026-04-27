@@ -18,6 +18,8 @@
 		A0000000000000000000000A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001A /* Assets.xcassets */; };
 		A0000000000000000000000B /* LocalModelBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001B /* LocalModelBundle.swift */; };
 		A0000000000000000000000C /* SessionFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001C /* SessionFileStore.swift */; };
+		A0000000000000000000000D /* RecordingPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001D /* RecordingPipeline.swift */; };
+		A0000000000000000000000E /* livenotes_mlx_pipeline.py in Resources */ = {isa = PBXBuildFile; fileRef = A0000000000000000000001E /* livenotes_mlx_pipeline.py */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +46,8 @@
 		A0000000000000000000001A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A0000000000000000000001B /* LocalModelBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveNotesCore/Sources/LiveNotesCore/LocalModelBundle.swift; sourceTree = SOURCE_ROOT; };
 		A0000000000000000000001C /* SessionFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveNotesCore/Sources/LiveNotesCore/SessionFileStore.swift; sourceTree = SOURCE_ROOT; };
+		A0000000000000000000001D /* RecordingPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveNotesCore/Sources/LiveNotesCore/RecordingPipeline.swift; sourceTree = SOURCE_ROOT; };
+		A0000000000000000000001E /* livenotes_mlx_pipeline.py */ = {isa = PBXFileReference; lastKnownFileType = text.script.python; path = scripts/livenotes_mlx_pipeline.py; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -82,6 +86,8 @@
 				A00000000000000000000017 /* MarkdownExporter.swift */,
 				A0000000000000000000001B /* LocalModelBundle.swift */,
 				A0000000000000000000001C /* SessionFileStore.swift */,
+				A0000000000000000000001D /* RecordingPipeline.swift */,
+				A0000000000000000000001E /* livenotes_mlx_pipeline.py */,
 			);
 			name = LiveNotesCore;
 			sourceTree = "<group>";
@@ -174,12 +180,12 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A00000000000000000000043 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( A0000000000000000000000A /* Assets.xcassets in Resources */, ); runOnlyForDeploymentPostprocessing = 0; };
+		A00000000000000000000043 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( A0000000000000000000000A /* Assets.xcassets in Resources */, A0000000000000000000000E /* livenotes_mlx_pipeline.py in Resources */, ); runOnlyForDeploymentPostprocessing = 0; };
 		A00000000000000000000045 /* Resources */ = {isa = PBXResourcesBuildPhase; buildActionMask = 2147483647; files = ( ); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A00000000000000000000042 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( A00000000000000000000001 /* LiveNotesApp.swift in Sources */, A00000000000000000000002 /* ContentView.swift in Sources */, A00000000000000000000003 /* AppModel.swift in Sources */, A00000000000000000000004 /* DesignSystem.swift in Sources */, A00000000000000000000005 /* RecordingSession.swift in Sources */, A00000000000000000000006 /* SessionStore.swift in Sources */, A00000000000000000000007 /* MarkdownExporter.swift in Sources */, A0000000000000000000000B /* LocalModelBundle.swift in Sources */, A0000000000000000000000C /* SessionFileStore.swift in Sources */, ); runOnlyForDeploymentPostprocessing = 0; };
+		A00000000000000000000042 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( A00000000000000000000001 /* LiveNotesApp.swift in Sources */, A00000000000000000000002 /* ContentView.swift in Sources */, A00000000000000000000003 /* AppModel.swift in Sources */, A00000000000000000000004 /* DesignSystem.swift in Sources */, A00000000000000000000005 /* RecordingSession.swift in Sources */, A00000000000000000000006 /* SessionStore.swift in Sources */, A00000000000000000000007 /* MarkdownExporter.swift in Sources */, A0000000000000000000000B /* LocalModelBundle.swift in Sources */, A0000000000000000000000C /* SessionFileStore.swift in Sources */, A0000000000000000000000D /* RecordingPipeline.swift in Sources */, ); runOnlyForDeploymentPostprocessing = 0; };
 		A00000000000000000000044 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = ( A00000000000000000000008 /* LiveNotesUITests.swift in Sources */, ); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 

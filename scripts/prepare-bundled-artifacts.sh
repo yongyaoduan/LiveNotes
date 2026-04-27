@@ -15,13 +15,15 @@ fi
 mkdir -p "$DESTINATION_ROOT"
 
 for entry in "${REMOTE_ARTIFACTS[@]}"; do
-  remote_url="${entry%%|*}"
-  relative_path="${entry#*|}"
+  IFS='|' read -r remote_url relative_path expected_size expected_sha <<< "$entry"
   output_path="$DESTINATION_ROOT/$relative_path"
 
-  if [[ -s "$output_path" ]]; then
-    printf 'Using %s\n' "$relative_path"
-    continue
+  if [[ -s "$output_path" && -n "$expected_size" && "$(stat -f '%z' "$output_path")" == "$expected_size" ]]; then
+    if [[ -z "$expected_sha" ]] || [[ "$(shasum -a 256 "$output_path" | awk '{print $1}')" == "$expected_sha" ]]; then
+      printf 'Using %s\n' "$relative_path"
+      continue
+    fi
+    rm -f "$output_path"
   fi
 
   mkdir -p "$(dirname "$output_path")"

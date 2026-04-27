@@ -8,6 +8,9 @@ source "$ROOT_DIR/scripts/model-artifacts.sh"
 WORK_ROOT="$(mktemp -d /tmp/livenotes-dmg-test.XXXXXX)"
 trap 'rm -rf "$WORK_ROOT"' EXIT
 
+FIXTURE_LOCK="$WORK_ROOT/fixture-lock.json"
+export LIVENOTES_MODEL_ARTIFACT_LOCK="$FIXTURE_LOCK"
+
 EMPTY_ARTIFACTS="$WORK_ROOT/empty-artifacts"
 mkdir -p "$EMPTY_ARTIFACTS"
 
@@ -19,11 +22,55 @@ if LIVENOTES_BUNDLED_ARTIFACT_SOURCE_ROOT="$EMPTY_ARTIFACTS" \
 fi
 
 FIXTURE_ARTIFACTS="$WORK_ROOT/artifacts"
-for relative_path in "${REQUIRED_ARTIFACT_PATHS[@]}"; do
-  output_path="$FIXTURE_ARTIFACTS/$relative_path"
-  mkdir -p "$(dirname "$output_path")"
-  printf 'fixture\n' > "$output_path"
-done
+python - "$FIXTURE_ARTIFACTS" "$FIXTURE_LOCK" "${REQUIRED_ARTIFACT_PATHS[@]}" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+root = Path(sys.argv[1])
+lock_path = Path(sys.argv[2])
+paths = sys.argv[3:]
+artifacts = []
+
+for relative_path in paths:
+    path = root / relative_path
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if relative_path.endswith("model.safetensors.index.json"):
+        shard = "model.safetensors"
+        data = json.dumps({"weight_map": {"layer": shard}}).encode()
+        kind = "safetensors_index"
+    elif relative_path.endswith(".json"):
+        data = json.dumps({"fixture": relative_path}).encode()
+        kind = "json"
+    else:
+        data = b"fixture\n"
+        kind = "text"
+    path.write_bytes(data)
+    artifacts.append({
+        "path": relative_path,
+        "size": len(data),
+        "type": kind,
+    })
+
+lock = {
+    "schema": 1,
+    "default_profile": {
+        "runtime": "mlx",
+        "transcription": "fixture",
+        "summarization": "fixture",
+        "translation": "fixture",
+    },
+    "models": [
+        {
+            "id": "fixture",
+            "tasks": ["transcription", "summarization", "translation"],
+            "bundled": True,
+            "artifacts": artifacts,
+        }
+    ],
+}
+lock_path.write_text(json.dumps(lock), encoding="utf-8")
+PY
 
 PREBUILT_APP="$WORK_ROOT/LiveNotes.app"
 mkdir -p "$PREBUILT_APP/Contents/MacOS" "$PREBUILT_APP/Contents/Resources"

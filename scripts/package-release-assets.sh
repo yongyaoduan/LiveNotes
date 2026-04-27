@@ -18,12 +18,18 @@ if [[ ! -f "$DMG_PATH" ]]; then
 fi
 
 DMG_DIR="$(cd "$(dirname "$DMG_PATH")" && pwd)"
+DMG_PATH="$DMG_DIR/$(basename "$DMG_PATH")"
 ASSET_PARENT="$(dirname "$ASSET_DIR")"
 mkdir -p "$ASSET_PARENT"
 ASSET_DIR="$(cd "$ASSET_PARENT" && pwd)/$(basename "$ASSET_DIR")"
 
 if [[ "$ASSET_DIR" == "/" || "$ASSET_DIR" == "$DMG_DIR" ]]; then
   echo "Release asset directory must be separate from the dmg directory" >&2
+  exit 64
+fi
+
+if [[ "$DMG_PATH" == "$ASSET_DIR"/* ]]; then
+  echo "Release asset directory must not contain the source dmg" >&2
   exit 64
 fi
 

@@ -23,16 +23,19 @@ jobs:
       - name: Build app
         run: xcodebuild build -project LiveNotes.xcodeproj -scheme LiveNotes -destination 'platform=macOS,arch=arm64'
 
-      - name: Run UI tests
-        run: ./scripts/run-ui-tests.sh
+      - name: Test UI evidence recorder
+        run: ./scripts/test-record-ui-tests.sh
 
-      - name: Upload UI test results
+      - name: Run UI evidence tests
+        run: ./scripts/record-ui-tests.sh
+
+      - name: Upload UI evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: livenotes-ui-test-results
-          path: dist/LiveNotesUITests.xcresult
-          if-no-files-found: ignore
+          name: livenotes-ui-evidence
+          path: dist/ui-evidence
+          if-no-files-found: error
 
       - name: Test dmg packaging script
         run: ./scripts/test-build-dmg.sh
@@ -43,5 +46,17 @@ jobs:
       - name: Test bundled artifact preparation script
         run: ./scripts/test-prepare-bundled-artifacts.sh
 
+      - name: Test model artifact verifier
+        run: ./scripts/test-model-artifact-verifier.sh
+
       - name: Test Homebrew cask generator
         run: ./scripts/test-homebrew-cask.sh
+
+      - name: Test quality benchmark harness
+        run: ./scripts/test-quality-benchmark.sh
+
+      - name: Test MLX pipeline helper
+        run: ./scripts/test-mlx-pipeline-helper.sh
+
+      - name: Test release readiness guard
+        run: ./scripts/test-release-readiness.sh
