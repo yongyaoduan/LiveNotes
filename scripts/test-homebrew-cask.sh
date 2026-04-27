@@ -60,6 +60,10 @@ if grep -q 'Run quality benchmark' "$WORKFLOW_PATH"; then
   exit 1
 fi
 grep -q 'require_value HOMEBREW_TAP_TOKEN' "$WORKFLOW_PATH"
+grep -q 'sign_and_notarize=0' "$WORKFLOW_PATH"
+grep -q 'sign_and_notarize=1' "$WORKFLOW_PATH"
+grep -q 'Apple notarization secrets must be all set or all omitted' "$WORKFLOW_PATH"
+grep -q 'Homebrew preview build' "$WORKFLOW_PATH"
 grep -q 'DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64' "$WORKFLOW_PATH"
 grep -q 'APPLE_APP_SPECIFIC_PASSWORD' "$WORKFLOW_PATH"
 grep -q "publish=\\\"1\\\"" "$WORKFLOW_PATH"
@@ -81,7 +85,7 @@ from pathlib import Path
 content = Path(sys.argv[1]).read_text(encoding="utf-8")
 checks = {
     "resolve": content.find("- name: Resolve version"),
-    "credentials": content.find("- name: Validate publish credentials"),
+    "credentials": content.find("- name: Resolve publish mode"),
     "tests": content.find("- name: Run core tests"),
 }
 if any(index == -1 for index in checks.values()):

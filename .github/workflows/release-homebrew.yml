@@ -65,7 +65,8 @@ jobs:
           echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "publish=$publish" >> "$GITHUB_OUTPUT"
 
-      - name: Validate publish credentials
+      - name: Resolve publish mode
+        id: publish_context
         if: steps.version.outputs.publish == '1'
         env:
           DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64 }}
@@ -75,6 +76,7 @@ jobs:
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
         run: |
           missing=0
+          present=0
           require_value() {
             local name="$1"
             if [[ -z "${!name:-}" ]]; then
@@ -82,14 +84,35 @@ jobs:
               missing=1
             fi
           }
+          apple_secret_state() {
+            local name="$1"
+            if [[ -z "${!name:-}" ]]; then
+              missing=$((missing + 1))
+            else
+              present=$((present + 1))
+            fi
+          }
           require_value HOMEBREW_TAP_TOKEN
-          require_value DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64
-          require_value DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD
-          require_value APPLE_ID
-          require_value APPLE_TEAM_ID
-          require_value APPLE_APP_SPECIFIC_PASSWORD
           if [[ "$missing" == "1" ]]; then
             exit 65
+          fi
+          missing=0
+          apple_secret_state DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64
+          apple_secret_state DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD
+          apple_secret_state APPLE_ID
+          apple_secret_state APPLE_TEAM_ID
+          apple_secret_state APPLE_APP_SPECIFIC_PASSWORD
+          if (( present > 0 && missing > 0 )); then
+            echo "Apple notarization secrets must be all set or all omitted" >&2
+            exit 65
+          fi
+          if (( present == 5 )); then
+            echo "sign_and_notarize=1" >> "$GITHUB_OUTPUT"
+            echo "release_channel=Release" >> "$GITHUB_OUTPUT"
+          else
+            echo "Publishing Homebrew preview without Developer ID signing or notarization." >&2
+            echo "sign_and_notarize=0" >> "$GITHUB_OUTPUT"
+            echo "release_channel=Preview" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Run core tests
@@ -135,7 +158,7 @@ jobs:
         run: ./scripts/check-release-readiness.sh
 
       - name: Import Developer ID certificate
-        if: steps.version.outputs.publish == '1'
+        if: steps.version.outputs.publish == '1' && steps.publish_context.outputs.sign_and_notarize == '1'
         env:
           DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64 }}
           DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD }}
@@ -164,8 +187,8 @@ jobs:
         id: app_zip
         env:
           LIVENOTES_RELEASE_VERSION: ${{ steps.version.outputs.version }}
-          LIVENOTES_REQUIRE_SIGNED_APP: ${{ steps.version.outputs.publish == '1' && '1' || '0' }}
-          LIVENOTES_NOTARIZE_APP: ${{ steps.version.outputs.publish == '1' && '1' || '0' }}
+          LIVENOTES_REQUIRE_SIGNED_APP: ${{ steps.publish_context.outputs.sign_and_notarize == '1' && '1' || '0' }}
+          LIVENOTES_NOTARIZE_APP: ${{ steps.publish_context.outputs.sign_and_notarize == '1' && '1' || '0' }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
@@ -195,11 +218,13 @@ jobs:
           ```bash
           brew install yongyaoduan/livenotes/livenotes
           ```
+
+          This is a Homebrew preview build. It is not signed with Developer ID or notarized by Apple until Apple Developer Program credentials are configured.
           NOTES
           if ! gh release view "$release_tag" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             gh release create "$release_tag" \
               --repo "${{ github.repository }}" \
-              --title "LiveNotes ${{ steps.version.outputs.version }}" \
+              --title "LiveNotes ${{ steps.version.outputs.version }} ${{ steps.publish_context.outputs.release_channel }}" \
               --notes-file "$notes_path"
           fi
           gh release upload "$release_tag" "${{ steps.app_zip.outputs.zip_path }}" --repo "${{ github.repository }}" --clobber

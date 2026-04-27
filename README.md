@@ -2,7 +2,7 @@
 
 LiveNotes is a native macOS app for local recording notes, English-to-Chinese translation, topic summaries, and saved transcripts.
 
-Current release status: the native app shell, AVAudioEngine recording path, local MLX inference path, persistence layer, UI evidence coverage, model artifact locks, and live model checks are in place. A user-facing release is published through Homebrew after the release gate passes with real audio.
+Current release status: the native app shell, AVAudioEngine recording path, local MLX inference path, persistence layer, UI evidence coverage, model artifact locks, and live model checks are in place. A Homebrew preview release can be published after the release gate passes with real audio.
 
 The product keeps the interface focused on four jobs:
 
@@ -32,6 +32,8 @@ brew install yongyaoduan/livenotes/livenotes
 ```
 
 The cask installs the app, creates the local MLX runtime in `~/Library/Application Support/LiveNotes/Runtime`, and downloads model artifacts to `~/Library/Application Support/LiveNotes/LiveNotesArtifacts`.
+
+Preview builds are not signed with Developer ID or notarized by Apple. macOS may block first launch until the app is allowed from System Settings. The same Homebrew cask becomes the production release path after Apple Developer Program signing credentials are configured.
 
 ## Development
 
@@ -102,11 +104,14 @@ Generate a cask file:
 ./scripts/write-homebrew-cask.sh 0.1.0 <zip-url> <sha256>
 ```
 
-The `Release Homebrew` workflow runs on tags matching `v*`, `desktop-v*`, or `*.*.*`, and it can also publish from GitHub Actions when a manual run provides a version. The workflow generates UI screenshot and video evidence, runs the release readiness gate, signs and notarizes `LiveNotes-<version>.zip`, creates the GitHub release, and updates the Homebrew tap.
+The `Release Homebrew` workflow runs on tags matching `v*`, `desktop-v*`, or `*.*.*`, and it can also publish from GitHub Actions when a manual run provides a version. The workflow generates UI screenshot and video evidence, runs the release readiness gate, creates the GitHub release, and updates the Homebrew tap.
 
-Publishing requires these GitHub secrets:
+Homebrew preview publishing requires this GitHub secret:
 
 - `HOMEBREW_TAP_TOKEN`
+
+Signed and notarized publishing also requires these GitHub secrets:
+
 - `DEVELOPER_ID_APPLICATION_CERTIFICATE_BASE64`
 - `DEVELOPER_ID_APPLICATION_CERTIFICATE_PASSWORD`
 - `APPLE_ID`
