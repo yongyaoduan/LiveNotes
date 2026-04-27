@@ -236,6 +236,10 @@ jobs:
               --title "LiveNotes ${{ steps.version.outputs.version }} ${{ steps.publish_context.outputs.release_channel }}" \
               --notes-file "$notes_path"
           fi
+          gh release edit "$release_tag" \
+            --repo "${{ github.repository }}" \
+            --title "LiveNotes ${{ steps.version.outputs.version }} ${{ steps.publish_context.outputs.release_channel }}" \
+            --notes-file "$notes_path"
           gh release upload "$release_tag" "${{ steps.app_zip.outputs.zip_path }}" --repo "${{ github.repository }}" --clobber
 
       - name: Generate Homebrew cask
