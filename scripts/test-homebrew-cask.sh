@@ -9,6 +9,7 @@ trap 'rm -rf "$WORK_ROOT"' EXIT
 CASK_PATH="$WORK_ROOT/livenotes.rb"
 WORKFLOW_PATH="$ROOT_DIR/.github/workflows/release-homebrew.yml"
 CI_WORKFLOW_PATH="$ROOT_DIR/.github/workflows/ci.yml"
+APP_MODEL_PATH="$ROOT_DIR/LiveNotesApp/AppModel.swift"
 "$ROOT_DIR/scripts/write-homebrew-cask.sh" \
   "0.1.0" \
   "https://github.com/yongyaoduan/LiveNotes/releases/download/v0.1.0/LiveNotes-0.1.0.zip" \
@@ -39,6 +40,10 @@ grep -q 'Digest::SHA256' "$CASK_PATH"
 grep -q 'failed sha256 verification' "$CASK_PATH"
 grep -q 'LIVENOTES_SUPPORT_ROOT' "$CASK_PATH"
 grep -q 'LIVENOTES_CURL_BIN' "$CASK_PATH"
+grep -q 'Installing LiveNotes local MLX runtime packages' "$CASK_PATH"
+grep -q 'Downloading #{relative_path}' "$CASK_PATH"
+grep -q 'Installed #{relative_path}' "$CASK_PATH"
+grep -q 'LiveNotes local MLX runtime is ready' "$CASK_PATH"
 grep -q 'app "LiveNotes.app"' "$CASK_PATH"
 grep -q 'uninstall quit:' "$CASK_PATH"
 grep -q 'delete: \[' "$CASK_PATH"
@@ -139,6 +144,12 @@ if not checks["resolve"] < checks["credentials"] < checks["tests"]:
 PYTHON
 if [[ -f "$ROOT_DIR/.github/workflows/release-desktop.yml" ]]; then
   echo "Offline DMG workflow must not be a release path" >&2
+  exit 1
+fi
+grep -q 'import importlib.util' "$APP_MODEL_PATH"
+grep -q 'importlib.util.find_spec' "$APP_MODEL_PATH"
+if grep -q 'import mlx; import mlx_whisper; import mlx_lm' "$APP_MODEL_PATH"; then
+  echo "Production runtime readiness must not cold-import MLX packages on app launch" >&2
   exit 1
 fi
 
@@ -250,7 +261,12 @@ RUBY
 HOMEBREW_PREFIX="$FAKE_PREFIX" \
 LIVENOTES_SUPPORT_ROOT="$FAKE_SUPPORT" \
 LIVENOTES_CURL_BIN="$FAKE_CURL" \
-  ruby "$POSTFLIGHT_SMOKE" "$POSTFLIGHT_CASK"
+  ruby "$POSTFLIGHT_SMOKE" "$POSTFLIGHT_CASK" > "$WORK_ROOT/postflight.log"
+
+grep -q 'Installing LiveNotes local MLX runtime packages' "$WORK_ROOT/postflight.log"
+grep -q 'Downloading models/fixture.bin (0.0 MB)' "$WORK_ROOT/postflight.log"
+grep -q 'Installed models/fixture.bin' "$WORK_ROOT/postflight.log"
+grep -q 'LiveNotes local MLX runtime is ready' "$WORK_ROOT/postflight.log"
 
 if [[ ! -f "$FAKE_SUPPORT/Runtime/pip-install-args.txt" ]]; then
   echo "Expected postflight to install the local Python runtime packages" >&2

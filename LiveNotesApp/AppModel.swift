@@ -758,7 +758,14 @@ final class AppModel: ObservableObject {
         process.arguments = [
             pythonExecutable,
             "-c",
-            "import mlx; import mlx_whisper; import mlx_lm"
+            """
+            import importlib.util
+            missing = [
+                name for name in ("mlx", "mlx_whisper", "mlx_lm")
+                if importlib.util.find_spec(name) is None
+            ]
+            raise SystemExit(1 if missing else 0)
+            """
         ]
         process.standardOutput = Pipe()
         process.standardError = Pipe()

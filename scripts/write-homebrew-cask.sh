@@ -80,6 +80,7 @@ CASK
       system_command "/bin/rm", args: ["-rf", runtime_root]
       system_command python_candidates.first, args: ["-m", "venv", runtime_root]
     end
+    puts "Installing LiveNotes local MLX runtime packages..."
     system_command runtime_python,
                    args: ["-m", "pip", "install", "--upgrade"] + runtime_packages
 
@@ -97,12 +98,17 @@ CASK
     artifacts.each do |remote_url, relative_path, expected_size, expected_sha|
       output_path = File.join(artifact_root, relative_path)
       if File.exist?(output_path) && File.size(output_path) == expected_size
-        next if expected_sha.empty? || Digest::SHA256.file(output_path).hexdigest == expected_sha
+        if expected_sha.empty? || Digest::SHA256.file(output_path).hexdigest == expected_sha
+          puts "Using #{relative_path}"
+          next
+        end
       end
 
       system_command "/bin/mkdir", args: ["-p", File.dirname(output_path)]
       temporary_path = "#{output_path}.download"
       curl_bin = ENV.fetch("LIVENOTES_CURL_BIN", "/usr/bin/curl")
+      size_megabytes = expected_size.to_f / 1024 / 1024
+      puts "Downloading #{relative_path} (#{format('%.1f', size_megabytes)} MB)"
       system_command curl_bin,
                      args: [
                        "--fail",
@@ -120,7 +126,9 @@ CASK
         raise "Downloaded #{relative_path} failed sha256 verification"
       end
       File.rename(temporary_path, output_path)
+      puts "Installed #{relative_path}"
     end
+    puts "LiveNotes local MLX runtime is ready."
   end
 
   uninstall quit:   "app.livenotes.mac",

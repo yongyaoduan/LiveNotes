@@ -313,6 +313,10 @@ final class LiveNotesUITests: XCTestCase {
 
         XCTAssertTrue(app.staticTexts["New Recording"].waitForExistence(timeout: 3))
         let reasonVisible = app.staticTexts["recording-unavailable-reason"].exists
+        if ProcessInfo.processInfo.environment["LIVENOTES_EXPECT_PRODUCTION_RUNTIME_READY"] == "1" {
+            XCTAssertFalse(reasonVisible)
+            XCTAssertTrue(app.buttons["new-recording-start-button"].isEnabled)
+        }
         XCTAssertEqual(app.buttons["new-recording-start-button"].isEnabled, !reasonVisible)
 
         attachScreenshot(named: "production-runtime-readiness", app: app)
