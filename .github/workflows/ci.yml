@@ -17,11 +17,11 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      - name: Test build settings
+        run: ./scripts/test-build-settings.sh
+
       - name: Run core tests
         timeout-minutes: 8
-        env:
-          LIVENOTES_RECORDING_PIPELINE_LIVE: "0"
-          LIVENOTES_RECORDING_PIPELINE_CAPTURE_LIVE: "0"
         run: ./scripts/run-core-tests.sh
 
       - name: Build app
@@ -52,20 +52,8 @@ jobs:
       - name: Test release asset packaging
         run: ./scripts/test-package-release-assets.sh
 
-      - name: Test bundled artifact preparation script
-        run: ./scripts/test-prepare-bundled-artifacts.sh
-
-      - name: Test model artifact verifier
-        run: ./scripts/test-model-artifact-verifier.sh
-
       - name: Test Homebrew cask generator
         run: ./scripts/test-homebrew-cask.sh
-
-      - name: Test quality benchmark harness
-        run: ./scripts/test-quality-benchmark.sh
-
-      - name: Test MLX pipeline helper
-        run: ./scripts/test-mlx-pipeline-helper.sh
 
       - name: Test release readiness guard
         run: ./scripts/test-release-readiness.sh

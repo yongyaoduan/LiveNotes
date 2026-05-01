@@ -23,16 +23,6 @@ struct SessionFileStoreTests {
                     translation: TestText.activationFunctionTranslation,
                     confidence: .high
                 )
-            ],
-            topics: [
-                TopicNote(
-                    title: "Activation Functions",
-                    startTime: 883,
-                    endTime: 1_289,
-                    summary: "Activation functions add non-linearity to model outputs.",
-                    keyPoints: ["They transform linear outputs."],
-                    questions: ["Why does non-linearity matter?"]
-                )
             ]
         )
 

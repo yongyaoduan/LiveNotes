@@ -9,6 +9,7 @@ APP_NAME="LiveNotes"
 DERIVED_DATA_PATH="${DERIVED_DATA_PATH:-/tmp/livenotes-homebrew}"
 DIST_DIR="$ROOT_DIR/dist"
 BUILD_APP_PATH="$DERIVED_DATA_PATH/Build/Products/Release/$APP_NAME.app"
+ENTITLEMENTS_PATH="$ROOT_DIR/LiveNotesApp/LiveNotes.entitlements"
 SIGNING_IDENTITY="${LIVENOTES_DEVELOPER_ID_APPLICATION_IDENTITY:-Developer ID Application}"
 
 read_project_version() {
@@ -55,15 +56,27 @@ if [[ ! -d "$BUILD_APP_PATH" ]]; then
   echo "Release app was not built at $BUILD_APP_PATH" >&2
   exit 1
 fi
+if [[ ! -f "$ENTITLEMENTS_PATH" ]]; then
+  echo "Release entitlements file is missing" >&2
+  exit 1
+fi
 
 if [[ "${LIVENOTES_REQUIRE_SIGNED_APP:-0}" == "1" ]]; then
-  codesign --force --deep --options runtime --timestamp --sign "$SIGNING_IDENTITY" "$BUILD_APP_PATH"
+  codesign --force --deep --options runtime --timestamp --entitlements "$ENTITLEMENTS_PATH" --sign "$SIGNING_IDENTITY" "$BUILD_APP_PATH"
   codesign --verify --strict --deep "$BUILD_APP_PATH"
   signature_details="$(codesign -dv --verbose=4 "$BUILD_APP_PATH" 2>&1 || true)"
   if ! grep -q 'Authority=Developer ID Application' <<<"$signature_details"; then
     echo "Release app must be signed with a Developer ID Application certificate" >&2
     exit 1
   fi
+else
+  codesign --force --deep --entitlements "$ENTITLEMENTS_PATH" --sign - --identifier app.livenotes.mac "$BUILD_APP_PATH"
+  codesign --verify --deep "$BUILD_APP_PATH"
+fi
+
+if ! codesign -d --entitlements :- "$BUILD_APP_PATH" 2>/dev/null | grep -q 'com.apple.security.device.audio-input'; then
+  echo "Release app signature must include audio input entitlement" >&2
+  exit 1
 fi
 
 if [[ "${LIVENOTES_NOTARIZE_APP:-0}" == "1" ]]; then
@@ -72,7 +85,7 @@ if [[ "${LIVENOTES_NOTARIZE_APP:-0}" == "1" ]]; then
   : "${APPLE_APP_SPECIFIC_PASSWORD:?APPLE_APP_SPECIFIC_PASSWORD is required for notarization}"
   notarization_zip="$DIST_DIR/$APP_NAME-$VERSION-notarization.zip"
   rm -f "$notarization_zip"
-  ditto -c -k --keepParent "$BUILD_APP_PATH" "$notarization_zip"
+  COPYFILE_DISABLE=1 ditto -c -k --norsrc --keepParent "$BUILD_APP_PATH" "$notarization_zip"
   xcrun notarytool submit "$notarization_zip" \
     --apple-id "$APPLE_ID" \
     --team-id "$APPLE_TEAM_ID" \
@@ -84,6 +97,6 @@ if [[ "${LIVENOTES_NOTARIZE_APP:-0}" == "1" ]]; then
   rm -f "$notarization_zip"
 fi
 
-ditto -c -k --keepParent "$BUILD_APP_PATH" "$ZIP_PATH"
+COPYFILE_DISABLE=1 ditto -c -k --norsrc --keepParent "$BUILD_APP_PATH" "$ZIP_PATH"
 
 printf '%s\n' "$ZIP_PATH"

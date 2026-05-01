@@ -71,6 +71,16 @@ public struct SessionStore: Sendable {
         selectedSessionID = id
     }
 
+    public mutating func removeSession(_ id: UUID) throws {
+        guard let index = sessions.firstIndex(where: { $0.id == id }) else {
+            throw SessionStoreError.sessionNotFound
+        }
+        sessions.remove(at: index)
+        if selectedSessionID == id {
+            selectedSessionID = sessions.first?.id
+        }
+    }
+
     public mutating func startRecording(_ id: UUID, elapsedSeconds: Int = 0) throws {
         try updateSession(id) { session in
             session.status = .recording(elapsedSeconds: elapsedSeconds)
@@ -92,9 +102,13 @@ public struct SessionStore: Sendable {
     public mutating func saveRecording(
         _ id: UUID,
         durationSeconds: Int,
-        audioFileName: String? = nil
+        audioFileName: String? = nil,
+        title: String? = nil
     ) throws {
         try updateSession(id) { session in
+            if let title {
+                session.title = title
+            }
             session.status = .saved(durationSeconds: durationSeconds)
             if let audioFileName {
                 session.audioFileName = audioFileName
@@ -123,12 +137,10 @@ public struct SessionStore: Sendable {
 
     public mutating func replaceGeneratedContent(
         in id: UUID,
-        transcript: [TranscriptSentence],
-        topics: [TopicNote]
+        transcript: [TranscriptSentence]
     ) throws {
         try updateSession(id) { session in
             session.transcript = transcript
-            session.topics = topics
         }
     }
 
@@ -136,22 +148,64 @@ public struct SessionStore: Sendable {
         to id: UUID,
         sentence: TranscriptSentence
     ) throws {
+        try appendTranscript(to: id, sentences: [sentence])
+    }
+
+    public mutating func appendTranscript(
+        to id: UUID,
+        sentences: [TranscriptSentence]
+    ) throws {
         try updateSession(id) { session in
-            session.transcript.append(sentence)
+            session.transcript.append(contentsOf: sentences)
+            session.sortTranscript()
         }
     }
 
-    public mutating func upsertTopic(
+    public mutating func upsertTranscript(
         in id: UUID,
-        topic: TopicNote
+        sentence: TranscriptSentence
     ) throws {
         try updateSession(id) { session in
-            if let existingIndex = session.topics.firstIndex(where: { $0.id == topic.id }) {
-                session.topics[existingIndex] = topic
+            if let existingIndex = session.transcript.firstIndex(where: {
+                $0.startTime == sentence.startTime
+                    && $0.endTime == sentence.endTime
+                    && $0.text == sentence.text
+            }) {
+                session.transcript[existingIndex] = sentence
             } else {
-                session.topics.append(topic)
+                session.transcript.removeAll { existing in
+                    Self.transcriptRangesOverlap(existing, sentence)
+                }
+                session.transcript.append(sentence)
             }
+            session.sortTranscript()
         }
+    }
+
+    private static func transcriptRangesOverlap(
+        _ lhs: TranscriptSentence,
+        _ rhs: TranscriptSentence
+    ) -> Bool {
+        let overlap = min(lhs.endTime, rhs.endTime) - max(lhs.startTime, rhs.startTime)
+        guard overlap > 0 else { return false }
+        if lhs.startTime == rhs.startTime {
+            return true
+        }
+        if rangeContains(lhs, rhs) || rangeContains(rhs, lhs) {
+            return true
+        }
+        let shorterDuration = max(1, min(
+            lhs.endTime - lhs.startTime,
+            rhs.endTime - rhs.startTime
+        ))
+        return Double(overlap) / Double(shorterDuration) >= 0.67
+    }
+
+    private static func rangeContains(
+        _ lhs: TranscriptSentence,
+        _ rhs: TranscriptSentence
+    ) -> Bool {
+        lhs.startTime <= rhs.startTime && lhs.endTime >= rhs.endTime
     }
 
     private mutating func updateSession(
@@ -179,9 +233,17 @@ public struct SessionStore: Sendable {
     }
 
     private func maxRecoveredDuration(_ session: RecordingSession) -> Int {
-        max(
-            session.transcript.map(\.endTime).max() ?? 0,
-            session.topics.compactMap(\.endTime).max() ?? 0
-        )
+        session.transcript.map(\.endTime).max() ?? 0
+    }
+}
+
+private extension RecordingSession {
+    mutating func sortTranscript() {
+        transcript.sort { first, second in
+            if first.startTime == second.startTime {
+                return first.endTime < second.endTime
+            }
+            return first.startTime < second.startTime
+        }
     }
 }

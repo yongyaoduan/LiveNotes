@@ -38,7 +38,7 @@ struct SessionStoreTests {
         #expect(store.session(id: session.id)?.status == .finalizing(progress: 0.62))
 
         try store.finalizeRecording(session.id, progress: 1.0)
-        #expect(store.session(id: session.id)?.status.label == "Ready to review")
+        #expect(store.session(id: session.id)?.status.label == "Saved")
 
         try store.saveRecording(
             session.id,
@@ -49,7 +49,100 @@ struct SessionStoreTests {
         #expect(store.session(id: session.id)?.audioFileName == "Audio/neural-networks.m4a")
     }
 
-    @Test("saved session keeps transcript, translations, topics, and audio anchors")
+    @Test("live transcript appends complete sentences in timestamp order")
+    func liveTranscriptAppendsCompleteSentencesInOrder() throws {
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_700))
+        let session = store.createRecording(named: "Lecture")
+
+        try store.appendTranscript(
+            to: session.id,
+            sentences: [
+                TranscriptSentence(
+                    startTime: 8,
+                    endTime: 11,
+                    text: "Second sentence.",
+                    translation: "第二句。",
+                    confidence: .high
+                ),
+                TranscriptSentence(
+                    startTime: 1,
+                    endTime: 4,
+                    text: "First sentence.",
+                    translation: "第一句。",
+                    confidence: .high
+                ),
+            ]
+        )
+
+        let transcript = try #require(store.session(id: session.id)?.transcript)
+        #expect(transcript.map(\.text) == ["First sentence.", "Second sentence."])
+        #expect(transcript.map(\.translation) == ["第一句。", "第二句。"])
+    }
+
+    @Test("live transcript upsert replaces overlapping speech ranges")
+    func liveTranscriptUpsertReplacesOverlappingSpeechRanges() throws {
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_800))
+        let session = store.createRecording(named: "Lecture")
+
+        try store.upsertTranscript(
+            in: session.id,
+            sentence: TranscriptSentence(
+                startTime: 0,
+                endTime: 2,
+                text: "Hello.",
+                translation: "",
+                confidence: .medium
+            )
+        )
+        try store.upsertTranscript(
+            in: session.id,
+            sentence: TranscriptSentence(
+                startTime: 0,
+                endTime: 4,
+                text: "Hello everyone, my name is Joanna.",
+                translation: "",
+                confidence: .high
+            )
+        )
+
+        let transcript = try #require(store.session(id: session.id)?.transcript)
+        #expect(transcript.map(\.text) == ["Hello everyone, my name is Joanna."])
+    }
+
+    @Test("live transcript upsert keeps adjacent rounded speech ranges")
+    func liveTranscriptUpsertKeepsAdjacentRoundedSpeechRanges() throws {
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_900))
+        let session = store.createRecording(named: "Lecture")
+
+        try store.upsertTranscript(
+            in: session.id,
+            sentence: TranscriptSentence(
+                startTime: 0,
+                endTime: 4,
+                text: "This is the first sentence.",
+                translation: "",
+                confidence: .medium
+            )
+        )
+        try store.upsertTranscript(
+            in: session.id,
+            sentence: TranscriptSentence(
+                startTime: 3,
+                endTime: 6,
+                text: "This is the second sentence.",
+                translation: "",
+                confidence: .medium
+            )
+        )
+
+        let transcript = try #require(store.session(id: session.id)?.transcript)
+        #expect(transcript.map(\.text) == [
+            "This is the first sentence.",
+            "This is the second sentence."
+        ])
+    }
+
+    @Test("saved session keeps transcript, translations, and audio anchors")
     func savedSessionKeepsCoreContent() throws {
         var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 3_000))
         let session = store.createRecording(named: "Neural Networks")
@@ -64,31 +157,13 @@ struct SessionStoreTests {
                 confidence: .high
             )
         )
-        try store.upsertTopic(
-            in: session.id,
-            topic: TopicNote(
-                title: "Activation Functions",
-                startTime: 883,
-                endTime: nil,
-                summary: "Activation functions add non-linearity to model outputs.",
-                keyPoints: [
-                    "They transform linear outputs.",
-                    "They make deeper models useful."
-                ],
-                questions: [
-                    "Why does non-linearity matter?"
-                ]
-            )
-        )
 
         let saved = try #require(store.session(id: session.id))
         #expect(saved.transcript.count == 1)
         #expect(saved.transcript.first?.translation == TestText.activationFunctionTranslation)
-        #expect(saved.topics.first?.title == "Activation Functions")
-        #expect(saved.topics.first?.keyPoints.count == 2)
     }
 
-    @Test("generated transcript and topics replace processing placeholders")
+    @Test("generated transcript replaces processing placeholders")
     func generatedContentReplacesPlaceholders() throws {
         var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 3_300))
         let session = store.createRecording(named: "Planning")
@@ -101,21 +176,10 @@ struct SessionStoreTests {
                 confidence: .high
             )
         ]
-        let topics = [
-            TopicNote(
-                title: "Follow-up",
-                startTime: 0,
-                endTime: 3,
-                summary: "The session identifies a follow-up.",
-                keyPoints: ["A follow-up is required."],
-                questions: []
-            )
-        ]
 
-        try store.replaceGeneratedContent(in: session.id, transcript: transcript, topics: topics)
+        try store.replaceGeneratedContent(in: session.id, transcript: transcript)
 
         #expect(store.session(id: session.id)?.transcript == transcript)
-        #expect(store.session(id: session.id)?.topics == topics)
     }
 
     @Test("failed recording keeps the session visible")
@@ -126,6 +190,20 @@ struct SessionStoreTests {
         try store.failRecording(session.id, message: "Microphone access was interrupted.")
 
         #expect(store.session(id: session.id)?.status == .failed(message: "Microphone access was interrupted."))
+    }
+
+    @Test("preparing session can be removed after cancellation")
+    func preparingSessionCanBeRemovedAfterCancellation() throws {
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 3_900))
+        let preparing = store.createRecording(named: "Planning")
+        let saved = store.createRecording(named: "Saved")
+        try store.saveRecording(saved.id, durationSeconds: 60)
+        try store.selectSession(preparing.id)
+
+        try store.removeSession(preparing.id)
+
+        #expect(store.session(id: preparing.id) == nil)
+        #expect(store.selectedSessionID == saved.id)
     }
 
     @Test("recovered audio appears as a sidebar session")
@@ -143,6 +221,27 @@ struct SessionStoreTests {
         #expect(store.sessions.first?.status == .recovered(durationSeconds: 2_280))
         #expect(store.sessions.first?.audioFileName == "Audio/recovered.m4a")
         #expect(store.selectedSessionID == recovered.id)
+    }
+
+    @Test("saved recovered audio can receive a recovered session title")
+    func savedRecoveredAudioCanReceiveRecoveredTitle() throws {
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 4_200))
+        let recovered = store.recoverAudio(
+            title: "Unsaved Recording",
+            durationSeconds: 2_280,
+            lastSavedAt: Date(timeIntervalSince1970: 4_000),
+            audioFileName: "Audio/recovered.m4a"
+        )
+
+        try store.saveRecording(
+            recovered.id,
+            durationSeconds: 2_280,
+            audioFileName: "Audio/recovered.m4a",
+            title: "Recovered Session"
+        )
+
+        #expect(store.session(id: recovered.id)?.title == "Recovered Session")
+        #expect(store.session(id: recovered.id)?.status == .saved(durationSeconds: 2_280))
     }
 
     @Test("interrupted sessions recover on next launch")

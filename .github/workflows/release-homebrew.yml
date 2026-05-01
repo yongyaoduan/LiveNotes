@@ -29,10 +29,8 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Select Python 3.12
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.12"
+      - name: Test build settings
+        run: ./scripts/test-build-settings.sh
 
       - name: Resolve version
         id: version
@@ -117,9 +115,6 @@ jobs:
 
       - name: Run core tests
         timeout-minutes: 8
-        env:
-          LIVENOTES_RECORDING_PIPELINE_LIVE: "0"
-          LIVENOTES_RECORDING_PIPELINE_CAPTURE_LIVE: "0"
         run: ./scripts/run-core-tests.sh
 
       - name: Build app
@@ -146,25 +141,6 @@ jobs:
 
       - name: Test Homebrew cask generator
         run: ./scripts/test-homebrew-cask.sh
-
-      - name: Test bundled artifact preparation script
-        run: ./scripts/test-prepare-bundled-artifacts.sh
-
-      - name: Test model artifact verifier
-        run: ./scripts/test-model-artifact-verifier.sh
-
-      - name: Test MLX pipeline helper
-        run: ./scripts/test-mlx-pipeline-helper.sh
-
-      - name: Install release dependencies
-        run: |
-          python3.12 -m pip install --upgrade pip==25.0.1
-          python3.12 -m pip install -r scripts/release-requirements.txt
-
-      - name: Check release readiness
-        env:
-          LIVENOTES_PYTHON: python3.12
-        run: ./scripts/check-release-readiness.sh
 
       - name: Import Developer ID certificate
         if: steps.version.outputs.publish == '1' && steps.publish_context.outputs.sign_and_notarize == '1'
@@ -207,6 +183,12 @@ jobs:
           echo "zip_path=$zip_path" >> "$GITHUB_OUTPUT"
           echo "sha256=$sha256" >> "$GITHUB_OUTPUT"
 
+      - name: Check release readiness
+        if: steps.version.outputs.publish == '1'
+        env:
+          LIVENOTES_RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        run: ./scripts/check-release-readiness.sh "${{ steps.app_zip.outputs.zip_path }}" "${{ steps.app_zip.outputs.sha256 }}"
+
       - name: Upload Homebrew app zip artifact
         uses: actions/upload-artifact@v4
         with:
@@ -227,9 +209,19 @@ jobs:
           ```bash
           brew install yongyaoduan/livenotes/livenotes
           ```
+          NOTES
+          if [[ "${{ steps.publish_context.outputs.sign_and_notarize }}" == "1" ]]; then
+            cat >> "$notes_path" <<'NOTES'
+
+          This release is signed with Developer ID and submitted for Apple notarization.
+          NOTES
+          else
+            cat >> "$notes_path" <<'NOTES'
 
           This is a Homebrew preview build. It is not signed with Developer ID or notarized by Apple until Apple Developer Program credentials are configured.
+          If macOS blocks launch, open System Settings > Privacy & Security and choose Open Anyway.
           NOTES
+          fi
           if ! gh release view "$release_tag" --repo "${{ github.repository }}" >/dev/null 2>&1; then
             gh release create "$release_tag" \
               --repo "${{ github.repository }}" \

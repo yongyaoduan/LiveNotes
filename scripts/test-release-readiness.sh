@@ -6,117 +6,142 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WORK_ROOT="$(mktemp -d /tmp/livenotes-release-readiness-test.XXXXXX)"
 trap 'rm -rf "$WORK_ROOT"' EXIT
 
-FAKE_ARTIFACTS="$WORK_ROOT/artifacts"
-FAKE_AUDIO="$WORK_ROOT/public-audio.wav"
-FAKE_HELPER="$WORK_ROOT/livenotes_mlx_pipeline.py"
-FAKE_PREPARE="$WORK_ROOT/prepare-artifacts.sh"
-FAKE_VERIFY="$WORK_ROOT/verify-artifacts.sh"
-
-mkdir -p "$FAKE_ARTIFACTS/models/whisper-large-v3-turbo" "$FAKE_ARTIFACTS/models/qwen3-4b"
-printf 'audio\n' > "$FAKE_AUDIO"
-
-cat > "$FAKE_PREPARE" <<'SCRIPT'
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-mkdir -p "$1"
-printf '%s\n' "$1"
-SCRIPT
-chmod +x "$FAKE_PREPARE"
-
-cat > "$FAKE_VERIFY" <<'SCRIPT'
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-printf '%s\n' "$1"
-SCRIPT
-chmod +x "$FAKE_VERIFY"
-
-cat > "$FAKE_HELPER" <<'PY'
-#!/usr/bin/env python3
-
-import json
-import sys
-
-if False:
-    import mlx_whisper
-    from mlx_lm import load
-
-payload = {
-    "transcript": [
-        {
-            "startTime": 0,
-            "endTime": 3,
-            "text": "Real audio pipeline test.",
-            "translation": "Real audio pipeline test translation.",
-            "confidence": "high",
-        }
-    ],
-    "topics": [
-        {
-            "title": "Pipeline Test",
-            "startTime": 0,
-            "endTime": 3,
-            "summary": "The local pipeline produced transcript, translation, and topics.",
-            "keyPoints": ["The local pipeline ran."],
-            "questions": [],
-        }
-    ],
-    "metrics": {
-        "audioDurationSeconds": 3,
-        "transcriptSegments": 1,
-        "translationSegments": 1,
-        "topicCount": 1,
-        "totalProcessingSeconds": 0.2,
-        "realTimeFactor": 0.07,
-    },
-}
-json.dump(payload, sys.stdout, ensure_ascii=False)
-PY
-chmod +x "$FAKE_HELPER"
-
 LOG_PATH="$WORK_ROOT/release-readiness.log"
-LIVENOTES_MODEL_ARTIFACT_ROOT="$FAKE_ARTIFACTS" \
-LIVENOTES_RECORDING_PIPELINE_AUDIO="$FAKE_AUDIO" \
-LIVENOTES_RECORDING_PIPELINE_CAPTURE_LIVE=0 \
-LIVENOTES_MLX_HELPER="$FAKE_HELPER" \
-LIVENOTES_PREPARE_ARTIFACTS_COMMAND="$FAKE_PREPARE" \
-LIVENOTES_VERIFY_ARTIFACTS_COMMAND="$FAKE_VERIFY" \
-  "$ROOT_DIR/scripts/check-release-readiness.sh" >"$LOG_PATH" 2>&1
+if "$ROOT_DIR/scripts/check-release-readiness.sh" >"$LOG_PATH" 2>&1; then
+  echo "Release readiness must require the Homebrew app zip." >&2
+  exit 1
+fi
+grep -q 'Homebrew app zip path is required' "$LOG_PATH"
 
-grep -q 'Release readiness passed.' "$LOG_PATH"
+APP_ROOT="$WORK_ROOT/app-root"
+ZIP_PATH="$WORK_ROOT/LiveNotes-0.1.0.zip"
+mkdir -p "$APP_ROOT/LiveNotes.app/Contents/MacOS"
+printf 'fixture app\n' > "$APP_ROOT/LiveNotes.app/Contents/MacOS/LiveNotes"
+chmod +x "$APP_ROOT/LiveNotes.app/Contents/MacOS/LiveNotes"
+(
+  cd "$APP_ROOT"
+  zip -qry "$ZIP_PATH" LiveNotes.app
+)
+ZIP_SHA="$(shasum -a 256 "$ZIP_PATH" | awk '{print $1}')"
 
-FAKE_PYTHON="$WORK_ROOT/python-cache-check.sh"
-cat > "$FAKE_PYTHON" <<'SCRIPT'
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-if [[ "$#" -eq 3 && "$1" == "-" ]]; then
-  expected_root="$LIVENOTES_BENCHMARK_CACHE_ROOT/huggingface"
-  [[ "${HF_HOME:-}" == "$expected_root" ]]
-  [[ "${HF_HUB_CACHE:-}" == "$expected_root/hub" ]]
-  [[ "${HF_DATASETS_CACHE:-}" == "$expected_root/datasets" ]]
-  [[ "${TRANSFORMERS_CACHE:-}" == "$expected_root/transformers" ]]
-  printf 'audio\n' > "$3"
-  exit 0
+if ! command -v ffmpeg >/dev/null 2>&1; then
+  echo "ffmpeg is required to test release-readiness video validation" >&2
+  exit 1
 fi
 
-exec python3 "$@"
-SCRIPT
-chmod +x "$FAKE_PYTHON"
+BAD_EVIDENCE_DIR="$WORK_ROOT/bad-ui-evidence"
+mkdir -p "$BAD_EVIDENCE_DIR"
+printf 'video\n' > "$BAD_EVIDENCE_DIR/LiveNotesUITests.mov"
+printf 'timeline\n' > "$BAD_EVIDENCE_DIR/LiveNotesUITests-screenshot-timeline.mov"
+cat > "$BAD_EVIDENCE_DIR/summary.json" <<JSON
+{
+  "screenshots": 2,
+  "video": "$BAD_EVIDENCE_DIR/LiveNotesUITests.mov",
+  "screenshotTimelineVideo": "$BAD_EVIDENCE_DIR/LiveNotesUITests-screenshot-timeline.mov"
+}
+JSON
+cat > "$BAD_EVIDENCE_DIR/xcodebuild.log" <<'LOG'
+Test Suite 'All tests' passed.
+	 Executed 27 tests, with 0 failures (0 unexpected) in 216.750 seconds
+** TEST SUCCEEDED **
+LOG
+BAD_ARTIFACT_LOG_PATH="$WORK_ROOT/release-readiness-bad-video.log"
+if LIVENOTES_UI_EVIDENCE_DIR="$BAD_EVIDENCE_DIR" \
+  LIVENOTES_RELEASE_VERSION="0.1.0" \
+  "$ROOT_DIR/scripts/check-release-readiness.sh" "$ZIP_PATH" "$ZIP_SHA" >"$BAD_ARTIFACT_LOG_PATH" 2>&1; then
+  echo "Release readiness must reject unreadable UI evidence videos." >&2
+  exit 1
+fi
+grep -q 'not a readable video file' "$BAD_ARTIFACT_LOG_PATH"
 
-CACHE_LOG_PATH="$WORK_ROOT/release-readiness-cache.log"
-LIVENOTES_MODEL_ARTIFACT_ROOT="$FAKE_ARTIFACTS" \
-LIVENOTES_BENCHMARK_CACHE_ROOT="$WORK_ROOT/benchmark-cache" \
-LIVENOTES_RECORDING_PIPELINE_CAPTURE_LIVE=0 \
-LIVENOTES_MLX_HELPER="$FAKE_HELPER" \
-LIVENOTES_PREPARE_ARTIFACTS_COMMAND="$FAKE_PREPARE" \
-LIVENOTES_VERIFY_ARTIFACTS_COMMAND="$FAKE_VERIFY" \
-LIVENOTES_PYTHON="$FAKE_PYTHON" \
-  "$ROOT_DIR/scripts/check-release-readiness.sh" >"$CACHE_LOG_PATH" 2>&1
+EVIDENCE_DIR="$WORK_ROOT/ui-evidence"
+mkdir -p "$EVIDENCE_DIR"
+ffmpeg -y -f lavfi -i color=c=white:s=320x240:d=1 -pix_fmt yuv420p \
+  "$EVIDENCE_DIR/LiveNotesUITests.mov" >/dev/null 2>&1
+ffmpeg -y -f lavfi -i color=c=white:s=320x240:d=1 -pix_fmt yuv420p \
+  "$EVIDENCE_DIR/LiveNotesUITests-screenshot-timeline.mov" >/dev/null 2>&1
+cat > "$EVIDENCE_DIR/summary.json" <<JSON
+{
+  "screenshots": 2,
+  "video": "$EVIDENCE_DIR/LiveNotesUITests.mov",
+  "screenshotTimelineVideo": "$EVIDENCE_DIR/LiveNotesUITests-screenshot-timeline.mov"
+}
+JSON
+cat > "$EVIDENCE_DIR/xcodebuild.log" <<'LOG'
+Test Suite 'All tests' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveWaitsForGeneratedTranslations]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveContinuesWhenTranslationIsUnavailable]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveContinuesWhenTranslationDoesNotReturn]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testEmptyFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalFileTranscriptOverridesCommittedLiveTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceSavesCommittedLiveTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testSavedReviewExportsMarkdown]' passed.
+	 Executed 27 tests, with 0 failures (0 unexpected) in 216.750 seconds
+** TEST SUCCEEDED **
+LOG
 
-grep -q 'Release readiness passed.' "$CACHE_LOG_PATH"
+ARTIFACT_LOG_PATH="$WORK_ROOT/release-readiness-artifact.log"
+LIVENOTES_UI_EVIDENCE_DIR="$EVIDENCE_DIR" \
+LIVENOTES_RELEASE_VERSION="0.1.0" \
+  "$ROOT_DIR/scripts/check-release-readiness.sh" "$ZIP_PATH" "$ZIP_SHA" >"$ARTIFACT_LOG_PATH" 2>&1
+grep -q 'Release readiness passed.' "$ARTIFACT_LOG_PATH"
+
+if grep -Eq 'LIVENOTES_MLX_HELPER|prepare-bundled-artifacts|verify-model-artifacts|mlx_whisper|mlx_lm|local_mlx_inference' \
+  "$ROOT_DIR/scripts/check-release-readiness.sh"; then
+  echo "Release readiness guard must not use legacy Python MLX gates" >&2
+  exit 1
+fi
+
+if grep -Eq "require_grep 'LocalMLXRecordingInferenceRunner|require_grep 'SwiftWhisperTranscriber|require_grep 'SwiftQwenRunner|require_grep 'LocalModelBundleVerifier" \
+  "$ROOT_DIR/scripts/check-release-readiness.sh"; then
+  echo "Release readiness guard must not require the retired Swift MLX release path" >&2
+  exit 1
+fi
+
+if ! grep -Eq "require_grep 'NativeSpeechLiveTranscriber|require_grep 'NativeSpeechInferenceRunner|require_grep 'SpeechAnalyzer|require_grep 'SpeechTranscriber|require_grep 'TranslationSession" \
+  "$ROOT_DIR/scripts/check-release-readiness.sh"; then
+  echo "Release readiness guard must verify Apple Speech and Apple Translation gates" >&2
+  exit 1
+fi
+
+grep -q 'validate_app_zip' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'validate_ui_evidence' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFinalSaveWaitsForGeneratedTranslations' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFinalSaveContinuesWhenTranslationIsUnavailable' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFinalSaveContinuesWhenTranslationDoesNotReturn' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testEmptyFinalInferenceDoesNotSaveLivePreviewTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFailedFinalInferenceDoesNotSaveLivePreviewTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFinalFileTranscriptOverridesCommittedLiveTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFailedFinalInferenceSavesCommittedLiveTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testSavedReviewExportsMarkdown' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'zipinfo -1' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q '\\._' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'savedTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'LanguageAvailability(preferredStrategy: \\.lowLatency)' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'translate(batch: requests)' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'activeTranslationSession.*cancel()' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'markTranslationGenerationCancelled' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'isTranslationJobCancelled' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'AudioTapBufferSize.frameCount' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'AnalyzerInput(buffer: convertedBuffer)' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -Fq 'func finish() async -> \[TranscriptSentence\]' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'analyzeSequence(from: audioFile)' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'finalizeAndFinishThroughEndOfInput()' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'let activeJobs = jobs.filter' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'bufferStartTime:' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'bufferSize: 4_096|bufferSize: 4096' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'Homebrew app zip path is required' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -Eq 'Executed \[0-9\]\+ tests\?, with 0 failures' "$ROOT_DIR/scripts/check-release-readiness.sh"
+
+if grep -Eq 'NativeTopicSummarizer|Topic Notes|topic notes|topic summaries' "$ROOT_DIR/LiveNotesApp/ContentView.swift"; then
+  echo "LiveNotes v0.1 UI must not expose topic summary features" >&2
+  exit 1
+fi
+
+if grep -Eq 'depends_on macos: ">= :(sonoma|sequoia)"' "$ROOT_DIR/scripts/write-homebrew-cask.sh"; then
+  echo "Homebrew cask must not advertise macOS 14 or macOS 15 support" >&2
+  exit 1
+fi
+
 printf '%s\n' "$LOG_PATH"

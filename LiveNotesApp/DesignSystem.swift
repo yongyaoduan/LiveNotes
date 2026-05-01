@@ -19,7 +19,7 @@ extension View {
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             .overlay(
                 RoundedRectangle(cornerRadius: 8, style: .continuous)
-                    .stroke(LiveNotesStyle.line)
+                    .stroke(LiveNotesStyle.line.opacity(0.25))
             )
     }
 }

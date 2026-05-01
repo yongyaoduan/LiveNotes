@@ -7,7 +7,6 @@ public struct RecordingSession: Codable, Identifiable, Equatable, Sendable {
     public var status: RecordingStatus
     public var audioFileName: String?
     public var transcript: [TranscriptSentence]
-    public var topics: [TopicNote]
 
     public init(
         id: UUID = UUID(),
@@ -15,8 +14,7 @@ public struct RecordingSession: Codable, Identifiable, Equatable, Sendable {
         createdAt: Date,
         status: RecordingStatus,
         audioFileName: String? = nil,
-        transcript: [TranscriptSentence] = [],
-        topics: [TopicNote] = []
+        transcript: [TranscriptSentence] = []
     ) {
         self.id = id
         self.title = title
@@ -24,7 +22,13 @@ public struct RecordingSession: Codable, Identifiable, Equatable, Sendable {
         self.status = status
         self.audioFileName = audioFileName
         self.transcript = transcript
-        self.topics = topics
+    }
+
+    public var hasMissingTranslations: Bool {
+        transcript.contains {
+            !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                && $0.translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        }
     }
 }
 
@@ -47,15 +51,15 @@ public enum RecordingStatus: Codable, Equatable, Sendable {
             return "Paused · \(Self.clockLabel(elapsedSeconds))"
         case let .finalizing(progress):
             if progress >= 1 {
-                return "Ready to review"
+                return "Saved"
             }
             return "Finalizing · \(Int((progress * 100).rounded()))%"
         case let .saved(durationSeconds):
-            return "Saved · \(Self.durationLabel(durationSeconds))"
+            return "\(Self.durationLabel(durationSeconds)) recording · Saved locally"
         case let .recovered(durationSeconds):
-            return "Recovered · \(Self.durationLabel(durationSeconds))"
+            return "Unsaved audio · \(Self.durationLabel(durationSeconds))"
         case .failed:
-            return "Failed"
+            return "Not saved"
         }
     }
 
@@ -119,32 +123,4 @@ public enum TranscriptConfidence: String, Codable, Equatable, Sendable {
     case high
     case medium
     case low
-}
-
-public struct TopicNote: Codable, Identifiable, Equatable, Sendable {
-    public var id: UUID
-    public var title: String
-    public var startTime: Int
-    public var endTime: Int?
-    public var summary: String
-    public var keyPoints: [String]
-    public var questions: [String]
-
-    public init(
-        id: UUID = UUID(),
-        title: String,
-        startTime: Int,
-        endTime: Int?,
-        summary: String,
-        keyPoints: [String],
-        questions: [String]
-    ) {
-        self.id = id
-        self.title = title
-        self.startTime = startTime
-        self.endTime = endTime
-        self.summary = summary
-        self.keyPoints = keyPoints
-        self.questions = questions
-    }
 }

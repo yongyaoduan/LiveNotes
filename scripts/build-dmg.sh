@@ -3,7 +3,6 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-source "$ROOT_DIR/scripts/model-artifacts.sh"
 
 PROJECT_PATH="$ROOT_DIR/LiveNotes.xcodeproj"
 SCHEME_NAME="LiveNotes"
@@ -13,8 +12,6 @@ DERIVED_DATA_PATH="${DERIVED_DATA_PATH:-/tmp/livenotes-release}"
 DIST_DIR="$ROOT_DIR/dist"
 BUILD_APP_PATH="$DERIVED_DATA_PATH/Build/Products/Release/$APP_NAME.app"
 APPICONSET_PATH="$ROOT_DIR/LiveNotesApp/Assets.xcassets/AppIcon.appiconset"
-ARTIFACT_SOURCE_ROOT="${LIVENOTES_BUNDLED_ARTIFACT_SOURCE_ROOT:-$ROOT_DIR/.cache}"
-APP_ARTIFACTS_PATH="$BUILD_APP_PATH/Contents/Resources/LiveNotesArtifacts"
 PREBUILT_APP_SOURCE="${LIVENOTES_PREBUILT_APP_SOURCE:-}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 RELEASE_NAME="${LIVENOTES_RELEASE_NAME:-}"
@@ -44,7 +41,6 @@ create_volume_icon() {
 }
 
 mkdir -p "$DIST_DIR"
-verify_artifact_source "$ARTIFACT_SOURCE_ROOT"
 
 if [[ -n "$PREBUILT_APP_SOURCE" ]]; then
   rm -rf "$BUILD_APP_PATH"
@@ -64,13 +60,8 @@ fi
 
 if [[ ! -d "$BUILD_APP_PATH" ]]; then
   echo "Release app was not built at $BUILD_APP_PATH" >&2
-  exit 1
+    exit 1
 fi
-
-rm -rf "$APP_ARTIFACTS_PATH"
-mkdir -p "$(dirname "$APP_ARTIFACTS_PATH")"
-ditto "$ARTIFACT_SOURCE_ROOT" "$APP_ARTIFACTS_PATH"
-verify_artifact_source "$APP_ARTIFACTS_PATH"
 
 WORK_ROOT="$(mktemp -d /tmp/livenotes-dmg.XXXXXX)"
 trap 'rm -rf "$WORK_ROOT"' EXIT

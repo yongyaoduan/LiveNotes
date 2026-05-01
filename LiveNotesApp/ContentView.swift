@@ -1,4 +1,10 @@
 import SwiftUI
+#if canImport(_Translation_SwiftUI)
+@preconcurrency import _Translation_SwiftUI
+#endif
+#if canImport(Translation)
+@preconcurrency import Translation
+#endif
 
 struct ContentView: View {
     @EnvironmentObject private var model: AppModel
@@ -18,11 +24,79 @@ struct ContentView: View {
         .sheet(isPresented: $model.consentSheetVisible) {
             ConsentSheet()
         }
-        .sheet(isPresented: $model.stopConfirmationVisible) {
-            StopRecordingSheet()
+        .alert("Finish Recording?", isPresented: $model.stopConfirmationVisible) {
+            Button("Keep Recording", role: .cancel) {
+                model.stopConfirmationVisible = false
+            }
+            .accessibilityIdentifier("stop-cancel-button")
+            Button("Finish & Save") {
+                model.stopAndFinalize()
+            }
+            .accessibilityIdentifier("stop-save-button")
+        } message: {
+            Text("LiveNotes will finish the current transcription and translation before saving.")
+        }
+        .alert("Export Incomplete?", isPresented: $model.partialExportConfirmationVisible) {
+            Button("Retry Translation") {
+                model.retryPartialExportTranslation()
+            }
+            Button("Export Anyway") {
+                model.confirmPartialExport()
+            }
+            Button("Cancel", role: .cancel) {
+                model.cancelPartialExport()
+            }
+        } message: {
+            Text("Some lines do not have Chinese translations yet. Export anyway will mark them as unavailable.")
+        }
+        .modifier(TranslationTaskBridge())
+    }
+}
+
+private struct TranslationTaskBridge: ViewModifier {
+    @ViewBuilder
+    func body(content: Content) -> some View {
+#if canImport(_Translation_SwiftUI) && canImport(Translation)
+        if #available(macOS 26.4, *) {
+            content.modifier(NativeTranslationTaskBridge())
+        } else {
+            content
+        }
+#else
+        content
+#endif
+    }
+}
+
+#if canImport(_Translation_SwiftUI) && canImport(Translation)
+@available(macOS 26.4, *)
+private struct NativeTranslationTaskBridge: ViewModifier {
+    @EnvironmentObject private var model: AppModel
+    @State private var configuration: TranslationSession.Configuration?
+
+    func body(content: Content) -> some View {
+        content
+            .onChange(of: model.translationRequestVersion) {
+                scheduleTranslation()
+            }
+            .translationTask(configuration) { session in
+                await model.runTranslationTask(session)
+            }
+    }
+
+    private func scheduleTranslation() {
+        if configuration == nil {
+            configuration = TranslationSession.Configuration(
+                source: Locale.Language(identifier: "en"),
+                target: Locale.Language(identifier: "zh-Hans"),
+                preferredStrategy: .lowLatency
+            )
+        } else {
+            configuration?.invalidate()
         }
     }
 }
+#endif
 
 private struct SessionSidebar: View {
     @EnvironmentObject private var model: AppModel
@@ -33,26 +107,20 @@ private struct SessionSidebar: View {
                 .font(.system(size: 18, weight: .semibold))
                 .foregroundStyle(LiveNotesStyle.graphite)
 
-            if model.canShowNewRecording {
-                Button {
-                    model.showNewRecording()
-                } label: {
-                    Label("New Recording", systemImage: "record.circle")
-                        .frame(maxWidth: .infinity, alignment: .leading)
+            if model.shouldShowSidebarNewRecording {
+                if model.canShowNewRecording {
+                    Button {
+                        model.showNewRecording()
+                    } label: {
+                        Label("New Recording", systemImage: "record.circle")
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.large)
+                    .tint(LiveNotesStyle.recording)
+                    .help("Start a new local recording.")
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(.accentColor)
-                .help("Start a new local recording.")
-            } else {
-                Button {
-                    model.showNewRecording()
-                } label: {
-                    Label("New Recording", systemImage: "record.circle")
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }
-                .buttonStyle(.bordered)
-                .disabled(true)
-                if let reason = model.newRecordingUnavailableReason {
+                if let reason = model.sidebarNewRecordingHelp {
                     Text(reason)
                         .font(.system(size: 11))
                         .foregroundStyle(LiveNotesStyle.secondary)
@@ -66,20 +134,25 @@ private struct SessionSidebar: View {
                 .padding(.top, 4)
 
             if model.store.sessions.isEmpty {
-                EmptyRecordingsList()
+                EmptyRecordingsList(preparationTitle: model.recordingPreparationTitle)
             } else {
                 ScrollView {
                     VStack(spacing: 6) {
                         ForEach(model.store.sessions) { session in
+                            let canSelect = model.canSelect(session)
                             Button {
-                                model.select(session)
+                                if canSelect {
+                                    model.select(session)
+                                }
                             } label: {
                                 SessionRow(
                                     session: session,
-                                    selected: session.id == model.store.selectedSessionID
+                                    selected: session.id == model.store.selectedSessionID,
+                                    enabled: canSelect
                                 )
                             }
                             .buttonStyle(.plain)
+                            .allowsHitTesting(canSelect)
                             .accessibilityIdentifier("session-\(session.title)")
                             .accessibilityLabel("\(session.title), \(session.status.label)")
                         }
@@ -103,23 +176,37 @@ private struct SessionSidebar: View {
 }
 
 private struct EmptyRecordingsList: View {
+    var preparationTitle: String?
+
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("No recordings yet")
+            Text(title)
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundStyle(LiveNotesStyle.graphite)
-            Text("Start a recording to build your local library.")
+            Text(subtitle)
                 .font(.system(size: 12))
                 .foregroundStyle(LiveNotesStyle.secondary)
         }
         .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
+
+    private var title: String {
+        preparationTitle == nil ? "No recordings yet" : "Setup in progress"
+    }
+
+    private var subtitle: String {
+        if let preparationTitle {
+            return "\(preparationTitle) will appear here after recording starts."
+        }
+        return "Saved recordings will appear here."
+    }
 }
 
 private struct SessionRow: View {
     var session: RecordingSession
     var selected: Bool
+    var enabled: Bool
 
     var body: some View {
         HStack(spacing: 9) {
@@ -145,6 +232,7 @@ private struct SessionRow: View {
         .contentShape(Rectangle())
         .background(selected ? Color.white.opacity(0.70) : Color.clear)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .opacity(enabled ? 1 : 0.48)
     }
 
     private var statusColor: Color {
@@ -152,13 +240,16 @@ private struct SessionRow: View {
         case .recording:
             return LiveNotesStyle.recording
         case .paused, .preparing, .finalizing:
+            if case let .finalizing(progress) = session.status, progress >= 1 {
+                return LiveNotesStyle.secondary.opacity(0.55)
+            }
             return LiveNotesStyle.secondary
         case .saved:
-            return LiveNotesStyle.saved
+            return LiveNotesStyle.secondary.opacity(0.55)
         case .recovered:
             return LiveNotesStyle.amber
         case .failed:
-            return LiveNotesStyle.recording
+            return LiveNotesStyle.amber
         }
     }
 }
@@ -170,12 +261,22 @@ private struct MainSurface: View {
         ZStack(alignment: .bottom) {
             LiveNotesStyle.background.ignoresSafeArea()
 
-            if let session = model.selectedSession {
+            if let title = model.recordingPreparationTitle {
+                RecordingPreparationView(title: title) {
+                    model.cancelRecordingPreparation()
+                }
+            } else if let failure = model.recordingStartFailure {
+                RecordingStartFailedView(failure: failure)
+            } else if let session = model.selectedSession {
                 switch session.status {
                 case .preparing:
                     PreparingView(session: session)
                 case .finalizing:
-                    FinalizingView(session: session)
+                    if (session.status.finalizingProgress ?? 0) >= 1 {
+                        SavedReview(session: session)
+                    } else {
+                        FinalizingView(session: session)
+                    }
                 case .saved:
                     SavedReview(session: session)
                 case .recovered:
@@ -186,8 +287,118 @@ private struct MainSurface: View {
                     LiveRecordingView(session: session)
                 }
             } else {
-                EmptySelectionView()
+                EmptySelectionView(unavailableReason: model.recordingUnavailableReason)
             }
+        }
+    }
+}
+
+private struct RecordingPreparationView: View {
+    @EnvironmentObject private var model: AppModel
+    var title: String
+    var onCancel: () -> Void
+
+    var body: some View {
+        PreparationPanel(
+            title: title,
+            needsHelp: model.recordingPreparationNeedsHelp,
+            onCancel: onCancel
+        )
+    }
+}
+
+private struct PreparationPanel: View {
+    @EnvironmentObject private var model: AppModel
+    var title: String
+    var needsHelp: Bool
+    var onCancel: () -> Void
+
+    var body: some View {
+        VStack(spacing: 18) {
+            if needsHelp {
+                Image(systemName: "hourglass")
+                    .font(.system(size: 30))
+                    .foregroundStyle(LiveNotesStyle.recording)
+            } else {
+                ProgressView()
+                    .controlSize(.large)
+            }
+            Text(needsHelp ? "Waiting for macOS permission" : "Setting up recording")
+                .font(.system(size: 26, weight: .semibold))
+            Text(title)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(LiveNotesStyle.secondary)
+
+            VStack(alignment: .leading, spacing: 12) {
+                PreflightStatusRow(title: "Microphone access", status: needsHelp ? "Allow in macOS prompt" : "Checking")
+                PreflightStatusRow(title: "Speech recognition", status: needsHelp ? "Allow in macOS prompt" : "Checking")
+                PreflightStatusRow(title: "Audio input", status: needsHelp ? "Starts after permission" : "Waiting for speech")
+                if needsHelp {
+                    Text("Allow Microphone and Speech Recognition in the macOS prompts.")
+                        .font(.system(size: 12, weight: .medium))
+                    Text("LiveNotes will start recording automatically after access is allowed.")
+                        .font(.system(size: 12))
+                        .foregroundStyle(LiveNotesStyle.secondary)
+                }
+            }
+            .padding(14)
+            .frame(width: 420, alignment: .leading)
+            .softPanel()
+
+            if needsHelp {
+                HStack(spacing: 10) {
+                    Button {
+                        model.openMicrophoneSettings()
+                    } label: {
+                        Label("Open Microphone Settings", systemImage: "mic")
+                    }
+                    .buttonStyle(.borderedProminent)
+                    Button {
+                        model.openSpeechRecognitionSettings()
+                    } label: {
+                        Label("Open Speech Recognition Settings", systemImage: "text.bubble")
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            }
+
+            Button("Cancel") {
+                onCancel()
+            }
+            .keyboardShortcut(.cancelAction)
+            .accessibilityIdentifier("preparation-cancel-button")
+            .buttonStyle(.bordered)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct PreflightStatusRow: View {
+    var title: String
+    var status: String
+
+    var body: some View {
+        HStack(spacing: 10) {
+            Circle()
+                .fill(statusColor)
+                .frame(width: 7, height: 7)
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+            Spacer()
+            Text(status)
+                .font(.system(size: 12))
+                .foregroundStyle(LiveNotesStyle.secondary)
+        }
+    }
+
+    private var statusColor: Color {
+        switch status {
+        case "Ready":
+            return LiveNotesStyle.saved
+        case "Checking", "Pending":
+            return LiveNotesStyle.secondary
+        default:
+            return LiveNotesStyle.amber
         }
     }
 }
@@ -200,19 +411,11 @@ private struct LiveRecordingView: View {
         VStack(spacing: 0) {
             TopBar(session: session)
 
-            HStack(spacing: 0) {
-                TranscriptColumn(session: session)
-                    .frame(maxWidth: .infinity)
-
-                Divider()
-
-                CurrentTopicPanel(session: session)
-                    .frame(width: 360)
-            }
+            TranscriptColumn(session: session)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             RecordingBar(session: session)
-                .padding(.bottom, 22)
         }
     }
 }
@@ -237,6 +440,7 @@ private struct TopBar: View {
 }
 
 private struct TranscriptColumn: View {
+    @EnvironmentObject private var model: AppModel
     var session: RecordingSession
 
     var body: some View {
@@ -244,153 +448,190 @@ private struct TranscriptColumn: View {
             Text("Transcript")
                 .font(.system(size: 16, weight: .semibold))
 
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    ForEach(session.transcript) { sentence in
-                        TranscriptSentenceView(sentence: sentence)
-                    }
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        HStack {
-                            Circle()
-                                .fill(LiveNotesStyle.recording)
-                                .frame(width: 7, height: 7)
-                            Text("Listening")
-                                .font(.system(size: 12, weight: .medium))
-                                .foregroundStyle(LiveNotesStyle.recording)
+            ScrollViewReader { proxy in
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        ForEach(displayedTranscript) { sentence in
+                            TranscriptSentenceView(
+                                sentence: sentence,
+                                missingTranslationText: "Translating..."
+                            )
                         }
-                        Text(session.transcript.isEmpty ? "Waiting for speech..." : "Listening for the next complete sentence...")
-                            .font(.system(size: 15))
-                            .foregroundStyle(LiveNotesStyle.secondary)
+
+                        if let preview = model.selectedLiveSpeechPreview {
+                            LiveSpeechPreviewView(preview: preview, level: model.liveAudioLevel)
+                        }
+
+                        if model.selectedLiveSpeechPreview == nil {
+                            let paused = session.status.isPausedForDisplay
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    Circle()
+                                        .fill(paused ? LiveNotesStyle.secondary : LiveNotesStyle.liveBlue)
+                                        .frame(width: 7, height: 7)
+                                    Text(paused ? "Paused" : "Listening")
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(paused ? LiveNotesStyle.secondary : LiveNotesStyle.liveBlue)
+                                }
+                                Text(paused ? "Recording is paused." : listeningText)
+                                    .font(.system(size: 15))
+                                    .foregroundStyle(LiveNotesStyle.secondary)
+                                InputActivityMeter(
+                                    level: paused ? 0 : model.liveAudioLevel,
+                                    paused: paused
+                                )
+                                .padding(.top, 4)
+                            }
+                            .padding(14)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .softPanel()
+                            .padding(.top, 8)
+                        }
+
+                        Color.clear
+                            .frame(height: 96)
+                            .id(transcriptBottomID)
                     }
-                    .padding(.top, 8)
+                    .frame(maxWidth: 900, alignment: .leading)
                 }
-                .frame(maxWidth: 780, alignment: .leading)
+                .scrollIndicators(.hidden)
+                .onAppear {
+                    scrollToBottom(proxy)
+                }
+                .onChange(of: scrollTrigger) {
+                    scrollToBottom(proxy)
+                }
             }
         }
         .padding(28)
+    }
+
+    private var transcriptBottomID: String {
+        "transcript-bottom-\(session.id.uuidString)"
+    }
+
+    private var displayedTranscript: [TranscriptSentence] {
+        TranscriptUtteranceSegmenter.segment(
+            session.transcript,
+            translationMode: .preserveMergedTranslations
+        )
+    }
+
+    private var scrollTrigger: String {
+        [
+            session.id.uuidString,
+            "\(displayedTranscript.count)",
+            displayedTranscript.last?.id.uuidString ?? "",
+            displayedTranscript.last?.text ?? "",
+            displayedTranscript.last?.translation ?? "",
+            model.liveTranscriptPreview,
+            model.liveTranslationPreview,
+            "\(session.status.isPausedForDisplay)"
+        ].joined(separator: "|")
+    }
+
+    private func scrollToBottom(_ proxy: ScrollViewProxy) {
+        DispatchQueue.main.async {
+            withAnimation(.easeOut(duration: 0.18)) {
+                proxy.scrollTo(transcriptBottomID, anchor: .bottom)
+            }
+        }
+    }
+
+    private var listeningText: String {
+        session.transcript.isEmpty
+            ? "Listening for speech..."
+            : "Listening for the next complete sentence..."
+    }
+}
+
+private struct InputActivityMeter: View {
+    var level: Double
+    var paused: Bool
+
+    var body: some View {
+        HStack(spacing: 10) {
+            HStack(spacing: 3) {
+                ForEach(0..<12, id: \.self) { index in
+                    RoundedRectangle(cornerRadius: 2, style: .continuous)
+                        .fill(index < activeBars ? LiveNotesStyle.liveBlue : LiveNotesStyle.line)
+                        .frame(width: 5, height: CGFloat(5 + index % 4 * 3))
+                }
+            }
+            .frame(width: 94, height: 18, alignment: .leading)
+        }
+    }
+
+    private var activeBars: Int {
+        guard !paused, level > 0.08 else { return 0 }
+        return max(1, min(12, Int((level * 12).rounded(.up))))
+    }
+
+}
+
+private struct LiveSpeechPreviewView: View {
+    var preview: LiveSpeechPreview
+    var level: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 8) {
+                Circle()
+                    .fill(LiveNotesStyle.liveBlue)
+                    .frame(width: 7, height: 7)
+                Text(liveStatus)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(LiveNotesStyle.secondary)
+            }
+            Text(preview.text)
+                .font(.system(size: 18))
+                .foregroundStyle(LiveNotesStyle.graphite)
+            Label("Translation", systemImage: "character.bubble")
+                .font(.system(size: 11, weight: .medium))
+                .foregroundStyle(LiveNotesStyle.secondary)
+            Text(preview.translation.isEmpty ? "Translating..." : preview.translation)
+                .font(.system(size: 16))
+                .foregroundStyle(preview.translation.isEmpty ? LiveNotesStyle.secondary : LiveNotesStyle.graphite)
+            InputActivityMeter(level: level, paused: false)
+                .padding(.top, 4)
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .softPanel()
+    }
+
+    private var liveStatus: String {
+        level > 0.08 ? "Transcribing" : "Waiting for speech"
     }
 }
 
 private struct TranscriptSentenceView: View {
     var sentence: TranscriptSentence
+    var missingTranslationText: String
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 5) {
+        let translationMissing = sentence.translation.isEmpty
+        let translationText = translationMissing ? missingTranslationText : sentence.translation
+        VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 8) {
                 Text(timeLabel(sentence.startTime))
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(LiveNotesStyle.secondary)
-                if sentence.confidence == .low {
-                    Circle()
-                        .fill(LiveNotesStyle.amber)
-                        .frame(width: 7, height: 7)
-                    Text("Low confidence")
-                        .font(.system(size: 11, weight: .medium))
-                        .foregroundStyle(LiveNotesStyle.amber)
-                }
             }
             Text(sentence.text)
                 .font(.system(size: 18))
                 .foregroundStyle(LiveNotesStyle.graphite)
-            Text("Translation")
+            Divider()
+            Label("Translation", systemImage: "character.bubble")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(LiveNotesStyle.secondary)
-            Text(sentence.translation)
-                .font(.system(size: 15))
-                .foregroundStyle(LiveNotesStyle.secondary)
+            Text(translationText)
+                .font(.system(size: 16))
+                .foregroundStyle(translationMissing ? LiveNotesStyle.secondary : LiveNotesStyle.graphite)
         }
-    }
-}
-
-private struct CurrentTopicPanel: View {
-    @EnvironmentObject private var model: AppModel
-    var session: RecordingSession
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack {
-                Text("Current Topic")
-                    .font(.system(size: 16, weight: .semibold))
-                Spacer()
-                if canSplitTopic {
-                    Button {
-                        model.createNewTopic()
-                    } label: {
-                        Label("Split Topic", systemImage: "scissors")
-                    }
-                    .buttonStyle(.borderless)
-                    .controlSize(.small)
-                    .accessibilityIdentifier("topic-panel-split-topic-button")
-                }
-            }
-
-            ScrollView {
-                if let topic = currentTopic {
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack(alignment: .top, spacing: 10) {
-                            Rectangle()
-                                .fill(LiveNotesStyle.liveBlue)
-                                .frame(width: 3)
-                                .clipShape(Capsule())
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(topic.title)
-                                    .font(.system(size: 17, weight: .semibold))
-                                Text(timeRangeLabel(start: topic.startTime, end: topic.endTime))
-                                    .font(.system(size: 12))
-                                    .foregroundStyle(LiveNotesStyle.secondary)
-                            }
-                        }
-
-                        if topic.hasSummary {
-                            SectionText(title: "Summary", lines: [topic.summary])
-                        }
-                        if !topic.keyPoints.isEmpty {
-                            SectionText(title: "Key Points", lines: topic.keyPoints)
-                        }
-                        if !topic.hasGeneratedNotes {
-                            Text("Notes will appear after more speech is processed.")
-                                .font(.system(size: 13))
-                                .foregroundStyle(LiveNotesStyle.secondary)
-                        }
-                        if !topic.questions.isEmpty {
-                            SectionText(title: "Questions", lines: topic.questions)
-                        }
-                    }
-                    .padding(14)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .softPanel()
-                } else {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(model.currentTopicTitle)
-                            .font(.system(size: 17, weight: .semibold))
-                        Text("Topic notes will appear after enough speech is processed.")
-                            .font(.system(size: 13))
-                            .foregroundStyle(LiveNotesStyle.secondary)
-                    }
-                    .padding(14)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .softPanel()
-                    .accessibilityIdentifier("topic-empty-state")
-                }
-            }
-            .frame(maxWidth: .infinity, alignment: .topLeading)
-            .scrollIndicators(.automatic)
-
-            Spacer()
-        }
-        .padding(22)
-        .background(LiveNotesStyle.background)
-    }
-
-    private var currentTopic: TopicNote? {
-        session.topics.last
-    }
-
-    private var canSplitTopic: Bool {
-        guard let currentTopic else { return false }
-        return currentTopic.title == model.currentTopicTitle
-            && currentTopic.hasGeneratedNotes
+        .padding(12)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .softPanel()
     }
 }
 
@@ -399,18 +640,26 @@ private struct RecordingBar: View {
     var session: RecordingSession
 
     var body: some View {
-        HStack(spacing: 16) {
+        HStack(spacing: 18) {
             HStack(spacing: 8) {
                 Circle()
                     .fill(isPaused ? LiveNotesStyle.secondary : LiveNotesStyle.recording)
                     .frame(width: 8, height: 8)
-                Text(session.status.label)
-                    .font(.system(size: 13, weight: .medium))
-                    .accessibilityIdentifier("recording-duration-label")
-                    .accessibilityLabel("Recording duration")
-                    .accessibilityValue(session.status.label)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(isPaused ? "Paused" : "Recording")
+                        .font(.system(size: 11, weight: .medium))
+                        .foregroundStyle(LiveNotesStyle.secondary)
+                    Text(clockLabel)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(LiveNotesStyle.graphite)
+                        .accessibilityIdentifier("recording-duration-label")
+                        .accessibilityLabel("Recording duration")
+                        .accessibilityValue(clockLabel)
+                }
             }
-            .frame(minWidth: 128, alignment: .leading)
+            .frame(minWidth: 96, alignment: .leading)
+
+            Spacer(minLength: 18)
 
             RecordingControlButton(
                 title: isPaused ? "Resume" : "Pause",
@@ -420,25 +669,23 @@ private struct RecordingBar: View {
             }
             .accessibilityIdentifier("recording-bar-pause-button")
 
-            Button(role: .destructive) {
+            Button {
                 model.confirmStop()
             } label: {
-                Label("Stop", systemImage: "stop.fill")
+                Label("Finish & Save", systemImage: "checkmark")
             }
             .buttonStyle(.borderedProminent)
             .controlSize(.regular)
-            .tint(LiveNotesStyle.recording)
+            .tint(LiveNotesStyle.graphite)
             .accessibilityIdentifier("recording-bar-stop-button")
         }
-        .padding(.horizontal, 22)
-        .padding(.vertical, 14)
-        .background(.regularMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .stroke(Color.white.opacity(0.46))
-        )
-        .shadow(color: .black.opacity(0.11), radius: 18, y: 8)
+        .padding(.horizontal, 24)
+        .padding(.vertical, 12)
+        .frame(maxWidth: .infinity)
+        .background(LiveNotesStyle.surface)
+        .overlay(alignment: .top) {
+            Rectangle().fill(LiveNotesStyle.line).frame(height: 1)
+        }
     }
 
     private var isPaused: Bool {
@@ -446,6 +693,15 @@ private struct RecordingBar: View {
             return true
         }
         return false
+    }
+
+    private var clockLabel: String {
+        switch session.status {
+        case let .recording(elapsedSeconds), let .paused(elapsedSeconds):
+            return timeLabel(elapsedSeconds)
+        default:
+            return session.status.label
+        }
     }
 }
 
@@ -464,50 +720,44 @@ private struct RecordingControlButton: View {
 }
 
 private struct FinalizingView: View {
-    @EnvironmentObject private var model: AppModel
     var session: RecordingSession
 
     var body: some View {
         let progress = session.status.finalizingProgress ?? 0
-        let completed = progress >= 1.0
         VStack(spacing: 18) {
-            Text(completed ? "Recording saved" : "Finalizing recording")
+            Text("Saving recording")
                 .font(.system(size: 26, weight: .semibold))
-            ChecklistRow(text: "Saving audio", done: progress >= 0.20)
-            ChecklistRow(text: "Finalizing transcript", done: progress >= 0.50)
-            ChecklistRow(text: "Completing topics", done: progress >= 0.75)
-            ChecklistRow(text: "Saving notes", done: progress >= 1.00)
+            Text(session.title)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(LiveNotesStyle.secondary)
+            Label(
+                "Keep LiveNotes open while transcript and translation are saved.",
+                systemImage: "checkmark.seal"
+            )
+            .font(.system(size: 13, weight: .medium))
+            .multilineTextAlignment(.center)
+            .foregroundStyle(LiveNotesStyle.graphite)
+            .frame(maxWidth: 440)
             ProgressView(value: progress)
                 .frame(width: 360)
-            Text(completed ? "Ready to review" : session.status.label)
+            Text(session.status.label)
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(LiveNotesStyle.secondary)
-            Button(completed ? "Open Review" : "Open When Done") {
-                model.openSavedReview()
-            }
-            .accessibilityIdentifier("open-when-done-button")
-            .disabled(progress < 1.0)
-            .buttonStyle(.borderedProminent)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
 private struct PreparingView: View {
+    @EnvironmentObject private var model: AppModel
     var session: RecordingSession
 
     var body: some View {
-        VStack(spacing: 16) {
-            ProgressView()
-                .controlSize(.large)
-            Text("Preparing recording")
-                .font(.system(size: 26, weight: .semibold))
-            Text(session.title)
-                .font(.system(size: 15, weight: .medium))
-                .foregroundStyle(LiveNotesStyle.secondary)
-            Text("Checking microphone access and local models.")
-                .foregroundStyle(LiveNotesStyle.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        PreparationPanel(
+            title: session.title,
+            needsHelp: model.recordingPreparationNeedsHelp,
+            onCancel: model.cancelRecordingPreparation
+        )
     }
 }
 
@@ -529,24 +779,94 @@ private struct FailedView: View {
             Text(message)
                 .foregroundStyle(LiveNotesStyle.secondary)
             HStack(spacing: 10) {
-                Button {
-                    model.showNewRecording()
-                } label: {
-                    Label("New Recording", systemImage: "record.circle")
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.accentColor)
                 if message.localizedCaseInsensitiveContains("microphone") {
                     Button {
                         model.openMicrophoneSettings()
                     } label: {
-                        Label("Microphone Settings", systemImage: "mic")
+                        Label("Open Microphone Settings", systemImage: "mic")
                     }
+                    .accessibilityIdentifier("failed-microphone-settings-button")
+                    .buttonStyle(.bordered)
+                }
+                if model.canShowNewRecording {
+                    Button {
+                        model.showNewRecording()
+                    } label: {
+                        Label("Try Recording Again", systemImage: "arrow.clockwise")
+                    }
+                    .accessibilityIdentifier("failed-retry-recording-button")
                     .buttonStyle(.bordered)
                 }
             }
+            Text("After changing settings, start a new recording.")
+                .font(.system(size: 12))
+                .foregroundStyle(LiveNotesStyle.secondary)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private struct RecordingStartFailedView: View {
+    @EnvironmentObject private var model: AppModel
+    var failure: RecordingStartFailure
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "exclamationmark.triangle.fill")
+                .font(.system(size: 32))
+                .foregroundStyle(LiveNotesStyle.amber)
+            Text("Recording failed")
+                .font(.system(size: 26, weight: .semibold))
+            Text("No recording was created.")
+                .font(.system(size: 15, weight: .medium))
+                .foregroundStyle(LiveNotesStyle.secondary)
+            Text(failure.message)
+                .foregroundStyle(LiveNotesStyle.secondary)
+            HStack(spacing: 10) {
+                if failure.message.localizedCaseInsensitiveContains("microphone") {
+                    Button {
+                        model.openMicrophoneSettings()
+                    } label: {
+                        Label("Open Microphone Settings", systemImage: "mic")
+                    }
+                    .accessibilityIdentifier("failed-microphone-settings-button")
+                    .buttonStyle(.bordered)
+                }
+                if failure.message.localizedCaseInsensitiveContains("transcription")
+                    || failure.message.localizedCaseInsensitiveContains("transcribe") {
+                    Button {
+                        model.openSpeechRecognitionSettings()
+                    } label: {
+                        Label("Open Speech Recognition Settings", systemImage: "text.bubble")
+                    }
+                    .accessibilityIdentifier("failed-speech-settings-button")
+                    .buttonStyle(.bordered)
+                }
+                if model.canShowNewRecording {
+                    Button {
+                        model.retryRecordingStartFailure()
+                    } label: {
+                        Label("Try Recording Again", systemImage: "arrow.clockwise")
+                    }
+                    .buttonStyle(.bordered)
+                    .accessibilityIdentifier("failed-retry-recording-button")
+                }
+            }
+            Text(failure.hasSettingsRecovery
+                 ? "After changing settings, return here and start again."
+                 : "Start again when you are ready.")
+                .font(.system(size: 12))
+                .foregroundStyle(LiveNotesStyle.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+private extension RecordingStartFailure {
+    var hasSettingsRecovery: Bool {
+        message.localizedCaseInsensitiveContains("microphone")
+            || message.localizedCaseInsensitiveContains("transcription")
+            || message.localizedCaseInsensitiveContains("transcribe")
     }
 }
 
@@ -557,72 +877,81 @@ private struct SavedReview: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                VStack(alignment: .leading) {
+                VStack(alignment: .leading, spacing: 6) {
                     Text(session.title)
                         .font(.system(size: 20, weight: .semibold))
                     Text(session.status.label)
                         .font(.system(size: 12))
                         .foregroundStyle(LiveNotesStyle.secondary)
+                    if session.hasMissingTranslations {
+                        HStack(spacing: 8) {
+                            Label("Some translations are unavailable.", systemImage: "exclamationmark.circle.fill")
+                                .font(.system(size: 12, weight: .medium))
+                                .foregroundStyle(LiveNotesStyle.amber)
+                            Button("Retry Translation") {
+                                model.retryMissingTranslations(in: session)
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+                    }
                 }
                 Spacer()
-                Button {
-                    model.exportMarkdown(session)
-                } label: {
-                    Label("Export Markdown", systemImage: "square.and.arrow.up")
+                VStack(alignment: .trailing, spacing: 6) {
+                    Button {
+                        model.exportMarkdown(session)
+                    } label: {
+                        Label("Export", systemImage: "square.and.arrow.up")
+                    }
+                    .accessibilityIdentifier("saved-review-export-button")
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
+                    if let exportStatus = model.exportStatus(for: session) {
+                        Label(
+                            exportStatus.message,
+                            systemImage: exportStatusIcon(exportStatus.kind)
+                        )
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(exportStatusColor(exportStatus.kind))
+                    }
                 }
-                .accessibilityIdentifier("saved-review-export-button")
             }
             .padding(24)
             .background(LiveNotesStyle.surface)
 
-            if let exportStatus = model.exportStatus {
-                Text(exportStatus)
-                    .font(.system(size: 12))
-                    .foregroundStyle(
-                        exportStatus == "Exported Markdown"
-                            ? LiveNotesStyle.saved
-                            : LiveNotesStyle.recording
-                    )
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal, 24)
-                    .padding(.vertical, 8)
-                    .background(LiveNotesStyle.surface)
-                    .overlay(alignment: .bottom) {
-                        Rectangle().fill(LiveNotesStyle.line).frame(height: 1)
-                    }
+            ScrollView {
+                SavedTranscriptSection(session: session)
+                    .padding(28)
+                    .frame(maxWidth: 980, alignment: .topLeading)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .id("saved-review-\(session.id.uuidString)")
+        }
+    }
 
-            GeometryReader { geometry in
-                if geometry.size.width < 860 {
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 28) {
-                            SavedTranscriptSection(session: session)
-                            Divider()
-                            SavedTopicNotesSection(session: session)
-                        }
-                        .padding(28)
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                    }
-                } else {
-                    HStack(spacing: 0) {
-                        ScrollView {
-                            SavedTranscriptSection(session: session)
-                                .padding(28)
-                                .frame(maxWidth: .infinity, alignment: .topLeading)
-                        }
-                        .frame(minWidth: 360, maxWidth: .infinity, alignment: .leading)
+    private func exportStatusIcon(_ kind: SessionExportStatusKind) -> String {
+        switch kind {
+        case .success:
+            return "checkmark.circle.fill"
+        case .warning:
+            return "exclamationmark.circle.fill"
+        case .failure:
+            return "xmark.circle.fill"
+        case .progress:
+            return "arrow.clockwise.circle.fill"
+        }
+    }
 
-                        Divider()
-
-                        ScrollView {
-                            SavedTopicNotesSection(session: session)
-                                .padding(24)
-                                .frame(maxWidth: .infinity, alignment: .topLeading)
-                        }
-                        .frame(width: min(440, max(360, geometry.size.width * 0.42)))
-                    }
-                }
-            }
+    private func exportStatusColor(_ kind: SessionExportStatusKind) -> Color {
+        switch kind {
+        case .success:
+            return LiveNotesStyle.saved
+        case .warning:
+            return LiveNotesStyle.amber
+        case .failure:
+            return LiveNotesStyle.recording
+        case .progress:
+            return LiveNotesStyle.secondary
         }
     }
 }
@@ -634,61 +963,15 @@ private struct SavedTranscriptSection: View {
         VStack(alignment: .leading, spacing: 16) {
             if !session.transcript.isEmpty {
                 Text("Transcript")
-                    .font(.system(size: 13, weight: .semibold))
+                    .font(.system(size: 16, weight: .semibold))
                 ForEach(session.transcript) { sentence in
-                    TranscriptSentenceView(sentence: sentence)
+                    TranscriptSentenceView(
+                        sentence: sentence,
+                        missingTranslationText: "Translation unavailable."
+                    )
                 }
             }
         }
-    }
-}
-
-private struct SavedTopicNotesSection: View {
-    var session: RecordingSession
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Topic Notes")
-                .font(.system(size: 16, weight: .semibold))
-            if session.topics.isEmpty {
-                Text("No topics yet")
-                    .foregroundStyle(LiveNotesStyle.secondary)
-            } else {
-                ForEach(session.topics) { topic in
-                    SavedTopicCard(topic: topic)
-                }
-            }
-        }
-    }
-}
-
-private struct SavedTopicCard: View {
-    var topic: TopicNote
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text(topic.title)
-                .font(.system(size: 16, weight: .semibold))
-            Text(timeRangeLabel(start: topic.startTime, end: topic.endTime))
-                .font(.system(size: 12))
-                .foregroundStyle(LiveNotesStyle.secondary)
-            if topic.hasSummary {
-                SectionText(title: "Summary", lines: [topic.summary])
-            }
-            if !topic.keyPoints.isEmpty {
-                SectionText(title: "Key Points", lines: topic.keyPoints)
-            }
-            if !topic.hasGeneratedNotes {
-                Text("Notes will appear after more speech is processed.")
-                    .font(.system(size: 13))
-                    .foregroundStyle(LiveNotesStyle.secondary)
-            }
-            if !topic.questions.isEmpty {
-                SectionText(title: "Questions", lines: topic.questions)
-            }
-        }
-        .padding(14)
-        .softPanel()
     }
 }
 
@@ -697,87 +980,106 @@ private struct RecoveryView: View {
     var session: RecordingSession
 
     var body: some View {
-        VStack(spacing: 14) {
-            Text("Recovered Recording")
-                .font(.system(size: 24, weight: .semibold))
-            Text(session.status.label)
-                .foregroundStyle(LiveNotesStyle.secondary)
-            Text(session.audioFileName == nil
-                 ? "LiveNotes found an unfinished recording in the local library."
-                 : "LiveNotes found an unfinished recording with a preserved audio file.")
-                .foregroundStyle(LiveNotesStyle.secondary)
+        VStack(alignment: .leading, spacing: 16) {
+            VStack(alignment: .leading, spacing: 7) {
+                Text("Unsaved Recording")
+                    .font(.system(size: 24, weight: .semibold))
+                Text("Unsaved recording · \(recoveredDurationLabel(session))")
+                    .foregroundStyle(LiveNotesStyle.secondary)
+                Text(model.canProcessRecoveredAudio(session)
+                     ? "Create a saved transcript and translation from this audio."
+                     : "Finish the active recording before recovering this one.")
+                    .foregroundStyle(LiveNotesStyle.secondary)
+            }
+
             HStack(spacing: 10) {
-                Button {
-                    model.processRecoveredAudio(session)
-                } label: {
-                    Label("Process Audio", systemImage: "waveform")
+                Button("Leave Unsaved") {
+                    model.deferRecoveredAudio(session)
                 }
-                .buttonStyle(.borderedProminent)
-                .disabled(!model.canProcessRecoveredAudio(session))
+                .buttonStyle(.bordered)
                 if model.canShowNewRecording {
                     Button {
-                        model.showNewRecording()
+                        model.processRecoveredAudio(session)
                     } label: {
-                        Label("New Recording", systemImage: "record.circle")
+                        Label("Recover & Save", systemImage: "waveform")
                     }
-                    .buttonStyle(.bordered)
-                    .accessibilityIdentifier("recovered-new-recording-button")
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!model.canProcessRecoveredAudio(session))
                 } else {
                     Button {
                         model.selectActiveRecording()
                     } label: {
                         Label("Return to Active Recording", systemImage: "record.circle")
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.borderedProminent)
                     .accessibilityIdentifier("return-to-active-recording-button")
                 }
             }
-            if let reason = model.recoveredProcessingUnavailableReason(session) {
+
+            if let reason = model.recoveredProcessingUnavailableReason(session),
+               reason != "Finish the active recording before recovering this one." {
                 Text(reason)
                     .font(.system(size: 12))
                     .foregroundStyle(LiveNotesStyle.secondary)
             }
         }
+        .padding(20)
+        .frame(width: 460, alignment: .leading)
+        .softPanel()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private func recoveredDurationLabel(_ session: RecordingSession) -> String {
+        guard let seconds = session.status.elapsedSeconds else { return "unknown" }
+        return "\(max(0, seconds) / 60) min"
     }
 }
 
 private struct EmptySelectionView: View {
+    @EnvironmentObject private var model: AppModel
+    var unavailableReason: String?
+
     var body: some View {
         VStack(spacing: 12) {
-            Text("Select a recording or start a new one")
+            if unavailableReason != nil {
+                Image(systemName: "exclamationmark.triangle.fill")
+                    .font(.system(size: 30))
+                    .foregroundStyle(LiveNotesStyle.amber)
+            }
+            Text(title)
                 .font(.system(size: 26, weight: .semibold))
-            Text("Transcript, translation, topic notes, and local saves.")
+            Text(subtitle)
                 .foregroundStyle(LiveNotesStyle.secondary)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-private struct StopRecordingSheet: View {
-    @EnvironmentObject private var model: AppModel
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Stop recording?")
-                .font(.system(size: 22, weight: .semibold))
-            Text("The recording will finish and the local library will be updated.")
-            HStack {
-                Spacer()
-                Button("Cancel") {
-                    model.stopConfirmationVisible = false
+                .multilineTextAlignment(.center)
+            if unavailableReason != nil {
+                Text("Resolve the issue and try again.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(LiveNotesStyle.secondary)
+                    .multilineTextAlignment(.center)
+            } else {
+                Button {
+                    model.showNewRecording()
+                } label: {
+                    Label("New Recording", systemImage: "record.circle")
                 }
-                .accessibilityIdentifier("stop-cancel-button")
-                Button("Stop and Save") {
-                    model.stopAndFinalize()
-                }
-                .accessibilityIdentifier("stop-save-button")
                 .buttonStyle(.borderedProminent)
                 .tint(LiveNotesStyle.recording)
+                .accessibilityIdentifier("empty-start-recording-button")
             }
         }
-        .padding(26)
-        .frame(width: 420)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .offset(y: -34)
+    }
+
+    private var title: String {
+        unavailableReason ?? "Ready to record"
+    }
+
+    private var subtitle: String {
+        if unavailableReason != nil {
+            return "Recording is unavailable."
+        }
+        return "Record locally. Transcription and translation stay on this Mac."
     }
 }
 
@@ -788,6 +1090,12 @@ private struct NewRecordingSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("New Recording")
                 .font(.system(size: 22, weight: .semibold))
+            Text("Transcription and translation run on this Mac.")
+                .font(.system(size: 13))
+                .foregroundStyle(LiveNotesStyle.secondary)
+            Text("Name")
+                .font(.system(size: 12, weight: .medium))
+                .foregroundStyle(LiveNotesStyle.secondary)
             TextField("Recording Name", text: $model.recordingName)
                 .textFieldStyle(.roundedBorder)
                 .accessibilityLabel("Recording Name")
@@ -796,15 +1104,6 @@ private struct NewRecordingSheet: View {
                     .font(.system(size: 12))
                     .foregroundStyle(LiveNotesStyle.recording)
                     .accessibilityIdentifier("recording-unavailable-reason")
-                if reason.localizedCaseInsensitiveContains("model") {
-                    Button {
-                        model.openModelInstallLocation()
-                    } label: {
-                        Label("Open Install Location", systemImage: "folder")
-                    }
-                    .buttonStyle(.bordered)
-                    .accessibilityIdentifier("open-model-install-location-button")
-                }
             }
             HStack {
                 Spacer()
@@ -813,16 +1112,16 @@ private struct NewRecordingSheet: View {
                 }
                 .accessibilityIdentifier("new-recording-cancel-button")
                 Button("Start Recording") {
-                    model.requestRecordingConsent()
+                    model.startRecording()
                 }
                 .accessibilityIdentifier("new-recording-start-button")
-                .disabled(!model.canRequestRecording)
+                .disabled(!model.canRequestRecording || !model.consentAccepted)
                 .buttonStyle(.borderedProminent)
-                .tint(.accentColor)
+                .tint(LiveNotesStyle.recording)
             }
         }
         .padding(26)
-        .frame(width: 420)
+        .frame(width: 460)
     }
 }
 
@@ -833,26 +1132,40 @@ private struct ConsentSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Before You Record")
                 .font(.system(size: 22, weight: .semibold))
-            Text("Make sure you have permission to record this conversation.")
+            Text("Confirm everyone has agreed to be recorded.")
+                .font(.system(size: 12))
+                .foregroundStyle(LiveNotesStyle.secondary)
             Toggle("I have permission to record this session.", isOn: $model.consentAccepted)
                 .toggleStyle(.checkbox)
+            if !model.consentAccepted {
+                Text("Check the box to continue.")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundStyle(LiveNotesStyle.secondary)
+            }
             Text("Audio is saved locally by default.")
                 .font(.system(size: 12))
                 .foregroundStyle(LiveNotesStyle.secondary)
             HStack {
                 Spacer()
-                Button("Back") {
-                    model.consentSheetVisible = false
-                    model.newRecordingSheetVisible = true
+                Button("Cancel") {
+                    model.cancelRecordingConsent()
                 }
                 .accessibilityIdentifier("recording-consent-back-button")
-                Button("Start") {
-                    model.startRecording()
+                if model.consentAccepted, model.canRequestRecording {
+                    Button("Continue") {
+                        model.continueAfterRecordingConsent()
+                    }
+                    .accessibilityIdentifier("recording-consent-start-button")
+                    .buttonStyle(.borderedProminent)
+                    .tint(LiveNotesStyle.recording)
+                } else {
+                    Button("Continue") {
+                        model.continueAfterRecordingConsent()
+                    }
+                    .accessibilityIdentifier("recording-consent-start-button")
+                    .disabled(true)
+                    .buttonStyle(.bordered)
                 }
-                .accessibilityIdentifier("recording-consent-start-button")
-                .disabled(!model.consentAccepted || !model.canRequestRecording)
-                .buttonStyle(.borderedProminent)
-                .tint(.accentColor)
             }
         }
         .padding(26)
@@ -860,58 +1173,12 @@ private struct ConsentSheet: View {
     }
 }
 
-private struct SectionText: View {
-    var title: String
-    var lines: [String]
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            Text(title)
-                .font(.system(size: 13, weight: .semibold))
-            ForEach(displayLines, id: \.self) { line in
-                HStack(alignment: .top, spacing: 7) {
-                    Circle()
-                        .fill(LiveNotesStyle.secondary.opacity(0.55))
-                        .frame(width: 4, height: 4)
-                        .padding(.top, 7)
-                    Text(line)
-                        .font(.system(size: 13))
-                        .foregroundStyle(LiveNotesStyle.graphite)
-                }
-            }
+private extension RecordingStatus {
+    var isPausedForDisplay: Bool {
+        if case .paused = self {
+            return true
         }
-    }
-
-    private var displayLines: [String] {
-        lines.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-    }
-}
-
-private extension TopicNote {
-    var hasSummary: Bool {
-        !summary.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-            && summary != "No summary yet."
-    }
-
-    var hasGeneratedNotes: Bool {
-        hasSummary
-            || !keyPoints.isEmpty
-            || !questions.isEmpty
-    }
-}
-
-private struct ChecklistRow: View {
-    var text: String
-    var done: Bool
-
-    var body: some View {
-        HStack {
-            Image(systemName: done ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(done ? LiveNotesStyle.saved : LiveNotesStyle.secondary)
-            Text(text)
-        }
-        .frame(width: 360, alignment: .leading)
+        return false
     }
 }
 
@@ -920,11 +1187,4 @@ private func timeLabel(_ seconds: Int) -> String {
     let minutes = safeSeconds / 60
     let remainingSeconds = safeSeconds % 60
     return String(format: "%02d:%02d", minutes, remainingSeconds)
-}
-
-private func timeRangeLabel(start: Int, end: Int?) -> String {
-    guard let end else {
-        return "\(timeLabel(start)) - now"
-    }
-    return "\(timeLabel(start)) - \(timeLabel(end))"
 }

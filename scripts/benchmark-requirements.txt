@@ -1,7 +1,0 @@
--r runtime-requirements.txt
-jiwer==4.0.0
-soundfile==0.13.1
-datasets==3.6.0
-pyarrow==22.0.0
-transformers==5.5.0
-torch==2.11.0
