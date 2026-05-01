@@ -75,7 +75,9 @@ validate_ui_evidence() {
   require_file "$summary_path" "UI evidence summary is missing."
   require_file "$log_path" "UI evidence test log is missing."
 
-  mapfile -t ui_video_paths < <(ruby -rjson - "$summary_path" "$ROOT_DIR" <<'RUBY'
+  while IFS=$'\t' read -r label path; do
+    validate_ui_video "$path" "$label"
+  done < <(ruby -rjson - "$summary_path" "$ROOT_DIR" <<'RUBY'
 summary_path, root_dir = ARGV
 summary = JSON.parse(File.read(summary_path))
 abort "Release blocked: UI evidence must include screenshots." unless summary.fetch("screenshots", 0).to_i > 0
@@ -89,10 +91,6 @@ abort "Release blocked: UI evidence must include screenshots." unless summary.fe
 end
 RUBY
   )
-
-  for entry in "${ui_video_paths[@]}"; do
-    validate_ui_video "${entry#*$'\t'}" "${entry%%$'\t'*}"
-  done
 
   if ! grep -Eq 'TEST SUCCEEDED|with 0 failures' "$log_path"; then
     echo "Release blocked: UI evidence tests did not pass." >&2

@@ -141,6 +141,10 @@ grep -q 'testFailedFinalInferenceSavesCommittedLiveTranscript' "$ROOT_DIR/script
 grep -q 'testSavedReviewExportsMarkdown' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'testProductionLoopbackRecordsTranscribesSavesAndExports' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'production audio end-to-end UI test was skipped' "$ROOT_DIR/scripts/check-release-readiness.sh"
+if grep -q 'mapfile' "$ROOT_DIR/scripts/check-release-readiness.sh"; then
+  echo "Release readiness must stay compatible with macOS /bin/bash." >&2
+  exit 1
+fi
 grep -q 'zipinfo -1' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q '\\._' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'savedTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
