@@ -9,12 +9,14 @@ FIXTURE_PATH_FILE="/tmp/livenotes-e2e-audio-fixture-path.txt"
 EXPECTED_PHRASE_FILE="/tmp/livenotes-e2e-expected-phrase.txt"
 MIN_DURATION_FILE="/tmp/livenotes-e2e-min-duration-seconds.txt"
 MODE_FILE="/tmp/livenotes-e2e-mode.txt"
+NATIVE_INFERENCE_FILE="/tmp/livenotes-e2e-native-inference.txt"
 SOURCE_AUDIO="${LIVENOTES_E2E_AUDIO_SOURCE:-}"
 CLIP_SECONDS="${LIVENOTES_E2E_CLIP_SECONDS:-45}"
 EXPECTED_PHRASE="${LIVENOTES_E2E_EXPECTED_PHRASE:-}"
 MIN_DURATION_SECONDS="${LIVENOTES_E2E_MIN_DURATION_SECONDS:-20}"
 CONFIGURATION="${LIVENOTES_E2E_CONFIGURATION:-Release}"
 MODE="${LIVENOTES_E2E_MODE:-audio-file}"
+NATIVE_INFERENCE="${LIVENOTES_E2E_NATIVE_INFERENCE:-false}"
 
 cleanup() {
   rm -rf "$WORK_ROOT"
@@ -97,6 +99,7 @@ printf '%s\n' "$FIXTURE_PATH" > "$FIXTURE_PATH_FILE"
 printf '%s\n' "$EXPECTED_PHRASE" > "$EXPECTED_PHRASE_FILE"
 printf '%s\n' "$MIN_DURATION_SECONDS" > "$MIN_DURATION_FILE"
 printf '%s\n' "$MODE" > "$MODE_FILE"
+printf '%s\n' "$NATIVE_INFERENCE" > "$NATIVE_INFERENCE_FILE"
 
 if [[ "$MODE" == "loopback" ]]; then
   require_tool SwitchAudioSource

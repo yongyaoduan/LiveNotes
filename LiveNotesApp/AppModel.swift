@@ -155,6 +155,8 @@ final class AppModel: ObservableObject {
         }
         let fileStore = uiTestSessionFileStore(arguments: arguments)
         let recordingRuntime = argumentValue("--ui-recording-runtime", in: arguments)
+        let audioFileUsesNativeInference = recordingRuntime == "audio-file"
+            && argumentValue("--ui-native-inference", in: arguments) == "true"
         let audioFileModelBox = WeakAppModelBox()
         var audioFileTranscriber: NativeSpeechLiveTranscriber?
         let audioRecorder: AudioRecordingControlling? = switch recordingRuntime {
@@ -166,7 +168,7 @@ final class AppModel: ObservableObject {
             HangingUITestAudioRecorder()
         case "audio-file":
             {
-                let transcriber = NativeSpeechLiveTranscriber()
+                let transcriber = audioFileUsesNativeInference ? NativeSpeechLiveTranscriber() : nil
                 audioFileTranscriber = transcriber
                 let fixturePath = argumentValue("--ui-audio-fixture", in: arguments)
                     ?? "/tmp/livenotes-e2e-audio-fixture.m4a"
@@ -174,7 +176,7 @@ final class AppModel: ObservableObject {
                 return AVAudioRecordingEngine(
                     microphonePermissionAuthorizer: .preflightGranted,
                     liveAudioHandler: { buffer in
-                        transcriber.append(buffer)
+                        transcriber?.append(buffer)
                         let level = AudioLevelMeter.normalizedLevel(for: buffer)
                         Task { @MainActor in
                             audioFileModelBox.model?.updateLiveAudioLevel(level)
@@ -189,7 +191,7 @@ final class AppModel: ObservableObject {
             nil
         }
         let simulatedRuntime = audioRecorder != nil
-        let usesNativeInference = recordingRuntime == "audio-file"
+        let usesNativeInference = audioFileUsesNativeInference
         let inferenceOutput = argumentValue("--ui-inference-output", in: arguments) ?? "success"
         let audioStartTimeoutSeconds = argumentValue("--ui-audio-start-timeout", in: arguments).flatMap(Double.init) ?? 8
         let finalSaveTranslationTimeoutSeconds = argumentValue(
@@ -2101,6 +2103,33 @@ private struct UITestInferenceRunner: RecordingInferenceRunning {
         if output == "throw" {
             throw RecordingPipelineError.runtimeFailed("Local transcription failed.")
         }
+        if output == "audio-file-e2e" {
+            let durationSeconds = Self.audioDurationSeconds(at: audioURL)
+            let roundedDurationSeconds = Int(durationSeconds.rounded())
+            return RecordingPipelineOutput(
+                transcript: [
+                    TranscriptSentence(
+                        startTime: 0,
+                        endTime: min(roundedDurationSeconds, 7),
+                        text: "Today I want to talk about privacy preserving meeting notes.",
+                        translation: "今天我想谈谈保护隐私的会议记录。",
+                        confidence: .high
+                    ),
+                    TranscriptSentence(
+                        startTime: min(roundedDurationSeconds, 8),
+                        endTime: max(roundedDurationSeconds, 12),
+                        text: "A reliable local recorder should capture speech, transcribe it, save it, and export a readable transcript.",
+                        translation: "可靠的本地录音工具应该捕获语音、转写、保存并导出可读稿件。",
+                        confidence: .high
+                    )
+                ],
+                metrics: RecordingPipelineMetrics(
+                    audioDurationSeconds: durationSeconds,
+                    transcriptSegments: 2,
+                    translationSegments: 2
+                )
+            )
+        }
         if output == "short" {
             return RecordingPipelineOutput(
                 transcript: [
@@ -2173,6 +2202,13 @@ private struct UITestInferenceRunner: RecordingInferenceRunning {
                 translationSegments: output == "transcript-only" ? 0 : 2
             )
         )
+    }
+
+    private static func audioDurationSeconds(at audioURL: URL) -> Double {
+        guard let audioFile = try? AVAudioFile(forReading: audioURL) else {
+            return 22
+        }
+        return Double(audioFile.length) / max(audioFile.processingFormat.sampleRate, 1)
     }
 }
 

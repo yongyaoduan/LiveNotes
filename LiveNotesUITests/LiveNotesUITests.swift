@@ -457,6 +457,10 @@ final class LiveNotesUITests: XCTestCase {
             fileName: "livenotes-e2e-mode.txt",
             fallback: "loopback"
         )
+        let nativeInference = e2eConfigValue(
+            fileName: "livenotes-e2e-native-inference.txt",
+            fallback: "false"
+        ) == "true"
         let minimumDuration = Double(e2eConfigValue(
             fileName: "livenotes-e2e-min-duration-seconds.txt",
             fallback: "20"
@@ -475,6 +479,11 @@ final class LiveNotesUITests: XCTestCase {
                 "--ui-recording-runtime", "audio-file",
                 "--ui-audio-fixture", fixturePath
             ] + launchArguments
+            if nativeInference {
+                launchArguments += ["--ui-native-inference", "true"]
+            } else {
+                launchArguments += ["--ui-inference-output", "audio-file-e2e"]
+            }
         }
         let app = launchApp(
             arguments: launchArguments,
