@@ -15,7 +15,7 @@ on:
 
 jobs:
   homebrew-release:
-    runs-on: macos-15
+    runs-on: macos-26
     permissions:
       contents: write
     env:
