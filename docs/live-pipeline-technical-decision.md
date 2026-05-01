@@ -70,7 +70,7 @@ Downloaded references are stored under `/tmp/livenotes-technical-research` durin
 | Streaming systems expose interim and final states separately. | Live preview remains display-only, while final transcript lines are persisted and translated. |
 | Mature endpointing can produce multiple final segments before an utterance is complete. | LiveNotes does not equate any one audio callback with a sentence or topic. |
 | Translation APIs can stream batch responses independently. | Production translation uses `translate(batch:)` with stable client identifiers. |
-| Translation availability is model-asset dependent. | Recording preflight checks English to Simplified Chinese availability with `LanguageAvailability(preferredStrategy: .lowLatency)`. |
+| Translation availability is model-asset dependent. | Before a recording starts on macOS 26.4 or newer, LiveNotes checks English to Simplified Chinese availability with `LanguageAvailability(preferredStrategy: .lowLatency)`. |
 
 ## Findings
 
@@ -115,7 +115,7 @@ Use this pipeline:
 
 Use explicit source language `en` and target language `zh-Hans`.
 
-Before recording, check `LanguageAvailability(preferredStrategy: .lowLatency)`:
+Before recording on macOS 26.4 or newer, check `LanguageAvailability(preferredStrategy: .lowLatency)`:
 
 - `.installed`: enable live translation.
 - `.supported`: block recording with a clear instruction to install English and Chinese translation assets before recording.

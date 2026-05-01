@@ -460,6 +460,7 @@ private struct TranscriptColumn: View {
 
                         if let preview = model.selectedLiveSpeechPreview {
                             LiveSpeechPreviewView(preview: preview, level: model.liveAudioLevel)
+                                .id(livePreviewID)
                         }
 
                         if model.selectedLiveSpeechPreview == nil {
@@ -496,10 +497,10 @@ private struct TranscriptColumn: View {
                 }
                 .scrollIndicators(.hidden)
                 .onAppear {
-                    scrollToBottom(proxy)
+                    scrollToCurrentTranscriptEnd(proxy)
                 }
                 .onChange(of: scrollTrigger) {
-                    scrollToBottom(proxy)
+                    scrollToCurrentTranscriptEnd(proxy)
                 }
             }
         }
@@ -508,6 +509,10 @@ private struct TranscriptColumn: View {
 
     private var transcriptBottomID: String {
         "transcript-bottom-\(session.id.uuidString)"
+    }
+
+    private var livePreviewID: String {
+        "live-preview-\(session.id.uuidString)"
     }
 
     private var displayedTranscript: [TranscriptSentence] {
@@ -530,10 +535,16 @@ private struct TranscriptColumn: View {
         ].joined(separator: "|")
     }
 
-    private func scrollToBottom(_ proxy: ScrollViewProxy) {
+    private func scrollToCurrentTranscriptEnd(_ proxy: ScrollViewProxy) {
+        let targetID = model.selectedLiveSpeechPreview == nil ? transcriptBottomID : livePreviewID
         DispatchQueue.main.async {
             withAnimation(.easeOut(duration: 0.18)) {
-                proxy.scrollTo(transcriptBottomID, anchor: .bottom)
+                proxy.scrollTo(targetID, anchor: .bottom)
+            }
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+            withAnimation(.easeOut(duration: 0.18)) {
+                proxy.scrollTo(targetID, anchor: .bottom)
             }
         }
     }

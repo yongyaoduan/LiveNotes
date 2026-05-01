@@ -118,6 +118,8 @@ grep -q 'testSavedReviewExportsMarkdown' "$ROOT_DIR/scripts/check-release-readin
 grep -q 'zipinfo -1' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q '\\._' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'savedTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'MACOSX_DEPLOYMENT_TARGET = 26.0' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -Fq 'if #available(macOS 26[.]4, [*])' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'LanguageAvailability(preferredStrategy: \\.lowLatency)' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'translate(batch: requests)' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'activeTranslationSession.*cancel()' "$ROOT_DIR/scripts/check-release-readiness.sh"

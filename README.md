@@ -17,7 +17,7 @@ The production runtime is fixed:
 
 - `AVAudioEngine` records microphone audio into the local library.
 - Apple Speech `SpeechAnalyzer` and `SpeechTranscriber` provide English transcription.
-- Apple Translation provides low-latency English-to-Chinese translation on macOS 26.4 or newer.
+- Apple Translation provides low-latency English-to-Chinese translation on macOS 26.4 or newer when available.
 - LiveNotes shows volatile transcript text while recording and commits only finalized transcript segments.
 
 Only English-to-Chinese translation is supported in this version.
@@ -32,7 +32,7 @@ brew install yongyaoduan/livenotes/livenotes
 
 The cask installs only `LiveNotes.app`. It does not install Python, create a virtual environment, or download model artifacts.
 
-LiveNotes requires macOS 26.4 or newer.
+LiveNotes requires macOS 26 or newer. Low-latency English-to-Chinese translation requires macOS 26.4 or newer and installed translation assets.
 
 Preview builds are published through the same Homebrew cask path. Signed and notarized releases are enabled after Apple Developer Program credentials are configured.
 

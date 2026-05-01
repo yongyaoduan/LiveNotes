@@ -120,8 +120,12 @@ final class LiveNotesUITests: XCTestCase {
 
         let preview = app.staticTexts["We are checking the audio and confirming the transcript is clear."]
         XCTAssertTrue(preview.waitForExistence(timeout: 3))
-        XCTAssertTrue(preview.isHittable)
-        XCTAssertFalse(app.staticTexts["Transcript segment 1 keeps the recording history visible."].isHittable)
+        XCTAssertTrue(waitForElementInWindow(preview, app: app, timeout: 3))
+        XCTAssertTrue(waitForElementOutsideWindow(
+            app.staticTexts["Transcript segment 1 keeps the recording history visible."],
+            app: app,
+            timeout: 3
+        ))
     }
 
     func testRecordingStartsWhenLiveTranscriptionIsStillPreparing() {
@@ -907,6 +911,43 @@ final class LiveNotesUITests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.05))
         }
         return element.exists && element.isHittable
+    }
+
+    private func elementIsInWindow(_ element: XCUIElement, app: XCUIApplication) -> Bool {
+        guard element.exists else { return false }
+        let window = app.windows.firstMatch
+        guard window.exists else { return false }
+        return !element.frame.isEmpty && window.frame.intersects(element.frame)
+    }
+
+    private func waitForElementInWindow(
+        _ element: XCUIElement,
+        app: XCUIApplication,
+        timeout: TimeInterval
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if elementIsInWindow(element, app: app) {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        }
+        return elementIsInWindow(element, app: app)
+    }
+
+    private func waitForElementOutsideWindow(
+        _ element: XCUIElement,
+        app: XCUIApplication,
+        timeout: TimeInterval
+    ) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if !elementIsInWindow(element, app: app) {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.05))
+        }
+        return !elementIsInWindow(element, app: app)
     }
 
     private func textValue(of element: XCUIElement) -> String {
