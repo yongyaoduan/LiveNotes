@@ -110,6 +110,7 @@ RUBY
     testFailedFinalInferenceDoesNotSaveLivePreviewTranscript \
     testFinalFileTranscriptOverridesCommittedLiveTranscript \
     testFailedFinalInferenceSavesCommittedLiveTranscript \
+    testProductionLoopbackRecordsTranscribesSavesAndExports \
     testSavedReviewExportsMarkdown
   do
     if ! grep -q "$required_test" "$log_path"; then
@@ -117,6 +118,10 @@ RUBY
       exit 1
     fi
   done
+  if grep -q 'testProductionLoopbackRecordsTranscribesSavesAndExports.*skipped' "$log_path"; then
+    echo "Release blocked: production audio end-to-end UI test was skipped." >&2
+    exit 1
+  fi
 }
 
 validate_app_zip() {

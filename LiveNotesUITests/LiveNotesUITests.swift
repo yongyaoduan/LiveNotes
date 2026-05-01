@@ -120,7 +120,7 @@ final class LiveNotesUITests: XCTestCase {
 
         let preview = app.staticTexts["We are checking the audio and confirming the transcript is clear."]
         XCTAssertTrue(preview.waitForExistence(timeout: 3))
-        XCTAssertTrue(waitForElementInWindow(preview, app: app, timeout: 3))
+        XCTAssertTrue(waitForElementInWindow(preview, app: app, timeout: 8))
         XCTAssertTrue(waitForElementOutsideWindow(
             app.staticTexts["Transcript segment 1 keeps the recording history visible."],
             app: app,
@@ -841,6 +841,7 @@ final class LiveNotesUITests: XCTestCase {
         let app = XCUIApplication()
         app.launchArguments = (includeUITestArgument ? ["--ui-test"] : []) + arguments
         app.terminate()
+        allowSystemPermissionPrompts()
         app.launch()
         app.activate()
         XCTAssertTrue(app.windows.firstMatch.waitForExistence(timeout: 15), file: file, line: line)

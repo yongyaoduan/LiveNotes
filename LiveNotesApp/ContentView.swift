@@ -537,14 +537,11 @@ private struct TranscriptColumn: View {
 
     private func scrollToCurrentTranscriptEnd(_ proxy: ScrollViewProxy) {
         let targetID = model.selectedLiveSpeechPreview == nil ? transcriptBottomID : livePreviewID
-        DispatchQueue.main.async {
-            withAnimation(.easeOut(duration: 0.18)) {
-                proxy.scrollTo(targetID, anchor: .bottom)
-            }
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            withAnimation(.easeOut(duration: 0.18)) {
-                proxy.scrollTo(targetID, anchor: .bottom)
+        for delay in [0.0, 0.2, 0.6, 1.2] {
+            DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                withAnimation(.easeOut(duration: 0.18)) {
+                    proxy.scrollTo(targetID, anchor: .bottom)
+                }
             }
         }
     }

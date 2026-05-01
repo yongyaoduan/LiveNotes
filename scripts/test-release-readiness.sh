@@ -76,8 +76,32 @@ Test Case '-[LiveNotesUITests.LiveNotesUITests testEmptyFinalInferenceDoesNotSav
 Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
 Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalFileTranscriptOverridesCommittedLiveTranscript]' passed.
 Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceSavesCommittedLiveTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testProductionLoopbackRecordsTranscribesSavesAndExports]' skipped.
 Test Case '-[LiveNotesUITests.LiveNotesUITests testSavedReviewExportsMarkdown]' passed.
 	 Executed 27 tests, with 0 failures (0 unexpected) in 216.750 seconds
+** TEST SUCCEEDED **
+LOG
+SKIPPED_ARTIFACT_LOG_PATH="$WORK_ROOT/release-readiness-skipped-e2e.log"
+if LIVENOTES_UI_EVIDENCE_DIR="$EVIDENCE_DIR" \
+  LIVENOTES_RELEASE_VERSION="0.1.0" \
+  "$ROOT_DIR/scripts/check-release-readiness.sh" "$ZIP_PATH" "$ZIP_SHA" >"$SKIPPED_ARTIFACT_LOG_PATH" 2>&1; then
+  echo "Release readiness must reject skipped production audio end-to-end UI tests." >&2
+  exit 1
+fi
+grep -q 'production audio end-to-end UI test was skipped' "$SKIPPED_ARTIFACT_LOG_PATH"
+
+cat > "$EVIDENCE_DIR/xcodebuild.log" <<'LOG'
+Test Suite 'All tests' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveWaitsForGeneratedTranslations]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveContinuesWhenTranslationIsUnavailable]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveContinuesWhenTranslationDoesNotReturn]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testEmptyFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalFileTranscriptOverridesCommittedLiveTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceSavesCommittedLiveTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testProductionLoopbackRecordsTranscribesSavesAndExports]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testSavedReviewExportsMarkdown]' passed.
+	 Executed 33 tests, with 0 failures (0 unexpected) in 216.750 seconds
 ** TEST SUCCEEDED **
 LOG
 
@@ -115,6 +139,8 @@ grep -q 'testFailedFinalInferenceDoesNotSaveLivePreviewTranscript' "$ROOT_DIR/sc
 grep -q 'testFinalFileTranscriptOverridesCommittedLiveTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'testFailedFinalInferenceSavesCommittedLiveTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'testSavedReviewExportsMarkdown' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testProductionLoopbackRecordsTranscribesSavesAndExports' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'production audio end-to-end UI test was skipped' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'zipinfo -1' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q '\\._' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'savedTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
