@@ -17,6 +17,7 @@ final class LiveNotesApp: NSObject, NSApplicationDelegate {
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        configureMainMenu()
         showMainWindow()
     }
 
@@ -26,6 +27,22 @@ final class LiveNotesApp: NSObject, NSApplicationDelegate {
     ) -> Bool {
         showMainWindow()
         return true
+    }
+
+    private func configureMainMenu() {
+        let mainMenu = NSMenu()
+        let appMenuItem = NSMenuItem()
+        let appMenu = NSMenu(title: "LiveNotes")
+        let quitItem = NSMenuItem(
+            title: "Quit LiveNotes",
+            action: #selector(NSApplication.terminate(_:)),
+            keyEquivalent: "q"
+        )
+        quitItem.target = NSApp
+        appMenu.addItem(quitItem)
+        appMenuItem.submenu = appMenu
+        mainMenu.addItem(appMenuItem)
+        NSApp.mainMenu = mainMenu
     }
 
     private func showMainWindow() {

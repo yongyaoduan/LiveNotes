@@ -1571,7 +1571,10 @@ enum TranscriptUtteranceSegmenter {
 
     private static func sanitizedFragment(_ sentence: TranscriptSentence) -> TranscriptSentence? {
         let text = normalizedText(sentence.text)
-        guard !text.isEmpty else { return nil }
+        guard !text.isEmpty,
+              text.rangeOfCharacter(from: .alphanumerics) != nil else {
+            return nil
+        }
         let startTime = max(0, sentence.startTime)
         let endTime = max(startTime + 1, sentence.endTime)
         return TranscriptSentence(
@@ -1593,6 +1596,10 @@ enum TranscriptUtteranceSegmenter {
         if translationMode == .preserveMergedTranslations,
            current.hasTranslation != nextHasTranslation {
             return true
+        }
+        if next.startTime < current.endTime,
+           shouldMergeOverlappingShortLatinFragment(current.text, wordCount: current.wordCount) {
+            return false
         }
         if next.startTime - current.endTime >= pauseBoundarySeconds {
             return true
@@ -1620,6 +1627,31 @@ enum TranscriptUtteranceSegmenter {
 
     private static func wordCount(_ text: String) -> Int {
         text.split(whereSeparator: \.isWhitespace).count
+    }
+
+    private static func isShortLatinFragment(_ text: String, wordCount: Int) -> Bool {
+        wordCount <= 5 && text.range(of: #"[A-Za-z]"#, options: .regularExpression) != nil
+    }
+
+    private static func shouldMergeOverlappingShortLatinFragment(_ text: String, wordCount: Int) -> Bool {
+        guard isShortLatinFragment(text, wordCount: wordCount) else { return false }
+        guard endsWithSentenceTerminator(text) else { return true }
+        return isAudienceAddressLeadIn(text)
+    }
+
+    private static func isAudienceAddressLeadIn(_ text: String) -> Bool {
+        let fragment = text
+            .lowercased()
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .trimmingCharacters(in: CharacterSet(charactersIn: ".!?"))
+        return [
+            "all right class",
+            "no class",
+            "now class",
+            "ok class",
+            "okay class",
+            "yeah class"
+        ].contains(fragment)
     }
 
     private static func endsWithSentenceTerminator(_ text: String) -> Bool {

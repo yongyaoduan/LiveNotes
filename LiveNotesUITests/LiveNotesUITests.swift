@@ -45,6 +45,15 @@ final class LiveNotesUITests: XCTestCase {
         attachScreenshot(named: "sidebar-select-recovered-session", app: recovered)
     }
 
+    func testCommandQQuitsApplication() {
+        let app = launchApp(arguments: ["--ui-state", "empty"])
+
+        XCTAssertTrue(app.staticTexts["Recordings"].waitForExistence(timeout: 5))
+        app.typeKey("q", modifierFlags: [.command])
+
+        XCTAssertTrue(waitForAppToTerminate(app, timeout: 3))
+    }
+
     func testNewRecordingFlowCreatesLiveSession() {
         let app = launchApp(arguments: ["--ui-state", "empty"])
 
@@ -736,23 +745,64 @@ final class LiveNotesUITests: XCTestCase {
     func testSavedReviewExportsMarkdown() {
         let storePath = temporaryStorePath()
         let exportPath = exportPath(forStorePath: storePath, title: "Morning Session")
+        let exportedAudioPath = URL(fileURLWithPath: exportPath)
+            .deletingPathExtension()
+            .appendingPathExtension("m4a")
+            .path
         let app = launchApp(arguments: [
             "--ui-state", "saved",
             "--session-store", storePath
         ])
 
         XCTAssertTrue(app.staticTexts["52 min recording · Saved locally"].waitForExistence(timeout: 5))
+        let sourceAudioPath = firstAudioFilePath(forStorePath: storePath)
+        let sourceAudioData = try? Data(contentsOf: URL(fileURLWithPath: sourceAudioPath))
+        XCTAssertNotNil(sourceAudioData)
         XCTAssertFalse(app.staticTexts["Topic Notes"].exists)
         XCTAssertTrue(app.staticTexts["Transcript"].exists)
         XCTAssertTrue(app.buttons["saved-review-export-button"].exists)
         app.buttons["saved-review-export-button"].click()
         XCTAssertTrue(waitForFile(at: exportPath, contains: "# Morning Session", timeout: 3))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: exportedAudioPath))
+        XCTAssertGreaterThan(fileSize(at: exportedAudioPath), 0)
+        XCTAssertTrue(audioFileIsDecodable(at: exportedAudioPath))
+        XCTAssertEqual(try? Data(contentsOf: URL(fileURLWithPath: exportedAudioPath)), sourceAudioData)
         XCTAssertFalse(file(at: exportPath, contains: "Generated"))
         app.buttons["Customer Update, 31 min recording · Saved locally"].click()
         XCTAssertTrue(app.staticTexts["Transcript"].waitForExistence(timeout: 3))
         XCTAssertFalse(staticText(app, labeled: "Saved to \(exportPath)").exists)
         XCTAssertFalse(app.buttons["Settings"].exists)
         attachScreenshot(named: "saved-review", app: app)
+    }
+
+    func testSavedReviewExportFailsWhenSourceAudioIsMissing() {
+        let storePath = temporaryStorePath()
+        let exportPath = exportPath(forStorePath: storePath, title: "Morning Session")
+        let exportedAudioPath = URL(fileURLWithPath: exportPath)
+            .deletingPathExtension()
+            .appendingPathExtension("m4a")
+            .path
+        let app = launchApp(arguments: [
+            "--ui-state", "saved",
+            "--session-store", storePath
+        ])
+
+        XCTAssertTrue(app.staticTexts["52 min recording · Saved locally"].waitForExistence(timeout: 5))
+        let sourceAudioPath = firstAudioFilePath(forStorePath: storePath)
+        XCTAssertFalse(sourceAudioPath.isEmpty)
+        XCTAssertTrue(FileManager.default.fileExists(atPath: sourceAudioPath))
+        try? FileManager.default.removeItem(at: URL(fileURLWithPath: sourceAudioPath))
+
+        app.buttons["saved-review-export-button"].click()
+
+        XCTAssertFalse(FileManager.default.fileExists(atPath: exportPath))
+        XCTAssertFalse(FileManager.default.fileExists(atPath: exportedAudioPath))
+        let exportStatus = app.descendants(matching: .any)["saved-review-export-status"]
+        XCTAssertTrue(exportStatus.waitForExistence(timeout: 3))
+        XCTAssertTrue(
+            exportStatus.label.contains("Could not export Markdown."),
+            "Export status label: \(exportStatus.label)"
+        )
     }
 
     func testSidebarShowsEmptyRecordingsState() {
@@ -1099,6 +1149,17 @@ final class LiveNotesUITests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         }
         return exportedMarkdown(in: exportDirectory, contains: expectedText)
+    }
+
+    private func waitForAppToTerminate(_ app: XCUIApplication, timeout: TimeInterval) -> Bool {
+        let deadline = Date().addingTimeInterval(timeout)
+        while Date() < deadline {
+            if !app.exists {
+                return true
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+        }
+        return !app.exists
     }
 
     private func exportedMarkdown(in directory: URL, contains expectedText: String) -> Bool {

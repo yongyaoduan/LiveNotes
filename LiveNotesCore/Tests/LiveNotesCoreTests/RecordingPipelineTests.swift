@@ -449,6 +449,76 @@ struct RecordingPipelineTests {
         #expect(coalesced.map(\.endTime) == [6, 14])
     }
 
+    @Test("final transcript segmenter drops punctuation-only speech results")
+    func finalTranscriptSegmenterDropsPunctuationOnlySpeechResults() {
+        let rawTranscript = [
+            transcript(".", start: 7, end: 10),
+            transcript("Now we can discuss supervised learning.", start: 9, end: 14)
+        ]
+
+        let coalesced = TranscriptUtteranceSegmenter.segment(rawTranscript)
+
+        #expect(coalesced.map(\.text) == [
+            "Now we can discuss supervised learning."
+        ])
+        #expect(coalesced.map(\.startTime) == [9])
+        #expect(coalesced.map(\.endTime) == [14])
+    }
+
+    @Test("final transcript segmenter merges overlapping short finalized fragments")
+    func finalTranscriptSegmenterMergesOverlappingShortFinalizedFragments() {
+        let rawTranscript = [
+            transcript("Now class.", start: 3, end: 5),
+            transcript("Today we discuss supervised learning.", start: 4, end: 10)
+        ]
+
+        let coalesced = TranscriptUtteranceSegmenter.segment(rawTranscript)
+
+        #expect(coalesced.map(\.text) == [
+            "Now class. Today we discuss supervised learning."
+        ])
+        #expect(coalesced.map(\.startTime) == [3])
+        #expect(coalesced.map(\.endTime) == [10])
+    }
+
+    @Test("final transcript segmenter keeps overlapping complete short utterances separate")
+    func finalTranscriptSegmenterKeepsOverlappingCompleteShortUtterancesSeparate() {
+        let thanks = TranscriptUtteranceSegmenter.segment([
+            transcript("Thanks.", start: 0, end: 2),
+            transcript("Let's move to neural networks.", start: 1, end: 6)
+        ])
+        let question = TranscriptUtteranceSegmenter.segment([
+            transcript("Any questions?", start: 10, end: 12),
+            transcript("We can continue with regression.", start: 11, end: 16)
+        ])
+
+        #expect(thanks.map(\.text) == [
+            "Thanks.",
+            "Let's move to neural networks."
+        ])
+        #expect(question.map(\.text) == [
+            "Any questions?",
+            "We can continue with regression."
+        ])
+    }
+
+    @Test("final transcript segmenter keeps overlapping unspaced sentences separate")
+    func finalTranscriptSegmenterKeepsOverlappingUnspacedSentencesSeparate() {
+        let rawTranscript = [
+            transcript("这是一个完整的中文句子，已经表达了清楚的意思。", start: 0, end: 10),
+            transcript("下一句也应该单独保留。", start: 9, end: 14)
+        ]
+
+        let coalesced = TranscriptUtteranceSegmenter.segment(rawTranscript)
+
+        #expect(coalesced.map(\.text) == [
+            "这是一个完整的中文句子，已经表达了清楚的意思。",
+            "下一句也应该单独保留。"
+        ])
+        #expect(coalesced.map(\.startTime) == [0, 9])
+        #expect(coalesced.map(\.endTime) == [10, 14])
+    }
+
     @Test("preserved translation segmenter keeps translated and pending fragments separate")
     func preservedTranslationSegmenterKeepsTranslatedAndPendingFragmentsSeparate() {
         var translated = transcript("Okay.", start: 0, end: 1)

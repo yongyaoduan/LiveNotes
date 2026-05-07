@@ -239,7 +239,7 @@ final class AppModel: ObservableObject {
                 .appendingPathComponent("Exports", isDirectory: true)
         }
         model.configureExportDirectoryOverride(arguments: arguments)
-        if simulatedRuntime && !usesNativeInference {
+        if fileStore != nil && !usesNativeInference {
             model.createUITestAudioFixtures()
         }
         switch argumentValue("--ui-translation-mode", in: arguments) {
@@ -933,6 +933,11 @@ final class AppModel: ObservableObject {
             return
         }
         do {
+            let audioExportPlan = try audioExportCopyPlan(
+                for: session,
+                transcriptURL: exportURL,
+                sessionFileStore: sessionFileStore
+            )
             try FileManager.default.createDirectory(
                 at: exportURL.deletingLastPathComponent(),
                 withIntermediateDirectories: true
@@ -940,6 +945,12 @@ final class AppModel: ObservableObject {
             try MarkdownExporter()
                 .export(session)
                 .write(to: exportURL, atomically: true, encoding: .utf8)
+            do {
+                try copyAudioForExport(audioExportPlan)
+            } catch {
+                try? FileManager.default.removeItem(at: exportURL)
+                throw error
+            }
             exportDirectoryHistory.rememberExportURL(exportURL)
             NSWorkspace.shared.activateFileViewerSelecting([exportURL])
             setExportStatus(
@@ -952,6 +963,35 @@ final class AppModel: ObservableObject {
         } catch {
             setExportStatus("Could not export Markdown.", for: session.id, kind: .failure)
         }
+    }
+
+    private func audioExportCopyPlan(
+        for session: RecordingSession,
+        transcriptURL: URL,
+        sessionFileStore: SessionFileStore
+    ) throws -> AudioExportCopyPlan? {
+        guard let audioFileName = session.audioFileName else { return nil }
+        let sourceURL = sessionFileStore.localFileURL(relativePath: audioFileName)
+        guard FileManager.default.fileExists(atPath: sourceURL.path) else {
+            throw CocoaError(.fileNoSuchFile)
+        }
+        let audioExtension = sourceURL.pathExtension.isEmpty ? "m4a" : sourceURL.pathExtension
+        let destinationURL = transcriptURL
+            .deletingPathExtension()
+            .appendingPathExtension(audioExtension)
+        guard sourceURL.standardizedFileURL != destinationURL.standardizedFileURL else {
+            return nil
+        }
+        return AudioExportCopyPlan(sourceURL: sourceURL, destinationURL: destinationURL)
+    }
+
+    private func copyAudioForExport(_ copyPlan: AudioExportCopyPlan?) throws {
+        guard let copyPlan else { return }
+        let destinationURL = copyPlan.destinationURL
+        if FileManager.default.fileExists(atPath: destinationURL.path) {
+            try FileManager.default.removeItem(at: destinationURL)
+        }
+        try FileManager.default.copyItem(at: copyPlan.sourceURL, to: destinationURL)
     }
 
     private func markdownExportURL(for session: RecordingSession, defaultDirectory: URL) -> URL? {
@@ -1894,6 +1934,11 @@ enum SessionExportStatusKind: Equatable {
     case warning
     case failure
     case progress
+}
+
+private struct AudioExportCopyPlan {
+    var sourceURL: URL
+    var destinationURL: URL
 }
 
 struct LiveSpeechPreview: Equatable, Sendable {

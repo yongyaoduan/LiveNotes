@@ -915,10 +915,13 @@ private struct SavedReview: View {
                     .buttonStyle(.bordered)
                     .controlSize(.large)
                     if let exportStatus = model.exportStatus(for: session) {
-                        Label(
-                            exportStatus.message,
-                            systemImage: exportStatusIcon(exportStatus.kind)
-                        )
+                        HStack(spacing: 4) {
+                            Image(systemName: exportStatusIcon(exportStatus.kind))
+                            Text(exportStatus.message)
+                        }
+                        .accessibilityElement(children: .ignore)
+                        .accessibilityIdentifier("saved-review-export-status")
+                        .accessibilityLabel(exportStatus.message)
                         .font(.system(size: 12, weight: .medium))
                         .foregroundStyle(exportStatusColor(exportStatus.kind))
                     }
@@ -972,7 +975,7 @@ private struct SavedTranscriptSection: View {
             if !session.transcript.isEmpty {
                 Text("Transcript")
                     .font(.system(size: 16, weight: .semibold))
-                ForEach(session.transcript) { sentence in
+                ForEach(displayedTranscript) { sentence in
                     TranscriptSentenceView(
                         sentence: sentence,
                         missingTranslationText: "Translation unavailable."
@@ -980,6 +983,13 @@ private struct SavedTranscriptSection: View {
                 }
             }
         }
+    }
+
+    private var displayedTranscript: [TranscriptSentence] {
+        TranscriptUtteranceSegmenter.segment(
+            session.transcript,
+            translationMode: .preserveMergedTranslations
+        )
     }
 }
 
