@@ -1040,16 +1040,7 @@ final class LiveNotesUITests: XCTestCase {
 
     private func allowSystemPermissionPrompts() {
         addUIInterruptionMonitor(withDescription: "System permissions") { alert in
-            let allowedLabels = ["OK", "Allow", "Continue"]
-            let preferredButton = alert.buttons.matching(
-                NSPredicate(format: "label IN %@ OR title IN %@", allowedLabels, allowedLabels)
-            ).firstMatch
-            if preferredButton.exists {
-                preferredButton.click()
-                return true
-            }
-
-            return false
+            self.clickSystemPermissionButton(in: alert)
         }
     }
 
@@ -1059,14 +1050,52 @@ final class LiveNotesUITests: XCTestCase {
             if app.staticTexts["Listening"].exists {
                 return true
             }
-            if app.windows.firstMatch.exists {
-                app.windows.firstMatch.click()
-            } else {
-                app.click()
+            if dismissSystemPermissionPrompts() {
+                RunLoop.current.run(until: Date().addingTimeInterval(0.5))
+                continue
             }
             RunLoop.current.run(until: Date().addingTimeInterval(0.5))
         }
         return app.staticTexts["Listening"].exists
+    }
+
+    private func dismissSystemPermissionPrompts() -> Bool {
+        for bundleIdentifier in ["com.apple.SecurityAgent", "com.apple.UserNotificationCenter"] {
+            let systemApp = XCUIApplication(bundleIdentifier: bundleIdentifier)
+            if clickSystemPermissionButton(in: systemApp) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private func clickSystemPermissionButton(in element: XCUIElement) -> Bool {
+        guard elementContainsSystemPrivacyPrompt(element) else {
+            return false
+        }
+
+        let allowedLabels = ["Allow", "OK", "Continue"]
+        let preferredButton = element.buttons.matching(
+            NSPredicate(format: "label IN %@ OR title IN %@", allowedLabels, allowedLabels)
+        ).firstMatch
+        guard preferredButton.exists else {
+            return false
+        }
+
+        preferredButton.click()
+        RunLoop.current.run(until: Date().addingTimeInterval(0.75))
+        return true
+    }
+
+    private func elementContainsSystemPrivacyPrompt(_ element: XCUIElement) -> Bool {
+        let promptPredicate = NSPredicate(
+            format: "label CONTAINS[c] %@ OR value CONTAINS[c] %@ OR label CONTAINS[c] %@ OR value CONTAINS[c] %@",
+            "would like to access",
+            "would like to access",
+            "would like to use",
+            "would like to use"
+        )
+        return element.staticTexts.matching(promptPredicate).firstMatch.exists
     }
 
     private func playAudioFixture(at path: String) throws {

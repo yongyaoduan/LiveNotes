@@ -42,15 +42,7 @@ choose_input_device() {
     printf '%s\n' 'BlackHole 2ch'
     return
   fi
-  if SwitchAudioSource -a -t input | grep -qx 'miaowaOutput 2ch'; then
-    printf '%s\n' 'miaowaOutput 2ch'
-    return
-  fi
-  if SwitchAudioSource -a -t input | grep -qx 'miaowaInput 2ch'; then
-    printf '%s\n' 'miaowaInput 2ch'
-    return
-  fi
-  echo "No supported loopback input device found. Install BlackHole 2ch or set LIVENOTES_TEST_AUDIO_DEVICE." >&2
+  echo "No verified loopback input device found. Install BlackHole 2ch, reboot, or set LIVENOTES_TEST_AUDIO_DEVICE to a verified loopback device." >&2
   exit 1
 }
 
@@ -69,11 +61,7 @@ choose_output_device() {
     printf '%s\n' 'BlackHole 2ch'
     return
   fi
-  if SwitchAudioSource -a -t output | grep -qx 'miaowaOutput 2ch'; then
-    printf '%s\n' 'miaowaOutput 2ch'
-    return
-  fi
-  echo "No supported loopback output device found. Install BlackHole 2ch or set LIVENOTES_TEST_AUDIO_OUTPUT." >&2
+  echo "No verified loopback output device found. Install BlackHole 2ch, reboot, or set LIVENOTES_TEST_AUDIO_OUTPUT to a verified loopback output device." >&2
   exit 1
 }
 
@@ -105,26 +93,6 @@ restore_audio_device() {
   elif [[ -n "$name" ]]; then
     SwitchAudioSource -t "$type" -s "$name" >/dev/null || true
   fi
-}
-
-audiotoolbox_output_index_for_name() {
-  local name="$1"
-  ffmpeg -hide_banner \
-    -f lavfi -i anullsrc=r=48000:cl=mono \
-    -t 0.01 \
-    -f audiotoolbox \
-    -list_devices true \
-    - 2>&1 | python3 -c '
-import re
-import sys
-
-target = sys.argv[1]
-for line in sys.stdin:
-    match = re.search(r"\[(\d+)\]\s+(.+?),\s+(.+)$", line)
-    if match and match.group(2).strip() == target:
-        print(match.group(1))
-        break
-' "$name"
 }
 
 prepare_fixture() {
@@ -165,16 +133,9 @@ printf '%s\n' "$NATIVE_INFERENCE" > "$NATIVE_INFERENCE_FILE"
 
 if [[ "$MODE" == "loopback" ]]; then
   require_tool SwitchAudioSource
-  require_tool ffmpeg
+  require_tool afplay
   INPUT_DEVICE="$(choose_input_device)"
   OUTPUT_DEVICE="$(choose_output_device "$INPUT_DEVICE")"
-  PLAYBACK_DEVICE_INDEX="$(audiotoolbox_output_index_for_name "$OUTPUT_DEVICE")"
-  if [[ -z "$PLAYBACK_DEVICE_INDEX" ]]; then
-    echo "Could not find AudioToolbox output device index for $OUTPUT_DEVICE." >&2
-    exit 1
-  fi
-  printf '%s\n' "$PLAYBACK_DEVICE_INDEX" > "$PLAYBACK_DEVICE_INDEX_FILE"
-  command -v ffmpeg > "$FFMPEG_PATH_FILE"
   OLD_INPUT="$(SwitchAudioSource -c -t input)"
   OLD_OUTPUT="$(SwitchAudioSource -c -t output)"
   OLD_SYSTEM="$(SwitchAudioSource -c -t system || true)"
@@ -192,6 +153,8 @@ if [[ "$MODE" == "loopback" ]]; then
   trap 'restore_audio; cleanup' EXIT INT TERM
 
   SwitchAudioSource -t input -s "$INPUT_DEVICE" >/dev/null
+  SwitchAudioSource -t output -s "$OUTPUT_DEVICE" >/dev/null
+  SwitchAudioSource -t system -s "$OUTPUT_DEVICE" >/dev/null || true
 elif [[ "$MODE" != "audio-file" ]]; then
   echo "Unsupported LIVENOTES_E2E_MODE: $MODE" >&2
   exit 1
