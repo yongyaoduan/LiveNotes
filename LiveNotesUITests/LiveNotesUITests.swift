@@ -1070,7 +1070,10 @@ final class LiveNotesUITests: XCTestCase {
     }
 
     private func clickSystemPermissionButton(in element: XCUIElement) -> Bool {
-        guard elementContainsSystemPrivacyPrompt(element) else {
+        let hasPromptText = elementContainsSystemPrivacyPrompt(element)
+        let hasNotificationPermissionButtons = element.buttons["action-button-1"].exists
+            && element.buttons["action-button-3"].exists
+        guard hasPromptText || hasNotificationPermissionButtons else {
             return false
         }
 
