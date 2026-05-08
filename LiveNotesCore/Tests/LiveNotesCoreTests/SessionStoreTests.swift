@@ -109,6 +109,38 @@ struct SessionStoreTests {
         #expect(transcript.map(\.text) == ["Hello everyone, my name is Joanna."])
     }
 
+    @Test("live transcript upsert keeps longer text over shorter overlapping regressions")
+    func liveTranscriptUpsertKeepsLongerTextOverShorterOverlappingRegressions() throws {
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_850))
+        let session = store.createRecording(named: "Lecture")
+
+        try store.upsertTranscript(
+            in: session.id,
+            sentence: TranscriptSentence(
+                startTime: 10,
+                endTime: 17,
+                text: "What you are doing to President Trump is disgusting.",
+                translation: "",
+                confidence: .medium
+            )
+        )
+        try store.upsertTranscript(
+            in: session.id,
+            sentence: TranscriptSentence(
+                startTime: 10,
+                endTime: 14,
+                text: "What you are doing",
+                translation: "",
+                confidence: .medium
+            )
+        )
+
+        let transcript = try #require(store.session(id: session.id)?.transcript)
+        #expect(transcript.map(\.text) == [
+            "What you are doing to President Trump is disgusting."
+        ])
+    }
+
     @Test("live transcript upsert keeps adjacent rounded speech ranges")
     func liveTranscriptUpsertKeepsAdjacentRoundedSpeechRanges() throws {
         var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_900))

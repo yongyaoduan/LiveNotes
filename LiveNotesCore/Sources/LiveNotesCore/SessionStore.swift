@@ -173,8 +173,16 @@ public struct SessionStore: Sendable {
             }) {
                 session.transcript[existingIndex] = sentence
             } else {
+                let replaceableExisting = session.transcript.filter { existing in
+                    Self.shouldReplaceTranscript(existing, with: sentence)
+                }
+                guard !replaceableExisting.isEmpty || !session.transcript.contains(where: {
+                    Self.transcriptRangesOverlap($0, sentence)
+                }) else {
+                    return
+                }
                 session.transcript.removeAll { existing in
-                    Self.transcriptRangesOverlap(existing, sentence)
+                    replaceableExisting.contains(where: { $0.id == existing.id })
                 }
                 session.transcript.append(sentence)
             }
@@ -201,11 +209,34 @@ public struct SessionStore: Sendable {
         return Double(overlap) / Double(shorterDuration) >= 0.67
     }
 
+    private static func shouldReplaceTranscript(
+        _ existing: TranscriptSentence,
+        with sentence: TranscriptSentence
+    ) -> Bool {
+        guard transcriptRangesOverlap(existing, sentence) else { return false }
+        let existingWords = wordCount(existing.text)
+        let sentenceWords = wordCount(sentence.text)
+        if existing.startTime == sentence.startTime && existing.endTime == sentence.endTime {
+            return sentenceWords >= existingWords
+        }
+        if rangeContains(sentence, existing) {
+            return sentenceWords >= existingWords
+        }
+        if rangeContains(existing, sentence) {
+            return sentenceWords > existingWords
+        }
+        return sentenceWords > existingWords
+    }
+
     private static func rangeContains(
         _ lhs: TranscriptSentence,
         _ rhs: TranscriptSentence
     ) -> Bool {
         lhs.startTime <= rhs.startTime && lhs.endTime >= rhs.endTime
+    }
+
+    private static func wordCount(_ text: String) -> Int {
+        text.split(whereSeparator: \.isWhitespace).count
     }
 
     private mutating func updateSession(

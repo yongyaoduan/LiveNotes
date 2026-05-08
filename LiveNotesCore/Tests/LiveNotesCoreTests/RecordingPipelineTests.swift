@@ -68,6 +68,43 @@ struct RecordingPipelineTests {
         #expect(final.first?.endTime == 18)
     }
 
+    @Test("live preview display keeps longer text over prefix regressions")
+    func livePreviewDisplayKeepsLongerTextOverPrefixRegressions() {
+        let current = "What you are doing to President Trump is disgusting."
+        let displayed = LiveTranscriptPreviewDisplayPolicy.displayedText(
+            current: current,
+            incoming: "What you are doing"
+        )
+
+        #expect(displayed == current)
+    }
+
+    @Test("live preview display accepts non-prefix corrections")
+    func livePreviewDisplayAcceptsNonPrefixCorrections() {
+        let displayed = LiveTranscriptPreviewDisplayPolicy.displayedText(
+            current: "Alcohol, so they don't",
+            incoming: "Also, so they don't"
+        )
+
+        #expect(displayed == "Also, so they don't")
+    }
+
+    @Test("live preview clears after matching committed transcript")
+    func livePreviewClearsAfterMatchingCommittedTranscript() {
+        #expect(LiveTranscriptPreviewDisplayPolicy.shouldClearAfterCommit(
+            preview: "Alcohol, so they don't, so by tuning.",
+            committed: "Alcohol, so they don't, so by tuning."
+        ))
+        #expect(LiveTranscriptPreviewDisplayPolicy.shouldClearAfterCommit(
+            preview: "Alcohol, so they don't, so by tuning.",
+            committed: "Alcohol, so they don't"
+        ))
+        #expect(!LiveTranscriptPreviewDisplayPolicy.shouldClearAfterCommit(
+            preview: "Alcohol, so they don't, so by tuning.",
+            committed: "Except now"
+        ))
+    }
+
     @Test("live fallback ignores volatile preview text")
     func liveFallbackIgnoresVolatilePreviewText() {
         let existing = [
@@ -950,6 +987,36 @@ struct RecordingPipelineTests {
         let file = try AVAudioFile(forReading: audioURL)
         #expect(file.length > 0)
         #expect(file.processingFormat.channelCount == 1)
+        #expect(Int(file.processingFormat.sampleRate.rounded()) == 48_000)
+        #expect(try rmsLevel(for: file) > 0.01)
+    }
+
+    @Test("audio recorder writes non-silent audio from two channel float input")
+    func audioRecorderWritesNonSilentAudioFromTwoChannelFloatInput() async throws {
+        let directory = try temporaryDirectory()
+        let audioURL = directory.appendingPathComponent("fixture.m4a")
+        let format = try #require(AVAudioFormat(
+            commonFormat: .pcmFormatFloat32,
+            sampleRate: 48_000,
+            channels: 2,
+            interleaved: false
+        ))
+        let provider = FixtureAudioInputProvider(
+            format: format,
+            buffers: [try sineWaveBuffer(format: format, durationSeconds: 1.0)]
+        )
+        let recorder = AVAudioRecordingEngine(
+            microphonePermissionAuthorizer: .preflightGranted,
+            audioInputProviderFactory: { provider }
+        )
+
+        try await recorder.startRecording(to: audioURL)
+        let durationSeconds = try recorder.stopRecording()
+
+        #expect(durationSeconds == 1)
+        let file = try AVAudioFile(forReading: audioURL)
+        #expect(file.length > 0)
+        #expect(file.processingFormat.channelCount == 2)
         #expect(Int(file.processingFormat.sampleRate.rounded()) == 48_000)
         #expect(try rmsLevel(for: file) > 0.01)
     }

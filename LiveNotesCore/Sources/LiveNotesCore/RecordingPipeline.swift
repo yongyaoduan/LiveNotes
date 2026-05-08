@@ -251,9 +251,7 @@ public final class AVAudioRecordingEngine: AudioRecordingControlling, @unchecked
     private var writeError: Error?
     private var recordingGeneration: UInt64 = 0
 
-    public init(
-        liveAudioHandler: (@Sendable (AVAudioPCMBuffer) -> Void)? = nil
-    ) {
+    public init(liveAudioHandler: (@Sendable (AVAudioPCMBuffer) -> Void)? = nil) {
         self.liveAudioHandler = liveAudioHandler
         bufferProcessingQueue = DispatchQueue(label: "app.livenotes.recording-engine.buffers")
         microphonePermissionAuthorizer = .live
@@ -1400,6 +1398,56 @@ public struct LiveTranscriptSegmentBuffer: Sendable {
         startTime = safeEndTime
         partialText = ""
         return [sentence]
+    }
+}
+
+public enum LiveTranscriptPreviewDisplayPolicy {
+    public static func displayedText(current: String, incoming: String) -> String {
+        let cleanedCurrent = current.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cleanedIncoming = incoming.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !cleanedIncoming.isEmpty else { return cleanedCurrent }
+        guard !shouldKeepCurrent(current: cleanedCurrent, incoming: cleanedIncoming) else {
+            return cleanedCurrent
+        }
+        return cleanedIncoming
+    }
+
+    public static func shouldClearAfterCommit(preview: String, committed: String) -> Bool {
+        let normalizedPreview = normalized(preview)
+        let normalizedCommitted = normalized(committed)
+        guard !normalizedPreview.isEmpty, !normalizedCommitted.isEmpty else {
+            return false
+        }
+        return normalizedPreview == normalizedCommitted
+            || normalizedPreview.hasPrefix(normalizedCommitted)
+            || normalizedCommitted.hasPrefix(normalizedPreview)
+    }
+
+    private static func shouldKeepCurrent(current: String, incoming: String) -> Bool {
+        let normalizedCurrent = normalized(current)
+        let normalizedIncoming = normalized(incoming)
+        guard !normalizedCurrent.isEmpty,
+              !normalizedIncoming.isEmpty,
+              normalizedCurrent != normalizedIncoming,
+              normalizedCurrent.hasPrefix(normalizedIncoming) else {
+            return false
+        }
+        return wordCount(current) >= wordCount(incoming)
+            && normalizedCurrent.count > normalizedIncoming.count
+    }
+
+    private static func normalized(_ text: String) -> String {
+        text.lowercased()
+            .split(whereSeparator: \.isWhitespace)
+            .map {
+                String($0).trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+            }
+            .filter { !$0.isEmpty }
+            .joined(separator: " ")
+    }
+
+    private static func wordCount(_ text: String) -> Int {
+        text.split(whereSeparator: \.isWhitespace).count
     }
 }
 

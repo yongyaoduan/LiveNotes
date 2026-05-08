@@ -1105,6 +1105,12 @@ final class AppModel: ObservableObject {
             guard !sentence.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 return
             }
+            if LiveTranscriptPreviewDisplayPolicy.shouldClearAfterCommit(
+                preview: liveTranscriptPreview,
+                committed: sentence.text
+            ) {
+                resetLivePreview()
+            }
             var updatedStore = store
             try? updatedStore.upsertTranscript(in: id, sentence: sentence)
             store = updatedStore
@@ -1341,15 +1347,18 @@ final class AppModel: ObservableObject {
     }
 
     private func updateLivePreview(_ text: String) {
-        let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleaned.isEmpty else { return }
-        if cleaned != liveTranscriptPreview {
-            liveTranscriptPreview = cleaned
-            if !normalizedPreview(cleaned).hasPrefix(normalizedPreview(lastQueuedPreviewTranslation)) {
+        let displayed = LiveTranscriptPreviewDisplayPolicy.displayedText(
+            current: liveTranscriptPreview,
+            incoming: text
+        )
+        guard !displayed.isEmpty else { return }
+        if displayed != liveTranscriptPreview {
+            liveTranscriptPreview = displayed
+            if !normalizedPreview(displayed).hasPrefix(normalizedPreview(lastQueuedPreviewTranslation)) {
                 liveTranslationPreview = ""
             }
         }
-        queuePreviewTranslation(for: cleaned)
+        queuePreviewTranslation(for: displayed)
     }
 
     private func normalizedPreview(_ text: String) -> String {

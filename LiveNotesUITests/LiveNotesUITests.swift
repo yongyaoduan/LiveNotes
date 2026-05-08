@@ -509,17 +509,20 @@ final class LiveNotesUITests: XCTestCase {
         } else {
             try playAudioFixture(at: fixturePath)
         }
+        app.activate()
+        XCTAssertTrue(app.buttons["recording-bar-stop-button"].waitForExistence(timeout: 10))
         app.buttons["recording-bar-stop-button"].click()
         XCTAssertTrue(app.staticTexts["Finish Recording?"].waitForExistence(timeout: 5))
         app.buttons["stop-save-button"].click()
 
-        XCTAssertTrue(waitForFile(at: storePath, contains: expectedPhrase, timeout: 240))
         XCTAssertTrue(app.buttons["saved-review-export-button"].waitForExistence(timeout: 30))
-        let audioFilePath = firstAudioFilePath(forStorePath: storePath)
+        let audioFilePath = waitForAudioFilePath(forStorePath: storePath, timeout: 10)
         XCTAssertTrue(FileManager.default.fileExists(atPath: audioFilePath))
         XCTAssertGreaterThan(fileSize(at: audioFilePath), 0)
         XCTAssertTrue(audioFileIsDecodable(at: audioFilePath))
         XCTAssertGreaterThanOrEqual(try audioDurationSeconds(at: audioFilePath), minimumDuration)
+        XCTAssertGreaterThan(try audioRMSLevel(at: audioFilePath), 0.005)
+        XCTAssertTrue(waitForFile(at: storePath, contains: expectedPhrase, timeout: 240))
 
         app.buttons["saved-review-export-button"].click()
         let exportAlert = app.sheets.firstMatch
@@ -1046,11 +1049,6 @@ final class LiveNotesUITests: XCTestCase {
                 return true
             }
 
-            let primaryAction = alert.buttons["action-button-1"]
-            if primaryAction.exists {
-                primaryAction.click()
-                return true
-            }
             return false
         }
     }
@@ -1073,8 +1071,31 @@ final class LiveNotesUITests: XCTestCase {
 
     private func playAudioFixture(at path: String) throws {
         let process = Process()
-        process.executableURL = URL(fileURLWithPath: "/usr/bin/afplay")
-        process.arguments = [path]
+        let errorPipe = Pipe()
+        process.standardError = errorPipe
+        let playbackDeviceIndex = e2eConfigValue(
+            fileName: "livenotes-e2e-playback-device-index.txt",
+            fallback: ""
+        )
+        if playbackDeviceIndex.isEmpty {
+            process.executableURL = URL(fileURLWithPath: "/usr/bin/afplay")
+            process.arguments = [path]
+        } else {
+            let ffmpegPath = e2eConfigValue(
+                fileName: "livenotes-e2e-ffmpeg-path.txt",
+                fallback: "/opt/homebrew/bin/ffmpeg"
+            )
+            process.executableURL = URL(fileURLWithPath: ffmpegPath)
+            process.arguments = [
+                "-hide_banner",
+                "-loglevel", "error",
+                "-i", path,
+                "-vn",
+                "-f", "audiotoolbox",
+                "-audio_device_index", playbackDeviceIndex,
+                "-"
+            ]
+        }
         let duration = try audioDurationSeconds(at: path)
         try process.run()
         let deadline = Date().addingTimeInterval(duration + 3)
@@ -1086,7 +1107,11 @@ final class LiveNotesUITests: XCTestCase {
             process.waitUntilExit()
             return
         }
-        XCTAssertEqual(process.terminationStatus, 0)
+        let errorOutput = String(
+            data: errorPipe.fileHandleForReading.readDataToEndOfFile(),
+            encoding: .utf8
+        ) ?? ""
+        XCTAssertEqual(process.terminationStatus, 0, errorOutput)
     }
 
     private func safeFileName(_ value: String) -> String {
@@ -1149,6 +1174,19 @@ final class LiveNotesUITests: XCTestCase {
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         }
         return exportedMarkdown(in: exportDirectory, contains: expectedText)
+    }
+
+    private func waitForAudioFilePath(forStorePath storePath: String, timeout: TimeInterval) -> String {
+        let deadline = Date().addingTimeInterval(timeout)
+        var path = firstAudioFilePath(forStorePath: storePath)
+        while Date() < deadline {
+            if !path.isEmpty, FileManager.default.fileExists(atPath: path) {
+                return path
+            }
+            RunLoop.current.run(until: Date().addingTimeInterval(0.1))
+            path = firstAudioFilePath(forStorePath: storePath)
+        }
+        return path
     }
 
     private func waitForAppToTerminate(_ app: XCUIApplication, timeout: TimeInterval) -> Bool {
@@ -1215,6 +1253,37 @@ final class LiveNotesUITests: XCTestCase {
     private func audioDurationSeconds(at path: String) throws -> Double {
         let file = try AVAudioFile(forReading: URL(fileURLWithPath: path))
         return Double(file.length) / max(file.processingFormat.sampleRate, 1)
+    }
+
+    private func audioRMSLevel(at path: String) throws -> Float {
+        let file = try AVAudioFile(forReading: URL(fileURLWithPath: path))
+        let chunkSize = AVAudioFrameCount(4096)
+        var sumSquares: Double = 0
+        var sampleCount = 0
+        while file.framePosition < file.length {
+            let remaining = file.length - file.framePosition
+            let frameCount = AVAudioFrameCount(min(Int64(chunkSize), remaining))
+            guard let buffer = AVAudioPCMBuffer(
+                pcmFormat: file.processingFormat,
+                frameCapacity: frameCount
+            ) else {
+                break
+            }
+            try file.read(into: buffer, frameCount: frameCount)
+            guard let channels = buffer.floatChannelData else {
+                continue
+            }
+            for channelIndex in 0..<Int(buffer.format.channelCount) {
+                let channel = channels[channelIndex]
+                for frameIndex in 0..<Int(buffer.frameLength) {
+                    let sample = Double(channel[frameIndex])
+                    sumSquares += sample * sample
+                    sampleCount += 1
+                }
+            }
+        }
+        guard sampleCount > 0 else { return 0 }
+        return Float(sqrt(sumSquares / Double(sampleCount)))
     }
 
     private func audioDirectoryHasFiles(forStorePath storePath: String) -> Bool {
