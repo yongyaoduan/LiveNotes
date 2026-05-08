@@ -1078,11 +1078,18 @@ final class LiveNotesUITests: XCTestCase {
         let preferredButton = element.buttons.matching(
             NSPredicate(format: "label IN %@ OR title IN %@", allowedLabels, allowedLabels)
         ).firstMatch
-        guard preferredButton.exists else {
+        if preferredButton.exists {
+            preferredButton.click()
+            RunLoop.current.run(until: Date().addingTimeInterval(0.75))
+            return true
+        }
+
+        let fallbackButton = element.buttons["action-button-1"]
+        guard fallbackButton.exists else {
             return false
         }
 
-        preferredButton.click()
+        fallbackButton.click()
         RunLoop.current.run(until: Date().addingTimeInterval(0.75))
         return true
     }
