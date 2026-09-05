@@ -61,6 +61,69 @@ public struct SessionFileStore: Sendable {
         try data.write(to: url, options: [.atomic])
     }
 
+    public func exportSnapshot(_ session: RecordingSession, to markdownURL: URL) throws {
+        let fileManager = FileManager.default
+        let audioSourceURL = session.audioFileName.map { localFileURL(relativePath: $0) }
+        if let audioSourceURL, !fileManager.fileExists(atPath: audioSourceURL.path) {
+            throw CocoaError(.fileNoSuchFile)
+        }
+        let directoryURL = markdownURL.deletingLastPathComponent()
+        try fileManager.createDirectory(at: directoryURL, withIntermediateDirectories: true)
+        let stagingURL = directoryURL.appendingPathComponent(".livenotes-export-\(UUID().uuidString)")
+        try fileManager.createDirectory(at: stagingURL, withIntermediateDirectories: false)
+        var removeStagingDirectory = true
+        defer {
+            if removeStagingDirectory {
+                try? fileManager.removeItem(at: stagingURL)
+            }
+        }
+        let stagedMarkdownURL = stagingURL.appendingPathComponent("transcript.md")
+        try MarkdownExporter().export(session).write(to: stagedMarkdownURL, atomically: true, encoding: .utf8)
+        var files = [(staged: stagedMarkdownURL, destination: markdownURL)]
+        if let audioSourceURL {
+            let audioExtension = audioSourceURL.pathExtension.isEmpty ? "m4a" : audioSourceURL.pathExtension
+            let audioDestinationURL = markdownURL.deletingPathExtension().appendingPathExtension(audioExtension)
+            if audioSourceURL.resolvingSymlinksInPath() != audioDestinationURL.resolvingSymlinksInPath() {
+                let stagedAudioURL = stagingURL.appendingPathComponent("recording.\(audioExtension)")
+                try fileManager.copyItem(at: audioSourceURL, to: stagedAudioURL)
+                files.append((stagedAudioURL, audioDestinationURL))
+            }
+        }
+        for file in files {
+            var isDirectory: ObjCBool = false
+            if fileManager.fileExists(atPath: file.destination.path, isDirectory: &isDirectory), isDirectory.boolValue {
+                throw CocoaError(.fileWriteFileExists, userInfo: [NSFilePathErrorKey: file.destination.path])
+            }
+        }
+        var publishedFiles: [(destination: URL, backup: URL?)] = []
+        do {
+            for (index, file) in files.enumerated() {
+                var backupURL: URL?
+                if fileManager.fileExists(atPath: file.destination.path) {
+                    let candidate = stagingURL.appendingPathComponent("previous-\(index)")
+                    try fileManager.moveItem(at: file.destination, to: candidate)
+                    backupURL = candidate
+                }
+                publishedFiles.append((file.destination, backupURL))
+                try fileManager.moveItem(at: file.staged, to: file.destination)
+            }
+        } catch {
+            for file in publishedFiles.reversed() {
+                do {
+                    if fileManager.fileExists(atPath: file.destination.path) {
+                        try fileManager.removeItem(at: file.destination)
+                    }
+                    if let backupURL = file.backup {
+                        try fileManager.moveItem(at: backupURL, to: file.destination)
+                    }
+                } catch {
+                    removeStagingDirectory = false
+                }
+            }
+            throw error
+        }
+    }
+
     private var encoder: JSONEncoder {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]

@@ -50,7 +50,8 @@ public struct RecordingPipelineOutput: Equatable, Sendable {
                     endTime: $0.endTime + seconds,
                     text: $0.text,
                     translation: $0.translation,
-                    confidence: $0.confidence
+                    confidence: $0.confidence,
+                    sourceStartTime: $0.sourceStartTime.map { $0 + Double(seconds) }
                 )
             },
             metrics: metrics
@@ -569,7 +570,7 @@ public protocol RecordingInferenceRunning: Sendable {
 public enum LiveTranscriptionEvent: Equatable, Sendable {
     case ready
     case partialTranscript(String)
-    case committedTranscript(TranscriptSentence)
+    case committedTranscript(TranscriptSentence, replacing: [UUID] = [])
     case failed(String)
 }
 
@@ -584,45 +585,92 @@ public protocol LiveTranscriptionRunning: AnyObject, Sendable {
     func cancel()
 }
 
+struct SpeechAnalyzerTranscriptFragment: Equatable, Sendable {
+    var text: String
+    var startTime: TimeInterval
+    var endTime: TimeInterval
+
+    static func wholeWords(_ fragments: [Self]) -> [Self] {
+        var words: [Self] = []
+        var current: Self?
+        var leadingWhitespace = ""
+        for fragment in fragments {
+            for character in fragment.text {
+                if character.isWhitespace {
+                    if var word = current {
+                        word.text.append(character)
+                        words.append(word)
+                        current = nil
+                    } else if !words.isEmpty {
+                        words[words.count - 1].text.append(character)
+                    } else {
+                        leadingWhitespace.append(character)
+                    }
+                } else if var word = current {
+                    word.text.append(character)
+                    word.startTime = min(word.startTime, fragment.startTime)
+                    word.endTime = max(word.endTime, fragment.endTime)
+                    current = word
+                } else {
+                    current = Self(
+                        text: leadingWhitespace + String(character),
+                        startTime: fragment.startTime,
+                        endTime: fragment.endTime
+                    )
+                    leadingWhitespace = ""
+                }
+            }
+        }
+        if let current { words.append(current) }
+        return words
+    }
+}
+
 struct SpeechAnalyzerTranscriptUpdate: Equatable, Sendable {
     var text: String
     var startTime: TimeInterval
     var endTime: TimeInterval
     var isFinal: Bool
     var confidence: TranscriptConfidence
+    var resultsFinalizationTime: TimeInterval?
+    var fragments: [SpeechAnalyzerTranscriptFragment] = []
 
     init(
         text: String,
         startTime: TimeInterval,
         endTime: TimeInterval,
         isFinal: Bool,
-        confidence: TranscriptConfidence
+        confidence: TranscriptConfidence,
+        resultsFinalizationTime: TimeInterval? = nil
     ) {
         self.text = text
         self.startTime = startTime
         self.endTime = endTime
         self.isFinal = isFinal
         self.confidence = confidence
+        self.resultsFinalizationTime = resultsFinalizationTime
     }
 }
 
 enum SpeechAnalyzerTranscriptAssemblyEvent: Equatable, Sendable {
     case none
     case preview(String)
-    case committed(TranscriptSentence)
+    case committed(TranscriptSentence, replacing: [UUID] = [])
 }
 
 struct SpeechAnalyzerTranscriptAssembler: Sendable {
     private struct PendingUpdate: Sendable {
+        var id = UUID()
         var text: String
         var startTime: TimeInterval
         var endTime: TimeInterval
         var confidence: TranscriptConfidence
+        var fragments: [SpeechAnalyzerTranscriptFragment] = []
+        var isFinal = false
     }
 
-    private static let rangeTolerance: TimeInterval = 0.05
+    private static let rangeTolerance: TimeInterval = 0.000_001
 
-    private var committedFingerprints = Set<String>()
     private var committedUpdates: [PendingUpdate] = []
     private var pendingUpdates: [PendingUpdate] = []
     private var stableBoundary: TimeInterval = 0
@@ -634,16 +682,23 @@ struct SpeechAnalyzerTranscriptAssembler: Sendable {
             text: cleaned,
             startTime: update.startTime,
             endTime: update.endTime,
-            confidence: update.confidence
+            confidence: update.confidence,
+            fragments: SpeechAnalyzerTranscriptFragment.wholeWords(update.fragments),
+            isFinal: update.isFinal
         )
-        let activePending = storePending(pending)
+        let activePending = storePending(pending, isFinal: update.isFinal)
         let finalizesActiveUpdate = update.isFinal
             && Self.sameRange(activePending, pending)
             && activePending.text == pending.text
         if finalizesActiveUpdate || activePending.endTime <= stableBoundary + Self.rangeTolerance {
             return commit(activePending)
         }
-        return .preview(activePending.text)
+        return .preview(previewText)
+    }
+
+    var previewText: String {
+        pendingUpdates.sorted { $0.startTime < $1.startTime }
+            .map(\.text).joined(separator: " ")
     }
 
     mutating func advanceStableBoundary(to boundary: TimeInterval) -> [SpeechAnalyzerTranscriptAssemblyEvent] {
@@ -658,8 +713,9 @@ struct SpeechAnalyzerTranscriptAssembler: Sendable {
                 return lhs.startTime < rhs.startTime
             }
         return stableUpdates.compactMap { update in
-            guard case let .committed(sentence) = commit(update) else { return nil }
-            return .committed(sentence)
+            let event = commit(update)
+            guard case .committed = event else { return nil }
+            return event
         }
     }
 
@@ -671,78 +727,162 @@ struct SpeechAnalyzerTranscriptAssembler: Sendable {
             return lhs.startTime < rhs.startTime
         }
         return remainingUpdates.compactMap { update in
-            guard case let .committed(sentence) = commit(update) else { return nil }
-            return .committed(sentence)
+            var update = update
+            update.confidence = .low
+            let event = commit(update)
+            guard case .committed = event else { return nil }
+            return event
         }
     }
 
-    private mutating func storePending(_ update: PendingUpdate) -> PendingUpdate {
-        var activeUpdate = update
-        var shouldAppendUpdate = true
-        pendingUpdates.removeAll { existing in
-            guard Self.rangesOverlap(existing, update) else { return false }
-            if Self.shouldKeep(existing, over: update) {
-                activeUpdate = existing
-                shouldAppendUpdate = false
-                return false
+    private mutating func storePending(_ update: PendingUpdate, isFinal: Bool) -> PendingUpdate {
+        if isFinal {
+            pendingUpdates = pendingUpdates.flatMap { existing -> [PendingUpdate] in
+                if Self.isCorrectedCoarsePhrase(existing, update) { return [] }
+                return Self.remainingFragments(of: existing, after: update) ?? [existing]
             }
-            return Self.shouldReplace(existing, with: update)
         }
-        if shouldAppendUpdate {
-            pendingUpdates.append(update)
+        if let existing = pendingUpdates.first(where: { Self.shouldKeep($0, over: update) }) {
+            return existing
         }
+        var activeUpdate = update
+        if let existing = pendingUpdates.first(where: { Self.shouldReplace($0, with: update) }) {
+            activeUpdate.id = existing.id
+        }
+        pendingUpdates.removeAll { Self.shouldReplace($0, with: update) }
+        pendingUpdates.append(activeUpdate)
         return activeUpdate
+    }
+
+    private static func isCorrectedCoarsePhrase(_ existing: PendingUpdate, _ update: PendingUpdate) -> Bool {
+        guard rangeContains(existing, update),
+              existing.fragments.allSatisfy({
+                  abs($0.startTime - existing.startTime) <= rangeTolerance
+                      && abs($0.endTime - existing.endTime) <= rangeTolerance
+              }) else { return false }
+        let oldWords = normalized(existing.text).split(separator: " ")
+        let newWords = normalized(update.text).split(separator: " ")
+        guard min(oldWords.count, newWords.count) >= 3 else { return false }
+        if oldWords.count == newWords.count,
+           zip(oldWords, newWords).filter({ $0 != $1 }).count <= 1 {
+            return true
+        }
+        var prefixCount = 0
+        while prefixCount < min(oldWords.count, newWords.count), oldWords[prefixCount] == newWords[prefixCount] {
+            prefixCount += 1
+        }
+        var suffixCount = 0
+        while suffixCount < min(oldWords.count, newWords.count) - prefixCount,
+              oldWords[oldWords.count - suffixCount - 1] == newWords[newWords.count - suffixCount - 1] {
+            suffixCount += 1
+        }
+        let oldChangedCount = oldWords.count - prefixCount - suffixCount
+        let newChangedCount = newWords.count - prefixCount - suffixCount
+        return (1...2).contains(oldChangedCount) && (1...2).contains(newChangedCount)
+            && prefixCount + suffixCount >= 2 * max(oldChangedCount, newChangedCount)
+    }
+
+    private static func remainingFragments(of existing: PendingUpdate, after update: PendingUpdate) -> [PendingUpdate]? {
+        guard !shouldReplace(existing, with: update),
+              max(existing.startTime, update.startTime) < min(existing.endTime, update.endTime) else {
+            return nil
+        }
+        if !existing.fragments.isEmpty,
+           !existing.fragments.contains(where: { fragment in
+               [update.startTime, update.endTime].contains { boundary in
+                   fragment.startTime < boundary - rangeTolerance && fragment.endTime > boundary + rangeTolerance
+               }
+           }) {
+            let before = existing.fragments.filter { $0.endTime <= update.startTime + rangeTolerance }
+            let after = existing.fragments.filter { $0.startTime >= update.endTime - rangeTolerance }
+            return [before, after].compactMap { fragments in
+                guard let first = fragments.first, let last = fragments.last else { return nil }
+                return PendingUpdate(
+                    text: fragments.map(\.text).joined().trimmingCharacters(in: .whitespacesAndNewlines),
+                    startTime: first.startTime,
+                    endTime: last.endTime,
+                    confidence: existing.confidence,
+                    fragments: fragments
+                )
+            }
+        }
+        let words = existing.text.split(whereSeparator: \.isWhitespace)
+        let finalizedWords = update.text.split(whereSeparator: \.isWhitespace)
+        guard finalizedWords.count < words.count else { return nil }
+        if abs(existing.startTime - update.startTime) <= rangeTolerance,
+           zip(words.prefix(finalizedWords.count), finalizedWords).allSatisfy({ normalized(String($0)) == normalized(String($1)) }) {
+            return [PendingUpdate(
+                text: String(existing.text[words[finalizedWords.count].startIndex...]),
+                startTime: update.endTime,
+                endTime: existing.endTime,
+                confidence: existing.confidence
+            )]
+        }
+        if abs(existing.endTime - update.endTime) <= rangeTolerance,
+           zip(words.suffix(finalizedWords.count), finalizedWords).allSatisfy({ normalized(String($0)) == normalized(String($1)) }) {
+            return [PendingUpdate(
+                text: String(existing.text[..<words[words.count - finalizedWords.count].startIndex])
+                    .trimmingCharacters(in: .whitespacesAndNewlines),
+                startTime: existing.startTime,
+                endTime: update.startTime,
+                confidence: existing.confidence
+            )]
+        }
+        return nil
     }
 
     private mutating func commit(_ update: PendingUpdate) -> SpeechAnalyzerTranscriptAssemblyEvent {
         let startTime = max(0, Int(update.startTime.rounded(.down)))
         let endTime = max(startTime + 1, Int(update.endTime.rounded(.up)))
-        let fingerprint = "\(startTime):\(endTime):\(normalized(update.text))"
-        guard !committedFingerprints.contains(fingerprint) else {
+        if let existingIndex = committedUpdates.firstIndex(where: {
+            Self.sameRange($0, update) && $0.text == update.text
+        }) {
+            committedUpdates[existingIndex].isFinal = committedUpdates[existingIndex].isFinal || update.isFinal
             pendingUpdates.removeAll { existing in
-                Self.sameRange(existing, update) && existing.text == update.text
+                existing.id == update.id
             }
             return .none
         }
-        if let existing = committedUpdates.first(where: { Self.rangesOverlap($0, update) }) {
-            guard Self.shouldReplace(existing, with: update) else {
-                pendingUpdates.removeAll { Self.rangesOverlap($0, update) }
-                return .none
-            }
-            committedUpdates.removeAll { Self.rangesOverlap($0, update) }
+        if committedUpdates.contains(where: { Self.shouldKeep($0, over: update) }) {
+            pendingUpdates.removeAll { $0.id == update.id }
+            return .none
         }
-        pendingUpdates.removeAll { existing in
-            Self.rangesOverlap(existing, update)
+        let replaced = committedUpdates.filter {
+            (update.isFinal || !$0.isFinal) && Self.shouldReplace($0, with: update)
         }
-        committedFingerprints.insert(fingerprint)
+        var update = update
+        if let existing = replaced.first {
+            update.id = existing.id
+        }
+        committedUpdates.removeAll { existing in replaced.contains { $0.id == existing.id } }
+        pendingUpdates.removeAll { Self.shouldReplace($0, with: update) }
         committedUpdates.append(update)
         return .committed(
             TranscriptSentence(
+                id: update.id,
                 startTime: startTime,
                 endTime: endTime,
                 text: update.text,
                 translation: "",
-                confidence: update.confidence
-            )
+                confidence: update.confidence,
+                sourceStartTime: update.startTime
+            ),
+            replacing: replaced.map(\.id)
         )
     }
 
-    private static func rangesOverlap(_ lhs: PendingUpdate, _ rhs: PendingUpdate) -> Bool {
-        max(lhs.startTime, rhs.startTime) < min(lhs.endTime, rhs.endTime) - Self.rangeTolerance
-    }
-
     private static func shouldKeep(_ existing: PendingUpdate, over update: PendingUpdate) -> Bool {
-        rangeContains(existing, update)
-            && wordCount(existing.text) >= wordCount(update.text)
+        !sameRange(existing, update)
+            && rangeContains(existing, update)
+            && (
+                normalized(existing.text) == normalized(update.text)
+                    || normalized(existing.text).hasPrefix(normalized(update.text) + " ")
+            )
     }
 
     private static func shouldReplace(_ existing: PendingUpdate, with update: PendingUpdate) -> Bool {
         sameRange(existing, update)
             || rangeContains(update, existing)
-            || (
-                wordCount(update.text) > wordCount(existing.text)
-                    && update.endTime - update.startTime >= existing.endTime - existing.startTime
-            )
     }
 
     private static func sameRange(_ lhs: PendingUpdate, _ rhs: PendingUpdate) -> Bool {
@@ -755,11 +895,7 @@ struct SpeechAnalyzerTranscriptAssembler: Sendable {
             && lhs.endTime + rangeTolerance >= rhs.endTime
     }
 
-    private static func wordCount(_ text: String) -> Int {
-        text.split(whereSeparator: \.isWhitespace).count
-    }
-
-    private func normalized(_ text: String) -> String {
+    private static func normalized(_ text: String) -> String {
         text.lowercased()
             .split(whereSeparator: \.isWhitespace)
             .map {
@@ -772,64 +908,59 @@ struct SpeechAnalyzerTranscriptAssembler: Sendable {
 
 actor SpeechAnalyzerTranscriptAssemblyStore {
     private var assembler = SpeechAnalyzerTranscriptAssembler()
+    private var isFinished = false
+    private var sentences: [TranscriptSentence] = []
 
     func apply(_ update: SpeechAnalyzerTranscriptUpdate) -> [SpeechAnalyzerTranscriptAssemblyEvent] {
-        [assembler.apply(update)]
-    }
-
-    func advanceStableBoundary(to boundary: TimeInterval) -> [SpeechAnalyzerTranscriptAssemblyEvent] {
-        assembler.advanceStableBoundary(to: boundary)
+        guard !isFinished else { return [] }
+        var events: [SpeechAnalyzerTranscriptAssemblyEvent] = []
+        let event = assembler.apply(update)
+        if case .committed = event {
+            events.append(event)
+        }
+        if let boundary = update.resultsFinalizationTime {
+            events += assembler.advanceStableBoundary(to: boundary)
+        }
+        events.append(.preview(assembler.previewText))
+        retain(events)
+        return events
     }
 
     func finish() -> [SpeechAnalyzerTranscriptAssemblyEvent] {
-        assembler.finish()
-    }
-}
-
-actor LiveTranscriptCommitStore {
-    private var sentences: [TranscriptSentence] = []
-
-    func append(_ sentence: TranscriptSentence) {
-        if let existingIndex = sentences.firstIndex(where: {
-            $0.startTime == sentence.startTime
-                && $0.endTime == sentence.endTime
-                && $0.text == sentence.text
-        }) {
-            sentences[existingIndex] = sentence
-        } else {
-            sentences.append(sentence)
-            sentences.sort { lhs, rhs in
-                if lhs.startTime == rhs.startTime {
-                    return lhs.endTime < rhs.endTime
-                }
-                return lhs.startTime < rhs.startTime
-            }
-        }
+        guard !isFinished else { return [] }
+        isFinished = true
+        let events = assembler.finish() + [.preview("")]
+        retain(events)
+        return events
     }
 
     func snapshot() -> [TranscriptSentence] {
         sentences
+    }
+
+    private func retain(_ events: [SpeechAnalyzerTranscriptAssemblyEvent]) {
+        for case let .committed(sentence, replacing) in events {
+            sentences.removeAll { $0.id == sentence.id || replacing.contains($0.id) }
+            sentences.append(sentence)
+        }
+        sentences.sort { $0.precedes($1) }
     }
 }
 
 public final class NativeSpeechLiveTranscriber: LiveTranscriptionRunning, @unchecked Sendable {
     private struct Resources: Sendable {
         var inputPipe: SpeechAnalyzerInputPipe?
-        var stableRangePipe: SpeechAnalyzerStableRangePipe?
         var analysisTask: Task<Void, Never>?
-        var stableRangeTask: Task<Void, Never>?
         var resultTask: Task<[TranscriptSentence], Never>?
-        var commitStore: LiveTranscriptCommitStore?
+        var assemblyStore: SpeechAnalyzerTranscriptAssemblyStore?
     }
 
     private let locale: Locale
     private let stateQueue = DispatchQueue(label: "app.livenotes.native-live-transcriber.state")
     private var inputPipe: SpeechAnalyzerInputPipe?
-    private var stableRangePipe: SpeechAnalyzerStableRangePipe?
     private var analysisTask: Task<Void, Never>?
-    private var stableRangeTask: Task<Void, Never>?
     private var resultTask: Task<[TranscriptSentence], Never>?
-    private var commitStore: LiveTranscriptCommitStore?
+    private var assemblyStore: SpeechAnalyzerTranscriptAssemblyStore?
     private var eventHandler: (@Sendable (LiveTranscriptionEvent) -> Void)?
     private var analysisAudioFormat: AVAudioFormat?
     private var liveInputConverter: SpeechAnalyzerLiveInputConverter?
@@ -843,30 +974,31 @@ public final class NativeSpeechLiveTranscriber: LiveTranscriptionRunning, @unche
     public func start(
         eventHandler: @escaping @Sendable (LiveTranscriptionEvent) -> Void
     ) async throws {
+        try Task.checkCancellation()
         cancel()
         try await ensureSpeechRecognitionAccess()
+        try Task.checkCancellation()
         let transcriber = try await NativeSpeechAnalyzer.makeTranscriber(locale: locale, live: true)
+        try Task.checkCancellation()
         let modules: [any SpeechModule] = [transcriber]
         let analysisAudioFormat = try await NativeSpeechAnalyzer.analysisFormat(for: modules)
+        try Task.checkCancellation()
         speechPipelineLogger.info("Live transcription started with \(SpeechPipelineLog.formatDescription(analysisAudioFormat), privacy: .public).")
         let inputPipe = SpeechAnalyzerInputPipe()
-        let stableRangePipe = SpeechAnalyzerStableRangePipe()
         let analyzer = SpeechAnalyzer(
             modules: modules,
             options: SpeechAnalyzer.Options(priority: .userInitiated, modelRetention: .lingering)
         )
-        let commitStore = LiveTranscriptCommitStore()
         let assemblyStore = SpeechAnalyzerTranscriptAssemblyStore()
-        let emitEvents: @Sendable ([SpeechAnalyzerTranscriptAssemblyEvent]) async -> Void = { events in
+        let emitEvents: @Sendable ([SpeechAnalyzerTranscriptAssemblyEvent]) -> Void = { events in
             for event in events {
                 switch event {
                 case .none:
                     break
                 case let .preview(text):
                     eventHandler(.partialTranscript(text))
-                case let .committed(sentence):
-                    await commitStore.append(sentence)
-                    eventHandler(.committedTranscript(sentence))
+                case let .committed(sentence, replacing):
+                    eventHandler(.committedTranscript(sentence, replacing: replacing))
                 }
             }
         }
@@ -876,27 +1008,16 @@ public final class NativeSpeechLiveTranscriber: LiveTranscriptionRunning, @unche
                     let update = SpeechAnalyzerTranscriptUpdate(result: result)
                     await emitEvents(assemblyStore.apply(update))
                 }
-                await emitEvents(assemblyStore.finish())
             } catch is CancellationError {
             } catch {
                 speechPipelineLogger.error("Live transcription result stream failed: \(SpeechPipelineLog.errorDescription(error), privacy: .public)")
                 eventHandler(.failed("Live speech recognition failed."))
             }
-            return await commitStore.snapshot()
-        }
-        let stableRangeTask = Task.detached(priority: .userInitiated) {
-            for await boundary in stableRangePipe.stream {
-                await emitEvents(assemblyStore.advanceStableBoundary(to: boundary))
-            }
+            await emitEvents(assemblyStore.finish())
+            return await assemblyStore.snapshot()
         }
         let analysisTask = Task.detached(priority: .userInitiated) {
             do {
-                await analyzer.setVolatileRangeChangedHandler { range, _, _ in
-                    stableRangePipe.yield(range.start.seconds)
-                }
-                defer {
-                    stableRangePipe.finish()
-                }
                 try await analyzer.prepareToAnalyze(in: analysisAudioFormat)
                 _ = try await analyzer.analyzeSequence(inputPipe.stream)
                 try await analyzer.finalizeAndFinishThroughEndOfInput()
@@ -906,18 +1027,24 @@ public final class NativeSpeechLiveTranscriber: LiveTranscriptionRunning, @unche
                 eventHandler(.failed("Live speech recognition failed."))
             }
         }
-        stateQueue.sync {
+        let installed = stateQueue.sync {
+            guard !Task.isCancelled else { return false }
             self.eventHandler = eventHandler
             self.inputPipe = inputPipe
-            self.stableRangePipe = stableRangePipe
             self.analysisTask = analysisTask
-            self.stableRangeTask = stableRangeTask
             self.resultTask = resultTask
-            self.commitStore = commitStore
+            self.assemblyStore = assemblyStore
             self.analysisAudioFormat = analysisAudioFormat
             self.liveInputConverter = SpeechAnalyzerLiveInputConverter(targetFormat: analysisAudioFormat)
             self.isPaused = false
             self.audioFormatFailureReported = false
+            return true
+        }
+        guard installed else {
+            inputPipe.finish()
+            analysisTask.cancel()
+            resultTask.cancel()
+            throw CancellationError()
         }
         eventHandler(.ready)
     }
@@ -962,25 +1089,18 @@ public final class NativeSpeechLiveTranscriber: LiveTranscriptionRunning, @unche
     public func finish() async -> [TranscriptSentence] {
         let resources = takeResources()
         resources.inputPipe?.finish()
-        resources.stableRangePipe?.finish()
-        let transcript = await Self.drain(
+        return await Self.drain(
             analysisTask: resources.analysisTask,
             resultTask: resources.resultTask,
-            commitStore: resources.commitStore,
+            assemblyStore: resources.assemblyStore,
             timeoutSeconds: 5
         )
-        resources.analysisTask?.cancel()
-        resources.stableRangeTask?.cancel()
-        resources.resultTask?.cancel()
-        return transcript
     }
 
     public func cancel() {
         let resources = takeResources()
         resources.inputPipe?.finish()
-        resources.stableRangePipe?.finish()
         resources.analysisTask?.cancel()
-        resources.stableRangeTask?.cancel()
         resources.resultTask?.cancel()
     }
 
@@ -988,18 +1108,14 @@ public final class NativeSpeechLiveTranscriber: LiveTranscriptionRunning, @unche
         stateQueue.sync {
             let resources = Resources(
                 inputPipe: inputPipe,
-                stableRangePipe: stableRangePipe,
                 analysisTask: analysisTask,
-                stableRangeTask: stableRangeTask,
                 resultTask: resultTask,
-                commitStore: commitStore
+                assemblyStore: assemblyStore
             )
             inputPipe = nil
-            stableRangePipe = nil
             analysisTask = nil
-            stableRangeTask = nil
             resultTask = nil
-            commitStore = nil
+            assemblyStore = nil
             eventHandler = nil
             analysisAudioFormat = nil
             liveInputConverter = nil
@@ -1012,33 +1128,35 @@ public final class NativeSpeechLiveTranscriber: LiveTranscriptionRunning, @unche
     static func drain(
         analysisTask: Task<Void, Never>?,
         resultTask: Task<[TranscriptSentence], Never>?,
-        commitStore: LiveTranscriptCommitStore?,
+        assemblyStore: SpeechAnalyzerTranscriptAssemblyStore?,
         timeoutSeconds: TimeInterval
     ) async -> [TranscriptSentence] {
         guard analysisTask != nil || resultTask != nil else {
-            return await commitStore?.snapshot() ?? []
+            _ = await assemblyStore?.finish()
+            return await assemblyStore?.snapshot() ?? []
         }
-        let waiter = Task<[TranscriptSentence], Never> {
-            await analysisTask?.value
-            if let resultTask {
-                return await resultTask.value
+        let transcript = await withCheckedContinuation { continuation in
+            let completion = LiveTranscriptDrainCompletion(continuation)
+            Task {
+                await analysisTask?.value
+                let transcript: [TranscriptSentence]
+                if let resultTask {
+                    transcript = await resultTask.value
+                } else {
+                    transcript = await assemblyStore?.snapshot() ?? []
+                }
+                completion.resume(returning: transcript)
             }
-            return await commitStore?.snapshot() ?? []
+            Task {
+                let nanoseconds = UInt64(max(0.1, timeoutSeconds) * 1_000_000_000)
+                try? await Task.sleep(nanoseconds: nanoseconds)
+                completion.resume(returning: await assemblyStore?.snapshot() ?? [])
+            }
         }
-        let timeout = Task<[TranscriptSentence], Never> {
-            let nanoseconds = UInt64(max(0.1, timeoutSeconds) * 1_000_000_000)
-            try? await Task.sleep(nanoseconds: nanoseconds)
-            return await commitStore?.snapshot() ?? []
-        }
-        return await withTaskGroup(of: [TranscriptSentence].self) { group in
-            group.addTask { await waiter.value }
-            group.addTask { await timeout.value }
-            let first = await group.next() ?? []
-            waiter.cancel()
-            timeout.cancel()
-            group.cancelAll()
-            return first
-        }
+        analysisTask?.cancel()
+        resultTask?.cancel()
+        _ = await assemblyStore?.finish()
+        return await assemblyStore?.snapshot() ?? transcript
     }
 
     private func ensureSpeechRecognitionAccess() async throws {
@@ -1093,32 +1211,21 @@ final class SpeechAnalyzerInputPipe: @unchecked Sendable {
     }
 }
 
-final class SpeechAnalyzerStableRangePipe: @unchecked Sendable {
-    let stream: AsyncStream<TimeInterval>
+private final class LiveTranscriptDrainCompletion: @unchecked Sendable {
     private let lock = NSLock()
-    private var continuation: AsyncStream<TimeInterval>.Continuation?
+    private var continuation: CheckedContinuation<[TranscriptSentence], Never>?
 
-    init() {
-        var continuation: AsyncStream<TimeInterval>.Continuation?
-        stream = AsyncStream(bufferingPolicy: .bufferingNewest(32)) { streamContinuation in
-            continuation = streamContinuation
-        }
+    init(_ continuation: CheckedContinuation<[TranscriptSentence], Never>) {
         self.continuation = continuation
     }
 
-    func yield(_ boundary: TimeInterval) {
-        guard boundary.isFinite else { return }
-        let continuation = lock.withLock { self.continuation }
-        continuation?.yield(max(0, boundary))
-    }
-
-    func finish() {
+    func resume(returning transcript: [TranscriptSentence]) {
         let continuation = lock.withLock {
             let continuation = self.continuation
             self.continuation = nil
             return continuation
         }
-        continuation?.finish()
+        continuation?.resume(returning: transcript)
     }
 }
 
@@ -1354,10 +1461,27 @@ extension SpeechAnalyzerTranscriptUpdate {
         self.init(
             text: String(result.text.characters),
             startTime: start,
-            endTime: max(start + 0.1, end),
+            endTime: max(start + 0.000_001, end),
             isFinal: result.isFinal,
-            confidence: result.isFinal ? .high : .medium
+            confidence: result.isFinal ? .high : .medium,
+            resultsFinalizationTime: result.resultsFinalizationTime.seconds
         )
+        var leadingText = ""
+        for run in result.text.runs {
+            let text = String(result.text[run.range].characters)
+            if let range = run.audioTimeRange {
+                fragments.append(SpeechAnalyzerTranscriptFragment(
+                    text: leadingText + text,
+                    startTime: range.start.seconds,
+                    endTime: CMTimeRangeGetEnd(range).seconds
+                ))
+                leadingText = ""
+            } else if !fragments.isEmpty {
+                fragments[fragments.count - 1].text += text
+            } else {
+                leadingText += text
+            }
+        }
     }
 
     private static func safeSeconds(_ seconds: Double, fallback: Double) -> Double {
@@ -1479,7 +1603,8 @@ public enum TranscriptCoverage {
                 endTime: max(start + 1, end),
                 text: text,
                 translation: sentence.translation.trimmingCharacters(in: .whitespacesAndNewlines),
-                confidence: sentence.confidence
+                confidence: sentence.confidence,
+                sourceStartTime: sentence.sourceStartTime
             )
         }
     }
@@ -1521,7 +1646,8 @@ public enum TranscriptFinalizationPolicy {
                 endTime: max(startTime + 1, sentence.endTime),
                 text: text,
                 translation: sentence.translation.trimmingCharacters(in: .whitespacesAndNewlines),
-                confidence: sentence.confidence
+                confidence: sentence.confidence,
+                sourceStartTime: sentence.sourceStartTime
             )
         }
     }
@@ -1586,12 +1712,7 @@ enum TranscriptUtteranceSegmenter {
     ) -> [TranscriptSentence] {
         let fragments = transcript
             .compactMap(sanitizedFragment)
-            .sorted { lhs, rhs in
-                if lhs.startTime == rhs.startTime {
-                    return lhs.endTime < rhs.endTime
-                }
-                return lhs.startTime < rhs.startTime
-        }
+            .sorted { $0.precedes($1) }
         var utterances: [TranscriptSentence] = []
         var pending: PendingUtterance?
 
@@ -1631,7 +1752,8 @@ enum TranscriptUtteranceSegmenter {
             endTime: endTime,
             text: text,
             translation: sentence.translation.trimmingCharacters(in: .whitespacesAndNewlines),
-            confidence: sentence.confidence
+            confidence: sentence.confidence,
+            sourceStartTime: sentence.sourceStartTime
         )
     }
 
@@ -1718,6 +1840,7 @@ enum TranscriptUtteranceSegmenter {
 
     private struct PendingUtterance {
         private let firstID: UUID
+        private let sourceStartTime: Double?
         private(set) var startTime: Int
         private(set) var endTime: Int
         private(set) var text: String
@@ -1729,6 +1852,7 @@ enum TranscriptUtteranceSegmenter {
 
         init(_ fragment: TranscriptSentence, translationMode: TranslationMode) {
             firstID = fragment.id
+            sourceStartTime = fragment.sourceStartTime
             startTime = fragment.startTime
             endTime = fragment.endTime
             text = fragment.text
@@ -1773,7 +1897,8 @@ enum TranscriptUtteranceSegmenter {
                 endTime: max(startTime + 1, endTime),
                 text: text,
                 translation: translation,
-                confidence: confidence
+                confidence: confidence,
+                sourceStartTime: sourceStartTime
             )
         }
 
@@ -1838,16 +1963,13 @@ public struct NativeSpeechInferenceRunner: RecordingInferenceRunning {
         let audioDurationSeconds = Double(audioFile.length) / max(audioFile.processingFormat.sampleRate, 1)
         speechPipelineLogger.info("Final transcription started from audio file: duration \(audioDurationSeconds, privacy: .public) seconds, format \(SpeechPipelineLog.formatDescription(audioFile.processingFormat), privacy: .public).")
         let resultTask = Task<[TranscriptSentence], Error> {
-            var assembler = SpeechAnalyzerTranscriptAssembler()
-            var sentences: [TranscriptSentence] = []
+            let assemblyStore = SpeechAnalyzerTranscriptAssemblyStore()
             for try await result in transcriber.results {
                 let update = SpeechAnalyzerTranscriptUpdate(result: result)
-                guard update.isFinal else { continue }
-                if case let .committed(sentence) = assembler.apply(update) {
-                    sentences.append(sentence)
-                }
+                _ = await assemblyStore.apply(update)
             }
-            return sentences
+            _ = await assemblyStore.finish()
+            return await assemblyStore.snapshot()
         }
 
         do {

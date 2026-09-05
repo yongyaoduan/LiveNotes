@@ -7,9 +7,9 @@ Current release status: the app uses Apple-native recording, speech recognition,
 The product keeps the interface focused on four jobs:
 
 - Transcribe the session while recording.
-- Translate complete English sentences into Chinese.
+- Show English-to-Chinese translations during recording.
 - Save audio, transcript, and translation for review.
-- Export saved transcripts when needed.
+- Export the current transcript, translations, and original audio when needed.
 
 ## Runtime
 
@@ -21,6 +21,14 @@ The production runtime is fixed:
 - LiveNotes shows volatile transcript text while recording and commits only finalized transcript segments.
 
 Only English-to-Chinese translation is supported in this version.
+
+Stopping a recording finishes the live transcription tail and saves the text and translations already available. It does not transcribe the whole recording again or wait for missing translations.
+
+Export writes a Markdown snapshot of the current transcript and translations alongside a copy of the original recording. Export does not run speech recognition or translation, and file writing runs in the background so the app remains responsive. An incomplete translation does not block export. Processing recovered audio is a separate recovery path; interrupted recordings with no transcript resume processing after relaunch.
+
+See [Live pipeline technical decision](docs/live-pipeline-technical-decision.md) for result handling, native API references, and audio validation requirements.
+
+The [September 5 validation report](docs/validation-2026-09-05.md) records microphone tests, continuous native transcription, export measurements, and remaining quality limits.
 
 ## Install
 

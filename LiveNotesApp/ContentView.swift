@@ -34,20 +34,7 @@ struct ContentView: View {
             }
             .accessibilityIdentifier("stop-save-button")
         } message: {
-            Text("LiveNotes will finish the current transcription and translation before saving.")
-        }
-        .alert("Export Incomplete?", isPresented: $model.partialExportConfirmationVisible) {
-            Button("Retry Translation") {
-                model.retryPartialExportTranslation()
-            }
-            Button("Export Anyway") {
-                model.confirmPartialExport()
-            }
-            Button("Cancel", role: .cancel) {
-                model.cancelPartialExport()
-            }
-        } message: {
-            Text("Some lines do not have Chinese translations yet. Export anyway will mark them as unavailable.")
+            Text("LiveNotes will save the recording, current transcript, and available translations.")
         }
         .modifier(TranslationTaskBridge())
     }
@@ -592,12 +579,14 @@ private struct LiveSpeechPreviewView: View {
                     .foregroundStyle(LiveNotesStyle.secondary)
             }
             Text(preview.text)
+                .accessibilityIdentifier("live-transcript-preview")
                 .font(.system(size: 18))
                 .foregroundStyle(LiveNotesStyle.graphite)
             Label("Translation", systemImage: "character.bubble")
                 .font(.system(size: 11, weight: .medium))
                 .foregroundStyle(LiveNotesStyle.secondary)
             Text(preview.translation.isEmpty ? "Translating..." : preview.translation)
+                .accessibilityIdentifier("live-translation-preview")
                 .font(.system(size: 16))
                 .foregroundStyle(preview.translation.isEmpty ? LiveNotesStyle.secondary : LiveNotesStyle.graphite)
             InputActivityMeter(level: level, paused: false)
@@ -739,7 +728,7 @@ private struct FinalizingView: View {
                 .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(LiveNotesStyle.secondary)
             Label(
-                "Keep LiveNotes open while transcript and translation are saved.",
+                "Finishing the last spoken words and saving your recording.",
                 systemImage: "checkmark.seal"
             )
             .font(.system(size: 13, weight: .medium))
@@ -912,6 +901,7 @@ private struct SavedReview: View {
                         Label("Export", systemImage: "square.and.arrow.up")
                     }
                     .accessibilityIdentifier("saved-review-export-button")
+                    .disabled(model.exportingSessionID != nil)
                     .buttonStyle(.bordered)
                     .controlSize(.large)
                     if let exportStatus = model.exportStatus(for: session) {

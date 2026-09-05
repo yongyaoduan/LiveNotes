@@ -14,7 +14,8 @@ let package = Package(
         .target(name: "LiveNotesCore"),
         .testTarget(
             name: "LiveNotesCoreTests",
-            dependencies: ["LiveNotesCore"]
+            dependencies: ["LiveNotesCore"],
+            resources: [.copy("Fixtures")]
         )
     ]
 )

@@ -69,13 +69,13 @@ cat > "$EVIDENCE_DIR/summary.json" <<JSON
 JSON
 cat > "$EVIDENCE_DIR/xcodebuild.log" <<'LOG'
 Test Suite 'All tests' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveWaitsForGeneratedTranslations]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveContinuesWhenTranslationIsUnavailable]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveContinuesWhenTranslationDoesNotReturn]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testEmptyFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalFileTranscriptOverridesCommittedLiveTranscript]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceSavesCommittedLiveTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinishDoesNotWaitForPendingTranslations]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testExportWithMissingTranslationsSavesCurrentSnapshotWithoutPrompt]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinishSavesCurrentRecordingImmediately]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinishSavesAudioWhenNoCommittedTranscriptExists]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testPausedRecordingCanFinishAndSave]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinishPreservesCurrentTranscriptAndTranslationsWithoutInference]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testRecordingWaitsForLiveTranscriptionAndCanCancelPreparation]' passed.
 Test Case '-[LiveNotesUITests.LiveNotesUITests testProductionLoopbackRecordsTranscribesSavesAndExports]' skipped.
 Test Case '-[LiveNotesUITests.LiveNotesUITests testSavedReviewExportsMarkdown]' passed.
 	 Executed 27 tests, with 0 failures (0 unexpected) in 216.750 seconds
@@ -92,18 +92,31 @@ grep -q 'production audio end-to-end UI test was skipped' "$SKIPPED_ARTIFACT_LOG
 
 cat > "$EVIDENCE_DIR/xcodebuild.log" <<'LOG'
 Test Suite 'All tests' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveWaitsForGeneratedTranslations]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveContinuesWhenTranslationIsUnavailable]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalSaveContinuesWhenTranslationDoesNotReturn]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testEmptyFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceDoesNotSaveLivePreviewTranscript]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFinalFileTranscriptOverridesCommittedLiveTranscript]' passed.
-Test Case '-[LiveNotesUITests.LiveNotesUITests testFailedFinalInferenceSavesCommittedLiveTranscript]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinishDoesNotWaitForPendingTranslations]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testExportWithMissingTranslationsSavesCurrentSnapshotWithoutPrompt]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinishSavesCurrentRecordingImmediately]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinishSavesAudioWhenNoCommittedTranscriptExists]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testPausedRecordingCanFinishAndSave]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testFinishPreservesCurrentTranscriptAndTranslationsWithoutInference]' passed.
+Test Case '-[LiveNotesUITests.LiveNotesUITests testRecordingWaitsForLiveTranscriptionAndCanCancelPreparation]' passed.
 Test Case '-[LiveNotesUITests.LiveNotesUITests testProductionLoopbackRecordsTranscribesSavesAndExports]' passed.
 Test Case '-[LiveNotesUITests.LiveNotesUITests testSavedReviewExportsMarkdown]' passed.
 	 Executed 33 tests, with 0 failures (0 unexpected) in 216.750 seconds
 ** TEST SUCCEEDED **
 LOG
+
+COMPLETE_UI_LOG_PATH="$WORK_ROOT/complete-ui-tests.log"
+cp "$EVIDENCE_DIR/xcodebuild.log" "$COMPLETE_UI_LOG_PATH"
+sed '/testFinishDoesNotWaitForPendingTranslations/d' "$COMPLETE_UI_LOG_PATH" > "$EVIDENCE_DIR/xcodebuild.log"
+MISSING_CONTRACT_LOG_PATH="$WORK_ROOT/release-readiness-missing-save-test.log"
+if LIVENOTES_UI_EVIDENCE_DIR="$EVIDENCE_DIR" \
+  LIVENOTES_RELEASE_VERSION="0.1.0" \
+  "$ROOT_DIR/scripts/check-release-readiness.sh" "$ZIP_PATH" "$ZIP_SHA" >"$MISSING_CONTRACT_LOG_PATH" 2>&1; then
+  echo "Release readiness must require verification that saving does not wait for translation." >&2
+  exit 1
+fi
+grep -q 'missing testFinishDoesNotWaitForPendingTranslations' "$MISSING_CONTRACT_LOG_PATH"
+cp "$COMPLETE_UI_LOG_PATH" "$EVIDENCE_DIR/xcodebuild.log"
 
 ARTIFACT_LOG_PATH="$WORK_ROOT/release-readiness-artifact.log"
 LIVENOTES_UI_EVIDENCE_DIR="$EVIDENCE_DIR" \
@@ -131,13 +144,13 @@ fi
 
 grep -q 'validate_app_zip' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'validate_ui_evidence' "$ROOT_DIR/scripts/check-release-readiness.sh"
-grep -q 'testFinalSaveWaitsForGeneratedTranslations' "$ROOT_DIR/scripts/check-release-readiness.sh"
-grep -q 'testFinalSaveContinuesWhenTranslationIsUnavailable' "$ROOT_DIR/scripts/check-release-readiness.sh"
-grep -q 'testFinalSaveContinuesWhenTranslationDoesNotReturn' "$ROOT_DIR/scripts/check-release-readiness.sh"
-grep -q 'testEmptyFinalInferenceDoesNotSaveLivePreviewTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
-grep -q 'testFailedFinalInferenceDoesNotSaveLivePreviewTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
-grep -q 'testFinalFileTranscriptOverridesCommittedLiveTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
-grep -q 'testFailedFinalInferenceSavesCommittedLiveTranscript' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFinishDoesNotWaitForPendingTranslations' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testExportWithMissingTranslationsSavesCurrentSnapshotWithoutPrompt' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFinishSavesCurrentRecordingImmediately' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFinishSavesAudioWhenNoCommittedTranscriptExists' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testPausedRecordingCanFinishAndSave' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testFinishPreservesCurrentTranscriptAndTranslationsWithoutInference' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'testRecordingWaitsForLiveTranscriptionAndCanCancelPreparation' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'testSavedReviewExportsMarkdown' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'testProductionLoopbackRecordsTranscribesSavesAndExports' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'production audio end-to-end UI test was skipped' "$ROOT_DIR/scripts/check-release-readiness.sh"
@@ -155,6 +168,13 @@ grep -q 'translate(batch: requests)' "$ROOT_DIR/scripts/check-release-readiness.
 grep -q 'activeTranslationSession.*cancel()' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'markTranslationGenerationCancelled' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'isTranslationJobCancelled' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'sessionFileStore.exportSnapshot(session, to: exportURL)' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -q 'resultsFinalizationTime' "$ROOT_DIR/scripts/check-release-readiness.sh"
+grep -Fq 'NATIVE_INFERENCE="${LIVENOTES_E2E_NATIVE_INFERENCE:-true}"' "$ROOT_DIR/scripts/run-loopback-e2e-test.sh"
+if grep -q "require_grep 'pendingFinalSaves'" "$ROOT_DIR/scripts/check-release-readiness.sh"; then
+  echo "Release readiness must not require normal save to wait for translation." >&2
+  exit 1
+fi
 grep -q 'AudioTapBufferSize.frameCount' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -q 'AnalyzerInput(buffer: convertedBuffer)' "$ROOT_DIR/scripts/check-release-readiness.sh"
 grep -Fq 'func finish() async -> \[TranscriptSentence\]' "$ROOT_DIR/scripts/check-release-readiness.sh"

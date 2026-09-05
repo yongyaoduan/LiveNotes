@@ -18,10 +18,11 @@ final class AppModel: ObservableObject {
     @Published var recordingEngineStatus: String
     @Published var persistenceStatus: String?
     @Published var exportStatus: SessionExportStatus?
-    @Published var partialExportConfirmationVisible = false
+    @Published private(set) var exportingSessionID: UUID?
     @Published var translationRequestVersion = 0
     @Published var liveTranscriptPreview = ""
     @Published var liveTranslationPreview = ""
+    private var liveTranslationPreviewSource = ""
     @Published var liveAudioLevel = 0.0
     @Published var recordingPreparationTitle: String?
     @Published var recordingPreparationNeedsHelp = false
@@ -53,7 +54,6 @@ final class AppModel: ObservableObject {
     private var liveDurationTask: Task<Void, Never>?
     private var translationRetryTask: Task<Void, Never>?
     private var liveTranscriptionStartTask: Task<Void, Never>?
-    private var partialExportSessionID: UUID?
     private var exportDirectoryOverrideURL: URL?
     private let exportDirectoryHistory = ExportDirectoryHistory()
     private var translationTaskRunning = false
@@ -134,6 +134,12 @@ final class AppModel: ObservableObject {
             store = DemoData.savedStore()
         case "live":
             store = DemoData.liveStore()
+        case "live-partial":
+            var partialStore = DemoData.liveStore()
+            var partialSession = partialStore.sessions[0]
+            partialSession.transcript[1].translation = ""
+            try? partialStore.replaceGeneratedContent(in: partialSession.id, transcript: partialSession.transcript)
+            store = partialStore
         case "long-live":
             store = DemoData.longLiveStore()
         case "live-preview-only":
@@ -198,9 +204,30 @@ final class AppModel: ObservableObject {
             "--ui-final-save-translation-timeout",
             in: arguments
         ).flatMap(Double.init) ?? 18
-        let liveTranscriber = argumentValue("--ui-live-transcriber", in: arguments) == "hanging"
-            ? HangingUITestLiveTranscriber()
-            : nil
+        let liveTranscriber: (any LiveTranscriptionRunning)?
+        switch argumentValue("--ui-live-transcriber", in: arguments) {
+        case "hanging":
+            liveTranscriber = HangingUITestLiveTranscriber()
+        case "final-tail":
+            let tail = TranscriptSentence(
+                startTime: 900, endTime: 908, text: DemoText.livePreview,
+                translation: "", confidence: .high
+            )
+            liveTranscriber = FinalUITestLiveTranscriber(transcript: (store.sessions.first?.transcript ?? []) + [tail])
+        case "pause-tail", "failed-tail":
+            liveTranscriber = FinalUITestLiveTranscriber(
+                transcript: [TranscriptSentence(
+                    startTime: 0, endTime: 1,
+                    text: "Speech captured before pausing still belongs to the recording.",
+                    translation: "暂停前采集的语音仍然属于这段录音。",
+                    confidence: .high
+                )],
+                commitsOnPause: true,
+                failsOnPause: argumentValue("--ui-live-transcriber", in: arguments) == "failed-tail"
+            )
+        default:
+            liveTranscriber = nil
+        }
         let recordingPreflight: (@MainActor @Sendable () async throws -> Void)?
         switch argumentValue("--ui-recording-preflight", in: arguments) {
         case "hanging":
@@ -209,7 +236,7 @@ final class AppModel: ObservableObject {
             }
         case "delayed-success":
             recordingPreflight = { @MainActor @Sendable in
-                try await Task.sleep(nanoseconds: 2_500_000_000)
+                try? await Task.sleep(nanoseconds: 10_000_000_000)
             }
         case "speech-denied":
             recordingPreflight = { @MainActor @Sendable in
@@ -271,6 +298,11 @@ final class AppModel: ObservableObject {
         default:
             break
         }
+        if argumentValue("--ui-state", in: arguments) == "live-partial", let session = model.selectedSession {
+            for sentence in session.transcript where sentence.translation.isEmpty {
+                model.queueTranslation(for: sentence, in: session.id)
+            }
+        }
         if simulatedRuntime, argumentValue("--ui-retry-recovered", in: arguments) == "true" {
             model.retryRecoveredInferenceIfReady()
         }
@@ -280,6 +312,7 @@ final class AppModel: ObservableObject {
         if ["live", "long-live", "live-preview-only"].contains(argumentValue("--ui-state", in: arguments)) {
             model.liveTranscriptPreview = DemoText.livePreview
             model.liveTranslationPreview = DemoTranslation.livePreview
+            model.liveTranslationPreviewSource = DemoText.livePreview
             model.liveAudioLevel = 0.58
         }
         return model
@@ -507,6 +540,10 @@ final class AppModel: ObservableObject {
         guard recordingPreparationTitle != nil || selectedSession?.status.isPreparing == true else { return }
         recordingStartTask?.cancel()
         recordingStartTask = nil
+        liveTranscriptionStartTask?.cancel()
+        liveTranscriptionStartTask = nil
+        liveTranscriber?.cancel()
+        liveTranscriptionSessionID = nil
         recordingPreparationID = nil
         recordingPreparationTitle = nil
         cancelRecordingPreparationHelp()
@@ -559,8 +596,8 @@ final class AppModel: ObservableObject {
             persist()
 
             startLiveTranscription(for: session.id)
+            await liveTranscriptionStartTask?.value
             guard recordingPreparationID == id, !Task.isCancelled else {
-                liveTranscriber?.cancel()
                 removePreparingSession(id)
                 return
             }
@@ -578,6 +615,7 @@ final class AppModel: ObservableObject {
             cancelRecordingPreparationHelp()
             activateRecording(id: session.id, audioURL: audioURL)
         } catch {
+            guard recordingPreparationID == id else { return }
             liveTranscriptionStartTask?.cancel()
             liveTranscriptionStartTask = nil
             liveTranscriber?.cancel()
@@ -655,8 +693,8 @@ final class AppModel: ObservableObject {
         liveTranscriptionStartTask = Task(priority: .userInitiated) { [liveTranscriber] in
             do {
                 try await liveTranscriber.start { event in
-                    Task { @MainActor in
-                        modelBox.model?.handleLiveTranscriptionEvent(event)
+                    DispatchQueue.main.async {
+                        modelBox.model?.handleLiveTranscriptionEvent(event, sessionID: sessionID)
                     }
                 }
             } catch is CancellationError {
@@ -792,68 +830,67 @@ final class AppModel: ObservableObject {
     }
 
     private func stopAndFinalizeRecording() async {
-        guard let session = selectedSession,
-              let id = store.selectedSessionID else { return }
+        guard let session = selectedSession else { return }
+        switch session.status {
+        case .recording, .paused:
+            break
+        default:
+            return
+        }
+        let id = session.id
+        let previewTranslation = liveTranslationPreview
+        let previewTranslationSource = liveTranslationPreviewSource
         let durationSeconds = elapsedSeconds(
             for: id,
-            fallback: session.status.elapsedSeconds
-                ?? session.transcript.map(\.endTime).max()
-                ?? 0
+            fallback: session.status.elapsedSeconds ?? session.transcript.map(\.endTime).max() ?? 0
         )
         finalizingDurations[id] = durationSeconds
         recordingClocks[id] = nil
-        let audioURL: URL?
-        var flushedTranscript: [TranscriptSentence] = []
-        if fixtureRecordingEnabled {
-            audioURL = nil
-        } else {
+        stopConfirmationVisible = false
+        var updatedStore = store
+        try? updatedStore.finalizeRecording(id, progress: 0.25)
+        store = updatedStore
+        persist()
+
+        if !fixtureRecordingEnabled {
             do {
                 let capturedDuration = try audioRecorder?.stopRecording() ?? durationSeconds
-                liveTranscriptionStartTask?.cancel()
-                liveTranscriptionStartTask = nil
-                flushedTranscript = await liveTranscriber?.finish() ?? []
                 finalizingDurations[id] = max(durationSeconds, capturedDuration)
-                audioURL = activeAudioURLs[id] ?? session.audioFileName.map {
-                    sessionFileStore?.localFileURL(relativePath: $0)
-                } ?? nil
+                await liveTranscriptionStartTask?.value
+                liveTranscriptionStartTask = nil
+                let flushedTranscript = await liveTranscriber?.finish() ?? []
+                if !flushedTranscript.isEmpty {
+                    var transcript = transcriptPreservingTranslations(
+                        sanitizedTranscript(flushedTranscript, maximumEndTime: finalizingDurations[id]),
+                        from: store.session(id: id)?.transcript ?? []
+                    )
+                    if !previewTranslation.isEmpty, !previewTranslationSource.isEmpty,
+                       let index = transcript.firstIndex(where: {
+                           $0.translation.isEmpty && normalizedPreview($0.text) == normalizedPreview(previewTranslationSource)
+                       }) {
+                        transcript[index].translation = previewTranslation
+                    }
+                    var transcriptStore = store
+                    try? transcriptStore.replaceGeneratedContent(in: id, transcript: transcript)
+                    store = transcriptStore
+                }
             } catch {
                 liveTranscriber?.cancel()
                 markFailed(id, error: error)
-                stopConfirmationVisible = false
                 return
             }
-        }
-        if !flushedTranscript.isEmpty {
-            var transcriptStore = store
-            for sentence in sanitizedTranscript(
-                flushedTranscript,
-                maximumEndTime: finalizingDurations[id] ?? durationSeconds
-            ) {
-                try? transcriptStore.upsertTranscript(in: id, sentence: sentence)
-            }
-            store = transcriptStore
         }
         if liveTranscriptionSessionID == id {
             liveTranscriptionSessionID = nil
         }
+        let generation = transcriptGenerations[id, default: 0]
+        markTranslationGenerationCancelled(sessionID: id, generation: generation)
+        cancelTranslationJobs(for: id)
+        cancelActiveTranslationSession()
+        activeAudioURLs[id] = nil
         liveAudioLevel = 0
         resetLivePreview()
-        var updatedStore = store
-        try? updatedStore.finalizeRecording(id, progress: 0.25)
-        store = updatedStore
-        stopConfirmationVisible = false
-        persist()
-        if fixtureRecordingEnabled {
-            Task { @MainActor [weak self] in
-                try? await Task.sleep(nanoseconds: 1_500_000_000)
-                self?.completeFinalizing(id)
-            }
-        } else if let audioURL {
-            runInference(
-                for: id,
-                audioURL: audioURL
-            )
-        }
+        completeFinalizing(id)
     }
 
     func openSavedReview() {
@@ -874,46 +911,8 @@ final class AppModel: ObservableObject {
     }
 
     func exportMarkdown(_ session: RecordingSession) {
-        if session.hasMissingTranslations {
-            partialExportSessionID = session.id
-            partialExportConfirmationVisible = true
-            setExportStatus(
-                "Translation is incomplete. Retry translation or export anyway.",
-                for: session.id,
-                kind: .warning
-            )
-            return
-        }
-        writeMarkdown(session, incomplete: false)
-    }
-
-    func confirmPartialExport() {
-        guard let sessionID = partialExportSessionID,
-              let session = store.session(id: sessionID) else {
-            partialExportConfirmationVisible = false
-            partialExportSessionID = nil
-            return
-        }
-        partialExportConfirmationVisible = false
-        partialExportSessionID = nil
-        writeMarkdown(session, incomplete: true)
-    }
-
-    func retryPartialExportTranslation() {
-        guard let sessionID = partialExportSessionID,
-              let session = store.session(id: sessionID) else {
-            partialExportConfirmationVisible = false
-            partialExportSessionID = nil
-            return
-        }
-        partialExportConfirmationVisible = false
-        partialExportSessionID = nil
-        retryMissingTranslations(in: session)
-    }
-
-    func cancelPartialExport() {
-        partialExportConfirmationVisible = false
-        partialExportSessionID = nil
+        guard exportingSessionID == nil else { return }
+        writeMarkdown(session)
     }
 
     func exportStatus(for session: RecordingSession) -> SessionExportStatus? {
@@ -923,7 +922,7 @@ final class AppModel: ObservableObject {
         return exportStatus
     }
 
-    private func writeMarkdown(_ session: RecordingSession, incomplete: Bool) {
+    private func writeMarkdown(_ session: RecordingSession) {
         guard let sessionFileStore else {
             setExportStatus("Could not export Markdown.", for: session.id, kind: .failure)
             return
@@ -932,66 +931,22 @@ final class AppModel: ObservableObject {
             setExportStatus("Export canceled.", for: session.id, kind: .warning)
             return
         }
-        do {
-            let audioExportPlan = try audioExportCopyPlan(
-                for: session,
-                transcriptURL: exportURL,
-                sessionFileStore: sessionFileStore
-            )
-            try FileManager.default.createDirectory(
-                at: exportURL.deletingLastPathComponent(),
-                withIntermediateDirectories: true
-            )
-            try MarkdownExporter()
-                .export(session)
-                .write(to: exportURL, atomically: true, encoding: .utf8)
+        exportingSessionID = session.id
+        setExportStatus("Exporting recording and transcript…", for: session.id, kind: .progress)
+        Task { @MainActor [weak self] in
+            guard let self else { return }
+            defer { self.exportingSessionID = nil }
             do {
-                try copyAudioForExport(audioExportPlan)
+                try await Task.detached(priority: .userInitiated) {
+                    try sessionFileStore.exportSnapshot(session, to: exportURL)
+                }.value
+                self.exportDirectoryHistory.rememberExportURL(exportURL)
+                NSWorkspace.shared.activateFileViewerSelecting([exportURL])
+                self.setExportStatus("Saved to \(exportURL.path)", for: session.id, kind: .success)
             } catch {
-                try? FileManager.default.removeItem(at: exportURL)
-                throw error
+                self.setExportStatus("Could not export Markdown.", for: session.id, kind: .failure)
             }
-            exportDirectoryHistory.rememberExportURL(exportURL)
-            NSWorkspace.shared.activateFileViewerSelecting([exportURL])
-            setExportStatus(
-                incomplete
-                    ? "Incomplete export saved to \(exportURL.path)"
-                    : "Saved to \(exportURL.path)",
-                for: session.id,
-                kind: incomplete ? .warning : .success
-            )
-        } catch {
-            setExportStatus("Could not export Markdown.", for: session.id, kind: .failure)
         }
-    }
-
-    private func audioExportCopyPlan(
-        for session: RecordingSession,
-        transcriptURL: URL,
-        sessionFileStore: SessionFileStore
-    ) throws -> AudioExportCopyPlan? {
-        guard let audioFileName = session.audioFileName else { return nil }
-        let sourceURL = sessionFileStore.localFileURL(relativePath: audioFileName)
-        guard FileManager.default.fileExists(atPath: sourceURL.path) else {
-            throw CocoaError(.fileNoSuchFile)
-        }
-        let audioExtension = sourceURL.pathExtension.isEmpty ? "m4a" : sourceURL.pathExtension
-        let destinationURL = transcriptURL
-            .deletingPathExtension()
-            .appendingPathExtension(audioExtension)
-        guard sourceURL.standardizedFileURL != destinationURL.standardizedFileURL else {
-            return nil
-        }
-        return AudioExportCopyPlan(sourceURL: sourceURL, destinationURL: destinationURL)
-    }
-
-    private func copyAudioForExport(_ copyPlan: AudioExportCopyPlan?) throws {
-        guard let copyPlan else { return }
-        let destinationURL = copyPlan.destinationURL
-        if FileManager.default.fileExists(atPath: destinationURL.path) {
-            try FileManager.default.removeItem(at: destinationURL)
-        }
-        try FileManager.default.copyItem(at: copyPlan.sourceURL, to: destinationURL)
     }
 
     private func markdownExportURL(for session: RecordingSession, defaultDirectory: URL) -> URL? {
@@ -1088,31 +1043,28 @@ final class AppModel: ObservableObject {
         }
     }
 
-    private func handleLiveTranscriptionEvent(_ event: LiveTranscriptionEvent) {
-        guard let id = liveTranscriptionSessionID,
-              let session = store.session(id: id),
-              session.status.acceptsLiveTranscript else {
+    private func handleLiveTranscriptionEvent(_ event: LiveTranscriptionEvent, sessionID: UUID) {
+        guard let id = liveTranscriptionSessionID, id == sessionID,
+              let session = store.session(id: id) else {
+            return
+        }
+        switch session.status {
+        case .recording, .paused:
+            break
+        default:
             return
         }
         switch event {
-        case .ready, .partialTranscript:
-            clearLiveSpeechFailureStatus()
-            if case let .partialTranscript(text) = event {
-                updateLivePreview(text)
-            }
-        case let .committedTranscript(sentence):
-            clearLiveSpeechFailureStatus()
+        case .ready:
+            break
+        case let .partialTranscript(text):
+            updateLivePreview(text)
+        case let .committedTranscript(sentence, replacing: replacedIDs):
             guard !sentence.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 return
             }
-            if LiveTranscriptPreviewDisplayPolicy.shouldClearAfterCommit(
-                preview: liveTranscriptPreview,
-                committed: sentence.text
-            ) {
-                resetLivePreview()
-            }
             var updatedStore = store
-            try? updatedStore.upsertTranscript(in: id, sentence: sentence)
+            try? updatedStore.upsertTranscript(in: id, sentence: sentence, replacingSentenceIDs: replacedIDs)
             store = updatedStore
             persist()
             queueTranslation(for: sentence, in: id)
@@ -1126,12 +1078,6 @@ final class AppModel: ObservableObject {
             persistenceStatus = nil
         }
         exportStatus = nil
-    }
-
-    private func clearLiveSpeechFailureStatus() {
-        if persistenceStatus == "Live speech recognition failed." {
-            persistenceStatus = nil
-        }
     }
 
     private func queueTranslation(for sentence: TranscriptSentence, in sessionID: UUID) {
@@ -1164,6 +1110,9 @@ final class AppModel: ObservableObject {
     }
 
     private func queuePreviewTranslation(for text: String) {
+        guard let sessionID = liveTranscriptionSessionID else { return }
+        let generation = transcriptGenerations[sessionID, default: 0]
+        guard !isTranslationGenerationCancelled(sessionID: sessionID, generation: generation) else { return }
         let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
         let wordCount = cleaned.split(whereSeparator: \.isWhitespace).count
         let endsSentence = cleaned.range(of: #"[.!?]$"#, options: .regularExpression) != nil
@@ -1176,14 +1125,14 @@ final class AppModel: ObservableObject {
             || !normalizedPreview(cleaned).hasPrefix(normalizedPreview(previous))
             || wordDelta >= 3
         guard shouldQueue else { return }
-        let key = TranslationJob.livePreviewKey(cleaned)
+        let key = TranslationJob.livePreviewKey(cleaned, sessionID: sessionID, generation: generation)
         guard !pendingTranslationKeys.contains(key) else { return }
         lastQueuedPreviewTranslation = cleaned
         pendingTranslationKeys.insert(key)
         pendingTranslationJobs.append(
             TranslationJob(
                 key: key,
-                target: .livePreview(text: cleaned)
+                target: .livePreview(sessionID: sessionID, generation: generation, text: cleaned)
             )
         )
         if uiTestTranslationProvider == nil {
@@ -1310,6 +1259,7 @@ final class AppModel: ObservableObject {
 
     @discardableResult
     private func applyTranslation(_ translatedText: String, for job: TranslationJob) -> Bool {
+        guard !isTranslationJobCancelled(job) else { return true }
         let cleaned = translatedText.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !cleaned.isEmpty else { return false }
         switch job.target {
@@ -1334,28 +1284,30 @@ final class AppModel: ObservableObject {
                 persistenceStatus = nil
             }
             return true
-        case let .livePreview(text):
+        case let .livePreview(_, _, text):
             let currentPreview = normalizedPreview(liveTranscriptPreview)
             let translatedPreview = normalizedPreview(text)
             guard currentPreview == translatedPreview || currentPreview.hasPrefix(translatedPreview) else {
                 return true
             }
             liveTranslationPreview = cleaned
+            liveTranslationPreviewSource = text
             translationAttemptCounts[job.key] = nil
             return true
         }
     }
 
     private func updateLivePreview(_ text: String) {
-        let displayed = LiveTranscriptPreviewDisplayPolicy.displayedText(
-            current: liveTranscriptPreview,
-            incoming: text
-        )
-        guard !displayed.isEmpty else { return }
+        let displayed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if displayed.isEmpty {
+            resetLivePreview()
+            return
+        }
         if displayed != liveTranscriptPreview {
             liveTranscriptPreview = displayed
             if !normalizedPreview(displayed).hasPrefix(normalizedPreview(lastQueuedPreviewTranslation)) {
                 liveTranslationPreview = ""
+                liveTranslationPreviewSource = ""
             }
         }
         queuePreviewTranslation(for: displayed)
@@ -1374,6 +1326,7 @@ final class AppModel: ObservableObject {
     private func resetLivePreview() {
         liveTranscriptPreview = ""
         liveTranslationPreview = ""
+        liveTranslationPreviewSource = ""
         lastQueuedPreviewTranslation = ""
     }
 
@@ -1553,7 +1506,8 @@ final class AppModel: ObservableObject {
     private func cancelTranslationJobs(for sessionID: UUID) {
         var removedKeys: [String] = []
         pendingTranslationJobs.removeAll { job in
-            if case let .transcript(jobSessionID, _, _) = job.target {
+            switch job.target {
+            case let .transcript(jobSessionID, _, _), let .livePreview(jobSessionID, _, _):
                 if jobSessionID == sessionID {
                     removedKeys.append(job.key)
                     return true
@@ -1590,8 +1544,9 @@ final class AppModel: ObservableObject {
         switch job.target {
         case let .transcript(sessionID, generation, _):
             return isTranslationGenerationCancelled(sessionID: sessionID, generation: generation)
-        case .livePreview:
-            return false
+        case let .livePreview(sessionID, generation, _):
+            return liveTranscriptionSessionID != sessionID
+                || isTranslationGenerationCancelled(sessionID: sessionID, generation: generation)
         }
     }
 
@@ -1781,7 +1736,8 @@ final class AppModel: ObservableObject {
                 endTime: endTime,
                 text: text,
                 translation: sentence.translation.trimmingCharacters(in: .whitespacesAndNewlines),
-                confidence: sentence.confidence
+                confidence: sentence.confidence,
+                sourceStartTime: sentence.sourceStartTime
             )
         }
     }
@@ -1945,11 +1901,6 @@ enum SessionExportStatusKind: Equatable {
     case progress
 }
 
-private struct AudioExportCopyPlan {
-    var sourceURL: URL
-    var destinationURL: URL
-}
-
 struct LiveSpeechPreview: Equatable, Sendable {
     var text: String
     var translation: String
@@ -1970,7 +1921,7 @@ private struct TranslationJob: Sendable {
         switch target {
         case let .transcript(_, _, sentence):
             return sentence.text
-        case let .livePreview(text):
+        case let .livePreview(_, _, text):
             return text
         }
     }
@@ -1987,8 +1938,8 @@ private struct TranslationJob: Sendable {
         "\(sessionID.uuidString)|\(generation)"
     }
 
-    static func livePreviewKey(_ text: String) -> String {
-        "live-preview|\(text)"
+    static func livePreviewKey(_ text: String, sessionID: UUID, generation: Int) -> String {
+        "\(generationKey(sessionID: sessionID, generation: generation))|live-preview|\(text)"
     }
 }
 
@@ -2015,7 +1966,7 @@ private final class AudioStartContinuation: @unchecked Sendable {
 
 private enum TranslationJobTarget: Sendable {
     case transcript(sessionID: UUID, generation: Int, sentence: TranscriptSentence)
-    case livePreview(text: String)
+    case livePreview(sessionID: UUID, generation: Int, text: String)
 }
 
 private extension RecordingStatus {
@@ -2148,6 +2099,44 @@ private final class HangingUITestLiveTranscriber: LiveTranscriptionRunning, @unc
     }
 
     func cancel() {}
+}
+
+private final class FinalUITestLiveTranscriber: LiveTranscriptionRunning, @unchecked Sendable {
+    let transcript: [TranscriptSentence]
+    private let commitsOnPause: Bool
+    private let failsOnPause: Bool
+    private let lock = NSLock()
+    private var eventHandler: (@Sendable (LiveTranscriptionEvent) -> Void)?
+
+    init(transcript: [TranscriptSentence], commitsOnPause: Bool = false, failsOnPause: Bool = false) {
+        self.transcript = transcript
+        self.commitsOnPause = commitsOnPause
+        self.failsOnPause = failsOnPause
+    }
+
+    func start(eventHandler: @escaping @Sendable (LiveTranscriptionEvent) -> Void) async throws {
+        lock.withLock { self.eventHandler = eventHandler }
+    }
+    func append(_ buffer: AVAudioPCMBuffer) {}
+    func pause() {
+        guard commitsOnPause else { return }
+        let handler = lock.withLock { eventHandler }
+        if failsOnPause {
+            handler?(.failed("Live speech recognition failed."))
+        }
+        for sentence in transcript {
+            handler?(.committedTranscript(sentence))
+        }
+        if failsOnPause {
+            handler?(.partialTranscript(""))
+            handler?(.ready)
+        }
+    }
+    func resume() {}
+    func finish() async -> [TranscriptSentence] { transcript }
+    func cancel() {
+        lock.withLock { eventHandler = nil }
+    }
 }
 
 private struct UITestInferenceRunner: RecordingInferenceRunning {

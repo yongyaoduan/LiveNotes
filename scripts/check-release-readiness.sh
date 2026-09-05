@@ -5,6 +5,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PIPELINE_FILE="$ROOT_DIR/LiveNotesCore/Sources/LiveNotesCore/RecordingPipeline.swift"
 APP_MODEL_FILE="$ROOT_DIR/LiveNotesApp/AppModel.swift"
+SESSION_FILE_STORE="$ROOT_DIR/LiveNotesCore/Sources/LiveNotesCore/SessionFileStore.swift"
 PROJECT_FILE="$ROOT_DIR/LiveNotes.xcodeproj/project.pbxproj"
 ENTITLEMENTS_FILE="$ROOT_DIR/LiveNotesApp/LiveNotes.entitlements"
 CI_WORKFLOW="$ROOT_DIR/.github/workflows/ci.yml"
@@ -101,13 +102,13 @@ RUBY
     exit 1
   fi
   for required_test in \
-    testFinalSaveWaitsForGeneratedTranslations \
-    testFinalSaveContinuesWhenTranslationIsUnavailable \
-    testFinalSaveContinuesWhenTranslationDoesNotReturn \
-    testEmptyFinalInferenceDoesNotSaveLivePreviewTranscript \
-    testFailedFinalInferenceDoesNotSaveLivePreviewTranscript \
-    testFinalFileTranscriptOverridesCommittedLiveTranscript \
-    testFailedFinalInferenceSavesCommittedLiveTranscript \
+    testFinishDoesNotWaitForPendingTranslations \
+    testExportWithMissingTranslationsSavesCurrentSnapshotWithoutPrompt \
+    testFinishSavesCurrentRecordingImmediately \
+    testFinishSavesAudioWhenNoCommittedTranscriptExists \
+    testPausedRecordingCanFinishAndSave \
+    testFinishPreservesCurrentTranscriptAndTranslationsWithoutInference \
+    testRecordingWaitsForLiveTranscriptionAndCanCancelPreparation \
     testProductionLoopbackRecordsTranscribesSavesAndExports \
     testSavedReviewExportsMarkdown
   do
@@ -162,6 +163,7 @@ validate_app_zip() {
 
 require_file "$PIPELINE_FILE" "production recording pipeline is missing."
 require_file "$APP_MODEL_FILE" "app model is missing."
+require_file "$SESSION_FILE_STORE" "session export storage is missing."
 require_file "$PROJECT_FILE" "Xcode project is missing."
 require_file "$ENTITLEMENTS_FILE" "release entitlements file is missing."
 
@@ -186,7 +188,7 @@ require_grep 'MACOSX_DEPLOYMENT_TARGET = 26.0' "$PROJECT_FILE" "release builds m
 require_grep 'CODE_SIGN_ENTITLEMENTS = LiveNotesApp/LiveNotes.entitlements' "$PROJECT_FILE" "release app must include signing entitlements."
 require_grep 'com.apple.security.device.audio-input' "$ENTITLEMENTS_FILE" "release entitlements must allow audio input under hardened runtime."
 require_grep 'NativeSpeechLiveTranscriber' "$PIPELINE_FILE" "production live transcription must use Apple Speech."
-require_grep 'NativeSpeechInferenceRunner' "$PIPELINE_FILE" "production final transcription must use Apple Speech."
+require_grep 'NativeSpeechInferenceRunner' "$PIPELINE_FILE" "recovered-audio transcription must use Apple Speech."
 require_grep 'SpeechAnalyzer' "$PIPELINE_FILE" "production transcription must use the latest Apple Speech analyzer."
 require_grep 'SpeechTranscriber' "$PIPELINE_FILE" "production transcription must use the latest Apple Speech transcriber."
 require_grep 'AssetInventory' "$PIPELINE_FILE" "production transcription must use Apple Speech asset management."
@@ -198,15 +200,19 @@ require_grep 'preferredStrategy: \.lowLatency' "$ROOT_DIR/LiveNotesApp/ContentVi
 require_grep 'LanguageAvailability(preferredStrategy: \.lowLatency)' "$APP_MODEL_FILE" "recording preflight must verify Apple Translation language availability."
 require_grep 'TranslationSession.Request' "$APP_MODEL_FILE" "production translation must batch pending text with stable client identifiers."
 require_grep 'translate(batch: requests)' "$APP_MODEL_FILE" "production translation must stream batch responses."
-require_grep 'activeTranslationSession.*cancel()' "$APP_MODEL_FILE" "translation timeouts must cancel the active Apple Translation session."
-require_grep 'markTranslationGenerationCancelled' "$APP_MODEL_FILE" "translation timeout must cancel the affected transcript generation."
+require_grep 'activeTranslationSession.*cancel()' "$APP_MODEL_FILE" "stopped translation work must cancel the active Apple Translation session."
+require_grep 'markTranslationGenerationCancelled' "$APP_MODEL_FILE" "translation cancellation must include the affected transcript generation."
 require_grep 'isTranslationJobCancelled' "$APP_MODEL_FILE" "canceled in-flight translation jobs must not be requeued."
-require_grep 'pendingFinalSaves' "$APP_MODEL_FILE" "final save must wait until generated translations are persisted."
+require_grep 'sessionFileStore.exportSnapshot(session, to: exportURL)' "$APP_MODEL_FILE" "export must save the current recording and transcript snapshot."
+require_grep 'Task.detached(priority: .userInitiated)' "$APP_MODEL_FILE" "export file operations must run in the background."
+require_grep 'func exportSnapshot' "$SESSION_FILE_STORE" "recording and transcript snapshot export is missing."
+reject_grep 'partialExportConfirmationVisible' "$APP_MODEL_FILE" "missing translations must not require confirmation before export."
+require_grep 'resultsFinalizationTime' "$PIPELINE_FILE" "live transcription must finalize unchanged results using the ordered result boundary."
 require_grep 'savedTranscript' "$PIPELINE_FILE" "release report must cover saved transcripts."
 require_grep 'AudioTapBufferSize.frameCount' "$PIPELINE_FILE" "audio capture must use a duration-derived tap buffer size."
 require_grep 'AnalyzerInput(buffer: convertedBuffer)' "$PIPELINE_FILE" "SpeechAnalyzer live input must use inferred contiguous timing."
 require_grep 'func finish() async -> \[TranscriptSentence\]' "$PIPELINE_FILE" "live transcription finish must drain committed results before saving."
-require_grep 'analyzeSequence(from: audioFile)' "$PIPELINE_FILE" "final transcription must use SpeechAnalyzer file input."
+require_grep 'analyzeSequence(from: audioFile)' "$PIPELINE_FILE" "recovered-audio transcription must use SpeechAnalyzer file input."
 require_grep 'finalizeAndFinishThroughEndOfInput()' "$PIPELINE_FILE" "SpeechAnalyzer finalization must drain through end of input."
 require_grep 'let activeJobs = jobs.filter' "$APP_MODEL_FILE" "canceled translation failures must not requeue stale in-flight jobs."
 reject_grep 'NativeTopicSummarizer|Current Topic|Topic Notes|topic notes|topic summaries' \

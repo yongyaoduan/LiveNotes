@@ -163,80 +163,27 @@ public struct SessionStore: Sendable {
 
     public mutating func upsertTranscript(
         in id: UUID,
-        sentence: TranscriptSentence
+        sentence: TranscriptSentence,
+        replacingSentenceIDs: [UUID] = []
     ) throws {
         try updateSession(id) { session in
+            session.transcript.removeAll {
+                $0.id != sentence.id && replacingSentenceIDs.contains($0.id)
+            }
             if let existingIndex = session.transcript.firstIndex(where: {
-                $0.startTime == sentence.startTime
-                    && $0.endTime == sentence.endTime
-                    && $0.text == sentence.text
+                $0.id == sentence.id
             }) {
-                session.transcript[existingIndex] = sentence
+                var updatedSentence = sentence
+                if sentence.text == session.transcript[existingIndex].text,
+                   sentence.translation.isEmpty {
+                    updatedSentence.translation = session.transcript[existingIndex].translation
+                }
+                session.transcript[existingIndex] = updatedSentence
             } else {
-                let replaceableExisting = session.transcript.filter { existing in
-                    Self.shouldReplaceTranscript(existing, with: sentence)
-                }
-                guard !replaceableExisting.isEmpty || !session.transcript.contains(where: {
-                    Self.transcriptRangesOverlap($0, sentence)
-                }) else {
-                    return
-                }
-                session.transcript.removeAll { existing in
-                    replaceableExisting.contains(where: { $0.id == existing.id })
-                }
                 session.transcript.append(sentence)
             }
             session.sortTranscript()
         }
-    }
-
-    private static func transcriptRangesOverlap(
-        _ lhs: TranscriptSentence,
-        _ rhs: TranscriptSentence
-    ) -> Bool {
-        let overlap = min(lhs.endTime, rhs.endTime) - max(lhs.startTime, rhs.startTime)
-        guard overlap > 0 else { return false }
-        if lhs.startTime == rhs.startTime {
-            return true
-        }
-        if rangeContains(lhs, rhs) || rangeContains(rhs, lhs) {
-            return true
-        }
-        let shorterDuration = max(1, min(
-            lhs.endTime - lhs.startTime,
-            rhs.endTime - rhs.startTime
-        ))
-        return Double(overlap) / Double(shorterDuration) >= 0.67
-    }
-
-    private static func shouldReplaceTranscript(
-        _ existing: TranscriptSentence,
-        with sentence: TranscriptSentence
-    ) -> Bool {
-        guard transcriptRangesOverlap(existing, sentence) else { return false }
-        let existingWords = wordCount(existing.text)
-        let sentenceWords = wordCount(sentence.text)
-        if existing.startTime == sentence.startTime && existing.endTime == sentence.endTime {
-            return sentenceWords >= existingWords
-        }
-        if rangeContains(sentence, existing) {
-            return sentenceWords >= existingWords
-        }
-        if rangeContains(existing, sentence) {
-            return sentenceWords > existingWords
-        }
-        return sentenceWords > existingWords
-    }
-
-    private static func rangeContains(
-        _ lhs: TranscriptSentence,
-        _ rhs: TranscriptSentence
-    ) -> Bool {
-        lhs.startTime <= rhs.startTime && lhs.endTime >= rhs.endTime
-    }
-
-    private static func wordCount(_ text: String) -> Int {
-        text.split(whereSeparator: \.isWhitespace).count
     }
 
     private mutating func updateSession(
@@ -270,11 +217,6 @@ public struct SessionStore: Sendable {
 
 private extension RecordingSession {
     mutating func sortTranscript() {
-        transcript.sort { first, second in
-            if first.startTime == second.startTime {
-                return first.endTime < second.endTime
-            }
-            return first.startTime < second.startTime
-        }
+        transcript.sort { $0.precedes($1) }
     }
 }

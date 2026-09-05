@@ -1,0 +1,2409 @@
+[
+  {
+    "text": "Today",
+    "startTime": 0,
+    "endTime": 6.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today",
+        "startTime": 0,
+        "endTime": 6.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we",
+    "startTime": 0,
+    "endTime": 6.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we",
+        "startTime": 0,
+        "endTime": 6.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are",
+    "startTime": 0,
+    "endTime": 6.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are",
+        "startTime": 0,
+        "endTime": 6.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are test",
+    "startTime": 0,
+    "endTime": 6.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are test",
+        "startTime": 0,
+        "endTime": 6.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are testing",
+    "startTime": 0,
+    "endTime": 7.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are testing",
+        "startTime": 0,
+        "endTime": 7.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are testing a",
+    "startTime": 0,
+    "endTime": 7.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are testing a",
+        "startTime": 0,
+        "endTime": 7.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are testing a local",
+    "startTime": 0,
+    "endTime": 7.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are testing a local",
+        "startTime": 0,
+        "endTime": 7.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are testing a local meeting",
+    "startTime": 0,
+    "endTime": 7.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are testing a local meeting",
+        "startTime": 0,
+        "endTime": 7.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are testing a local meeting record",
+    "startTime": 0,
+    "endTime": 8.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are testing a local meeting record",
+        "startTime": 0,
+        "endTime": 8.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are testing a local meeting recorder",
+    "startTime": 0,
+    "endTime": 8.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are testing a local meeting recorder",
+        "startTime": 0,
+        "endTime": 8.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are testing a local meeting recorder.",
+    "startTime": 0,
+    "endTime": 8.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "text": "Today we are testing a local meeting recorder.",
+        "startTime": 0,
+        "endTime": 8.799625
+      }
+    ]
+  },
+  {
+    "text": "Today we are testing a local meeting recorder.",
+    "startTime": 4.68,
+    "endTime": 8.34,
+    "isFinal": true,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": "Today",
+        "startTime": 4.68,
+        "endTime": 5.94
+      },
+      {
+        "text": " we",
+        "startTime": 5.94,
+        "endTime": 6.24
+      },
+      {
+        "text": " are",
+        "startTime": 6.24,
+        "endTime": 6.36
+      },
+      {
+        "text": " testing",
+        "startTime": 6.36,
+        "endTime": 6.78
+      },
+      {
+        "text": " a",
+        "startTime": 6.78,
+        "endTime": 6.9
+      },
+      {
+        "text": " local",
+        "startTime": 6.9,
+        "endTime": 7.02
+      },
+      {
+        "text": " meeting",
+        "startTime": 7.02,
+        "endTime": 7.38
+      },
+      {
+        "text": " recorder.",
+        "startTime": 7.38,
+        "endTime": 8.28
+      }
+    ]
+  },
+  {
+    "text": " The",
+    "startTime": 8.34,
+    "endTime": 9.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The",
+        "startTime": 8.34,
+        "endTime": 9.799625
+      }
+    ]
+  },
+  {
+    "text": " The first",
+    "startTime": 8.34,
+    "endTime": 9.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first",
+        "startTime": 8.34,
+        "endTime": 9.799625
+      }
+    ]
+  },
+  {
+    "text": " The first topic",
+    "startTime": 8.34,
+    "endTime": 9.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic",
+        "startTime": 8.34,
+        "endTime": 9.799625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is",
+    "startTime": 8.34,
+    "endTime": 9.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is",
+        "startTime": 8.34,
+        "endTime": 9.799625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is priv",
+    "startTime": 8.34,
+    "endTime": 10.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is priv",
+        "startTime": 8.34,
+        "endTime": 10.799625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy",
+    "startTime": 8.34,
+    "endTime": 10.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is privacy",
+        "startTime": 8.34,
+        "endTime": 10.799625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy pres",
+    "startTime": 8.34,
+    "endTime": 10.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is privacy pres",
+        "startTime": 8.34,
+        "endTime": 10.799625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy preser",
+    "startTime": 8.34,
+    "endTime": 10.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is privacy preser",
+        "startTime": 8.34,
+        "endTime": 10.799625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy preserving",
+    "startTime": 8.34,
+    "endTime": 10.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is privacy preserving",
+        "startTime": 8.34,
+        "endTime": 10.799625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy preserving meeting",
+    "startTime": 8.34,
+    "endTime": 11.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is privacy preserving meeting",
+        "startTime": 8.34,
+        "endTime": 11.599625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy preserving meeting n",
+    "startTime": 8.34,
+    "endTime": 11.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is privacy preserving meeting n",
+        "startTime": 8.34,
+        "endTime": 11.599625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy preserving meeting nodes",
+    "startTime": 8.34,
+    "endTime": 11.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is privacy preserving meeting nodes",
+        "startTime": 8.34,
+        "endTime": 11.599625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy preserving meeting nodes.",
+    "startTime": 8.34,
+    "endTime": 12.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 8.34,
+    "fragments": [
+      {
+        "text": " The first topic is privacy preserving meeting nodes.",
+        "startTime": 8.34,
+        "endTime": 12.599625
+      }
+    ]
+  },
+  {
+    "text": " The first topic is privacy preserving meeting nodes.",
+    "startTime": 8.34,
+    "endTime": 11.64,
+    "isFinal": true,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " The",
+        "startTime": 8.34,
+        "endTime": 8.7
+      },
+      {
+        "text": " first",
+        "startTime": 8.7,
+        "endTime": 8.82
+      },
+      {
+        "text": " topic",
+        "startTime": 8.82,
+        "endTime": 9
+      },
+      {
+        "text": " is",
+        "startTime": 9,
+        "endTime": 9.3
+      },
+      {
+        "text": " privacy",
+        "startTime": 9.3,
+        "endTime": 9.84
+      },
+      {
+        "text": " preserving",
+        "startTime": 9.84,
+        "endTime": 10.32
+      },
+      {
+        "text": " meeting",
+        "startTime": 10.32,
+        "endTime": 10.62
+      },
+      {
+        "text": " nodes.",
+        "startTime": 10.62,
+        "endTime": 11.58
+      }
+    ]
+  },
+  {
+    "text": " Every",
+    "startTime": 11.64,
+    "endTime": 12.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every",
+        "startTime": 11.64,
+        "endTime": 12.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp",
+    "startTime": 11.64,
+    "endTime": 12.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp",
+        "startTime": 11.64,
+        "endTime": 12.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons",
+    "startTime": 11.64,
+    "endTime": 12.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons",
+        "startTime": 11.64,
+        "endTime": 12.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sent",
+    "startTime": 11.64,
+    "endTime": 13.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sent",
+        "startTime": 11.64,
+        "endTime": 13.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence",
+    "startTime": 11.64,
+    "endTime": 13.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence",
+        "startTime": 11.64,
+        "endTime": 13.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should",
+    "startTime": 11.64,
+    "endTime": 13.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should",
+        "startTime": 11.64,
+        "endTime": 13.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should rem",
+    "startTime": 11.64,
+    "endTime": 13.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should rem",
+        "startTime": 11.64,
+        "endTime": 13.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain",
+    "startTime": 11.64,
+    "endTime": 13.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain",
+        "startTime": 11.64,
+        "endTime": 13.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain vis",
+    "startTime": 11.64,
+    "endTime": 14.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain vis",
+        "startTime": 11.64,
+        "endTime": 14.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible",
+    "startTime": 11.64,
+    "endTime": 14.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible",
+        "startTime": 11.64,
+        "endTime": 14.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible when",
+    "startTime": 11.64,
+    "endTime": 14.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible when",
+        "startTime": 11.64,
+        "endTime": 14.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible when the",
+    "startTime": 11.64,
+    "endTime": 14.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible when the",
+        "startTime": 11.64,
+        "endTime": 14.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible when the next",
+    "startTime": 11.64,
+    "endTime": 14.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible when the next",
+        "startTime": 11.64,
+        "endTime": 14.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible when the next sent",
+    "startTime": 11.64,
+    "endTime": 15.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible when the next sent",
+        "startTime": 11.64,
+        "endTime": 15.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible when the next sentence",
+    "startTime": 11.64,
+    "endTime": 15.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible when the next sentence",
+        "startTime": 11.64,
+        "endTime": 15.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible when the next sentence beg",
+    "startTime": 11.64,
+    "endTime": 15.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible when the next sentence beg",
+        "startTime": 11.64,
+        "endTime": 15.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible when the next sentence begins",
+    "startTime": 11.64,
+    "endTime": 15.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible when the next sentence begins",
+        "startTime": 11.64,
+        "endTime": 15.599625
+      }
+    ]
+  },
+  {
+    "text": " Every sp cons sentence should remain visible when the next sentence begins.",
+    "startTime": 11.64,
+    "endTime": 15.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 11.64,
+    "fragments": [
+      {
+        "text": " Every sp cons sentence should remain visible when the next sentence begins.",
+        "startTime": 11.64,
+        "endTime": 15.599625
+      }
+    ]
+  },
+  {
+    "text": " Every spoken sentence should remain visible when the next sentence begins.",
+    "startTime": 11.64,
+    "endTime": 15,
+    "isFinal": true,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " Every",
+        "startTime": 11.64,
+        "endTime": 11.7
+      },
+      {
+        "text": " spoken",
+        "startTime": 11.7,
+        "endTime": 12.3
+      },
+      {
+        "text": " sentence",
+        "startTime": 12.3,
+        "endTime": 12.72
+      },
+      {
+        "text": " should",
+        "startTime": 12.72,
+        "endTime": 12.9
+      },
+      {
+        "text": " remain",
+        "startTime": 12.9,
+        "endTime": 13.14
+      },
+      {
+        "text": " visible",
+        "startTime": 13.14,
+        "endTime": 13.62
+      },
+      {
+        "text": " when",
+        "startTime": 13.62,
+        "endTime": 13.8
+      },
+      {
+        "text": " the",
+        "startTime": 13.8,
+        "endTime": 13.98
+      },
+      {
+        "text": " next",
+        "startTime": 13.98,
+        "endTime": 14.1
+      },
+      {
+        "text": " sentence",
+        "startTime": 14.1,
+        "endTime": 14.58
+      },
+      {
+        "text": " begins.",
+        "startTime": 14.58,
+        "endTime": 14.94
+      }
+    ]
+  },
+  {
+    "text": " The",
+    "startTime": 15,
+    "endTime": 17.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The",
+        "startTime": 15,
+        "endTime": 17.399625
+      }
+    ]
+  },
+  {
+    "text": " The second",
+    "startTime": 15,
+    "endTime": 17.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second",
+        "startTime": 15,
+        "endTime": 17.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic",
+    "startTime": 15,
+    "endTime": 18.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic",
+        "startTime": 15,
+        "endTime": 18.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is",
+    "startTime": 15,
+    "endTime": 18.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic is",
+        "startTime": 15,
+        "endTime": 18.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is rel",
+    "startTime": 15,
+    "endTime": 18.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic is rel",
+        "startTime": 15,
+        "endTime": 18.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is reli",
+    "startTime": 15,
+    "endTime": 18.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic is reli",
+        "startTime": 15,
+        "endTime": 18.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is reliable",
+    "startTime": 15,
+    "endTime": 18.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic is reliable",
+        "startTime": 15,
+        "endTime": 18.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is reliable trans",
+    "startTime": 15,
+    "endTime": 19.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic is reliable trans",
+        "startTime": 15,
+        "endTime": 19.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is reliable transl",
+    "startTime": 15,
+    "endTime": 19.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic is reliable transl",
+        "startTime": 15,
+        "endTime": 19.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is reliable translation",
+    "startTime": 15,
+    "endTime": 19.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic is reliable translation",
+        "startTime": 15,
+        "endTime": 19.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is reliable translation.",
+    "startTime": 15,
+    "endTime": 20.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 15,
+    "fragments": [
+      {
+        "text": " The second topic is reliable translation.",
+        "startTime": 15,
+        "endTime": 20.399625
+      }
+    ]
+  },
+  {
+    "text": " The second topic is reliable translation.",
+    "startTime": 15.6,
+    "endTime": 19.32,
+    "isFinal": true,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " The",
+        "startTime": 15.6,
+        "endTime": 16.86
+      },
+      {
+        "text": " second",
+        "startTime": 16.86,
+        "endTime": 17.04
+      },
+      {
+        "text": " topic",
+        "startTime": 17.04,
+        "endTime": 17.46
+      },
+      {
+        "text": " is",
+        "startTime": 17.46,
+        "endTime": 17.76
+      },
+      {
+        "text": " reliable",
+        "startTime": 17.76,
+        "endTime": 18.18
+      },
+      {
+        "text": " translation.",
+        "startTime": 18.18,
+        "endTime": 19.26
+      }
+    ]
+  },
+  {
+    "text": " a",
+    "startTime": 19.32,
+    "endTime": 20.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " a",
+        "startTime": 19.32,
+        "endTime": 20.399625
+      }
+    ]
+  },
+  {
+    "text": " a cor",
+    "startTime": 19.32,
+    "endTime": 20.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " a cor",
+        "startTime": 19.32,
+        "endTime": 20.399625
+      }
+    ]
+  },
+  {
+    "text": " a corre",
+    "startTime": 19.32,
+    "endTime": 20.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " a corre",
+        "startTime": 19.32,
+        "endTime": 20.399625
+      }
+    ]
+  },
+  {
+    "text": " a correction may",
+    "startTime": 19.32,
+    "endTime": 21.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " a correction may",
+        "startTime": 19.32,
+        "endTime": 21.199625
+      }
+    ]
+  },
+  {
+    "text": " a correction may change",
+    "startTime": 19.32,
+    "endTime": 21.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " a correction may change",
+        "startTime": 19.32,
+        "endTime": 21.199625
+      }
+    ]
+  },
+  {
+    "text": " a correction may change a",
+    "startTime": 19.32,
+    "endTime": 21.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " a correction may change a",
+        "startTime": 19.32,
+        "endTime": 21.199625
+      }
+    ]
+  },
+  {
+    "text": " a correction may change a word",
+    "startTime": 19.32,
+    "endTime": 21.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " a correction may change a word",
+        "startTime": 19.32,
+        "endTime": 21.199625
+      }
+    ]
+  },
+  {
+    "text": " a correction may change a word.",
+    "startTime": 19.32,
+    "endTime": 21.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 19.32,
+    "fragments": [
+      {
+        "text": " a correction may change a word.",
+        "startTime": 19.32,
+        "endTime": 21.199625
+      }
+    ]
+  },
+  {
+    "text": " A correction may change a word.",
+    "startTime": 19.32,
+    "endTime": 20.76,
+    "isFinal": true,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " A",
+        "startTime": 19.32,
+        "endTime": 19.5
+      },
+      {
+        "text": " correction",
+        "startTime": 19.5,
+        "endTime": 19.86
+      },
+      {
+        "text": " may",
+        "startTime": 19.86,
+        "endTime": 20.22
+      },
+      {
+        "text": " change",
+        "startTime": 20.22,
+        "endTime": 20.34
+      },
+      {
+        "text": " a",
+        "startTime": 20.34,
+        "endTime": 20.46
+      },
+      {
+        "text": " word.",
+        "startTime": 20.46,
+        "endTime": 20.64
+      }
+    ]
+  },
+  {
+    "text": " but",
+    "startTime": 20.76,
+    "endTime": 22.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but",
+        "startTime": 20.76,
+        "endTime": 22.199625
+      }
+    ]
+  },
+  {
+    "text": " but it",
+    "startTime": 20.76,
+    "endTime": 22.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it",
+        "startTime": 20.76,
+        "endTime": 22.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must",
+    "startTime": 20.76,
+    "endTime": 22.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must",
+        "startTime": 20.76,
+        "endTime": 22.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must pres",
+    "startTime": 20.76,
+    "endTime": 22.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must pres",
+        "startTime": 20.76,
+        "endTime": 22.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must preserve",
+    "startTime": 20.76,
+    "endTime": 22.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must preserve",
+        "startTime": 20.76,
+        "endTime": 22.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must preserve the",
+    "startTime": 20.76,
+    "endTime": 23.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must preserve the",
+        "startTime": 20.76,
+        "endTime": 23.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must preserve the rest",
+    "startTime": 20.76,
+    "endTime": 23.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must preserve the rest",
+        "startTime": 20.76,
+        "endTime": 23.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must preserve the rest of",
+    "startTime": 20.76,
+    "endTime": 23.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must preserve the rest of",
+        "startTime": 20.76,
+        "endTime": 23.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must preserve the rest of the",
+    "startTime": 20.76,
+    "endTime": 23.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must preserve the rest of the",
+        "startTime": 20.76,
+        "endTime": 23.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must preserve the rest of the conversation",
+    "startTime": 20.76,
+    "endTime": 24.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must preserve the rest of the conversation",
+        "startTime": 20.76,
+        "endTime": 24.199625
+      }
+    ]
+  },
+  {
+    "text": " but it must preserve the rest of the conversation.",
+    "startTime": 20.76,
+    "endTime": 24.199625,
+    "isFinal": false,
+    "resultsFinalizationTime": 20.76,
+    "fragments": [
+      {
+        "text": " but it must preserve the rest of the conversation.",
+        "startTime": 20.76,
+        "endTime": 24.199625
+      }
+    ]
+  },
+  {
+    "text": " But it must preserve the rest of the conversation.",
+    "startTime": 20.76,
+    "endTime": 23.28,
+    "isFinal": true,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " But",
+        "startTime": 20.76,
+        "endTime": 21.3
+      },
+      {
+        "text": " it",
+        "startTime": 21.3,
+        "endTime": 21.42
+      },
+      {
+        "text": " must",
+        "startTime": 21.42,
+        "endTime": 21.54
+      },
+      {
+        "text": " preserve",
+        "startTime": 21.54,
+        "endTime": 22.02
+      },
+      {
+        "text": " the",
+        "startTime": 22.02,
+        "endTime": 22.26
+      },
+      {
+        "text": " rest",
+        "startTime": 22.26,
+        "endTime": 22.32
+      },
+      {
+        "text": " of",
+        "startTime": 22.32,
+        "endTime": 22.5
+      },
+      {
+        "text": " the",
+        "startTime": 22.5,
+        "endTime": 22.62
+      },
+      {
+        "text": " conversation.",
+        "startTime": 22.62,
+        "endTime": 23.22
+      }
+    ]
+  },
+  {
+    "text": " The",
+    "startTime": 23.28,
+    "endTime": 25.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The",
+        "startTime": 23.28,
+        "endTime": 25.999625
+      }
+    ]
+  },
+  {
+    "text": " The third",
+    "startTime": 23.28,
+    "endTime": 25.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The third",
+        "startTime": 23.28,
+        "endTime": 25.999625
+      }
+    ]
+  },
+  {
+    "text": " The third topic",
+    "startTime": 23.28,
+    "endTime": 25.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The third topic",
+        "startTime": 23.28,
+        "endTime": 25.999625
+      }
+    ]
+  },
+  {
+    "text": " The third topic is",
+    "startTime": 23.28,
+    "endTime": 26.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The third topic is",
+        "startTime": 23.28,
+        "endTime": 26.999625
+      }
+    ]
+  },
+  {
+    "text": " The third topic is sav",
+    "startTime": 23.28,
+    "endTime": 26.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The third topic is sav",
+        "startTime": 23.28,
+        "endTime": 26.999625
+      }
+    ]
+  },
+  {
+    "text": " The third topic is saving",
+    "startTime": 23.28,
+    "endTime": 26.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The third topic is saving",
+        "startTime": 23.28,
+        "endTime": 26.999625
+      }
+    ]
+  },
+  {
+    "text": " The third topic is saving our",
+    "startTime": 23.28,
+    "endTime": 26.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The third topic is saving our",
+        "startTime": 23.28,
+        "endTime": 26.999625
+      }
+    ]
+  },
+  {
+    "text": " The third topic is saving our work",
+    "startTime": 23.28,
+    "endTime": 26.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The third topic is saving our work",
+        "startTime": 23.28,
+        "endTime": 26.999625
+      }
+    ]
+  },
+  {
+    "text": " The third topic is saving our work.",
+    "startTime": 23.28,
+    "endTime": 27.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 23.28,
+    "fragments": [
+      {
+        "text": " The third topic is saving our work.",
+        "startTime": 23.28,
+        "endTime": 27.999625
+      }
+    ]
+  },
+  {
+    "text": " The third topic is saving our work.",
+    "startTime": 24,
+    "endTime": 27,
+    "isFinal": true,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " The",
+        "startTime": 24,
+        "endTime": 25.26
+      },
+      {
+        "text": " third",
+        "startTime": 25.26,
+        "endTime": 25.38
+      },
+      {
+        "text": " topic",
+        "startTime": 25.38,
+        "endTime": 25.68
+      },
+      {
+        "text": " is",
+        "startTime": 25.68,
+        "endTime": 26.04
+      },
+      {
+        "text": " saving",
+        "startTime": 26.04,
+        "endTime": 26.22
+      },
+      {
+        "text": " our",
+        "startTime": 26.22,
+        "endTime": 26.34
+      },
+      {
+        "text": " work.",
+        "startTime": 26.34,
+        "endTime": 26.94
+      }
+    ]
+  },
+  {
+    "text": " Ex",
+    "startTime": 27,
+    "endTime": 27.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Ex",
+        "startTime": 27,
+        "endTime": 27.999625
+      }
+    ]
+  },
+  {
+    "text": " Export",
+    "startTime": 27,
+    "endTime": 27.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export",
+        "startTime": 27,
+        "endTime": 27.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should",
+    "startTime": 27,
+    "endTime": 27.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should",
+        "startTime": 27,
+        "endTime": 27.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy",
+    "startTime": 27,
+    "endTime": 28.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy",
+        "startTime": 27,
+        "endTime": 28.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the",
+    "startTime": 27,
+    "endTime": 28.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the",
+        "startTime": 27,
+        "endTime": 28.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording",
+    "startTime": 27,
+    "endTime": 28.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording",
+        "startTime": 27,
+        "endTime": 28.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and",
+    "startTime": 27,
+    "endTime": 29.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and",
+        "startTime": 27,
+        "endTime": 29.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the",
+    "startTime": 27,
+    "endTime": 29.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the",
+        "startTime": 27,
+        "endTime": 29.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the exist",
+    "startTime": 27,
+    "endTime": 29.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the exist",
+        "startTime": 27,
+        "endTime": 29.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the existing",
+    "startTime": 27,
+    "endTime": 29.999625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the existing",
+        "startTime": 27,
+        "endTime": 29.999625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the existing trans",
+    "startTime": 27,
+    "endTime": 30.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the existing trans",
+        "startTime": 27,
+        "endTime": 30.799625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the existing transcript",
+    "startTime": 27,
+    "endTime": 30.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the existing transcript",
+        "startTime": 27,
+        "endTime": 30.799625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the existing transcript im",
+    "startTime": 27,
+    "endTime": 30.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the existing transcript im",
+        "startTime": 27,
+        "endTime": 30.799625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the existing transcript immedi",
+    "startTime": 27,
+    "endTime": 30.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the existing transcript immedi",
+        "startTime": 27,
+        "endTime": 30.799625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the existing transcript immediately",
+    "startTime": 27,
+    "endTime": 31.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the existing transcript immediately",
+        "startTime": 27,
+        "endTime": 31.799625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the existing transcript immediately.",
+    "startTime": 27,
+    "endTime": 31.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 27,
+    "fragments": [
+      {
+        "text": " Export should copy the recording and the existing transcript immediately.",
+        "startTime": 27,
+        "endTime": 31.799625
+      }
+    ]
+  },
+  {
+    "text": " Export should copy the recording and the existing transcript immediately.",
+    "startTime": 27,
+    "endTime": 30.9,
+    "isFinal": true,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " Export",
+        "startTime": 27,
+        "endTime": 27.48
+      },
+      {
+        "text": " should",
+        "startTime": 27.48,
+        "endTime": 27.72
+      },
+      {
+        "text": " copy",
+        "startTime": 27.72,
+        "endTime": 28.02
+      },
+      {
+        "text": " the",
+        "startTime": 28.02,
+        "endTime": 28.26
+      },
+      {
+        "text": " recording",
+        "startTime": 28.26,
+        "endTime": 28.44
+      },
+      {
+        "text": " and",
+        "startTime": 28.44,
+        "endTime": 29.04
+      },
+      {
+        "text": " the",
+        "startTime": 29.04,
+        "endTime": 29.1
+      },
+      {
+        "text": " existing",
+        "startTime": 29.1,
+        "endTime": 29.4
+      },
+      {
+        "text": " transcript",
+        "startTime": 29.4,
+        "endTime": 30.06
+      },
+      {
+        "text": " immediately.",
+        "startTime": 30.06,
+        "endTime": 30.84
+      }
+    ]
+  },
+  {
+    "text": " We",
+    "startTime": 30.9,
+    "endTime": 31.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We",
+        "startTime": 30.9,
+        "endTime": 31.799625
+      }
+    ]
+  },
+  {
+    "text": " We do",
+    "startTime": 30.9,
+    "endTime": 31.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do",
+        "startTime": 30.9,
+        "endTime": 31.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not",
+    "startTime": 30.9,
+    "endTime": 32.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not",
+        "startTime": 30.9,
+        "endTime": 32.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need",
+    "startTime": 30.9,
+    "endTime": 32.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not need",
+        "startTime": 30.9,
+        "endTime": 32.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need to",
+    "startTime": 30.9,
+    "endTime": 32.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not need to",
+        "startTime": 30.9,
+        "endTime": 32.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need to translate",
+    "startTime": 30.9,
+    "endTime": 32.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not need to translate",
+        "startTime": 30.9,
+        "endTime": 32.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need to translate the",
+    "startTime": 30.9,
+    "endTime": 33.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not need to translate the",
+        "startTime": 30.9,
+        "endTime": 33.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need to translate the whole",
+    "startTime": 30.9,
+    "endTime": 33.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not need to translate the whole",
+        "startTime": 30.9,
+        "endTime": 33.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need to translate the whole meeting",
+    "startTime": 30.9,
+    "endTime": 33.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not need to translate the whole meeting",
+        "startTime": 30.9,
+        "endTime": 33.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need to translate the whole meeting again",
+    "startTime": 30.9,
+    "endTime": 34.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not need to translate the whole meeting again",
+        "startTime": 30.9,
+        "endTime": 34.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need to translate the whole meeting again.",
+    "startTime": 30.9,
+    "endTime": 34.799625,
+    "isFinal": false,
+    "resultsFinalizationTime": 30.9,
+    "fragments": [
+      {
+        "text": " We do not need to translate the whole meeting again.",
+        "startTime": 30.9,
+        "endTime": 34.799625
+      }
+    ]
+  },
+  {
+    "text": " We do not need to translate the whole meeting again.",
+    "startTime": 30.9,
+    "endTime": 33.78,
+    "isFinal": true,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " We",
+        "startTime": 30.9,
+        "endTime": 31.38
+      },
+      {
+        "text": " do",
+        "startTime": 31.38,
+        "endTime": 31.44
+      },
+      {
+        "text": " not",
+        "startTime": 31.44,
+        "endTime": 31.74
+      },
+      {
+        "text": " need",
+        "startTime": 31.74,
+        "endTime": 31.8
+      },
+      {
+        "text": " to",
+        "startTime": 31.8,
+        "endTime": 31.98
+      },
+      {
+        "text": " translate",
+        "startTime": 31.98,
+        "endTime": 32.16
+      },
+      {
+        "text": " the",
+        "startTime": 32.16,
+        "endTime": 32.82
+      },
+      {
+        "text": " whole",
+        "startTime": 32.82,
+        "endTime": 32.94
+      },
+      {
+        "text": " meeting",
+        "startTime": 32.94,
+        "endTime": 33.12
+      },
+      {
+        "text": " again.",
+        "startTime": 33.12,
+        "endTime": 33.72
+      }
+    ]
+  },
+  {
+    "text": " Fin",
+    "startTime": 33.78,
+    "endTime": 36.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Fin",
+        "startTime": 33.78,
+        "endTime": 36.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally",
+    "startTime": 33.78,
+    "endTime": 36.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally",
+        "startTime": 33.78,
+        "endTime": 36.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally,",
+    "startTime": 33.78,
+    "endTime": 36.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally,",
+        "startTime": 33.78,
+        "endTime": 36.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember",
+    "startTime": 33.78,
+    "endTime": 37.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember",
+        "startTime": 33.78,
+        "endTime": 37.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the",
+    "startTime": 33.78,
+    "endTime": 37.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the",
+        "startTime": 33.78,
+        "endTime": 37.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three",
+    "startTime": 33.78,
+    "endTime": 37.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three",
+        "startTime": 33.78,
+        "endTime": 37.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors",
+    "startTime": 33.78,
+    "endTime": 37.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors",
+        "startTime": 33.78,
+        "endTime": 37.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors,",
+    "startTime": 33.78,
+    "endTime": 38.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors,",
+        "startTime": 33.78,
+        "endTime": 38.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors, red",
+    "startTime": 33.78,
+    "endTime": 38.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors, red",
+        "startTime": 33.78,
+        "endTime": 38.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors, red,",
+    "startTime": 33.78,
+    "endTime": 38.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors, red,",
+        "startTime": 33.78,
+        "endTime": 38.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors, red, green",
+    "startTime": 33.78,
+    "endTime": 39.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors, red, green",
+        "startTime": 33.78,
+        "endTime": 39.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors, red, green,",
+    "startTime": 33.78,
+    "endTime": 39.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors, red, green,",
+        "startTime": 33.78,
+        "endTime": 39.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors, red, green, and",
+    "startTime": 33.78,
+    "endTime": 39.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors, red, green, and",
+        "startTime": 33.78,
+        "endTime": 39.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors, red, green, and blue",
+    "startTime": 33.78,
+    "endTime": 39.599625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors, red, green, and blue",
+        "startTime": 33.78,
+        "endTime": 39.599625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors, red, green, and blue.",
+    "startTime": 33.78,
+    "endTime": 40.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 33.78,
+    "fragments": [
+      {
+        "text": " Finally, remember the three colors, red, green, and blue.",
+        "startTime": 33.78,
+        "endTime": 40.399625
+      }
+    ]
+  },
+  {
+    "text": " Finally, remember the three colors, red, green, and blue.",
+    "startTime": 34.38,
+    "endTime": 39.48,
+    "isFinal": true,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " Finally,",
+        "startTime": 34.38,
+        "endTime": 35.94
+      },
+      {
+        "text": " remember",
+        "startTime": 35.94,
+        "endTime": 36.54
+      },
+      {
+        "text": " the",
+        "startTime": 36.54,
+        "endTime": 36.72
+      },
+      {
+        "text": " three",
+        "startTime": 36.72,
+        "endTime": 36.78
+      },
+      {
+        "text": " colors,",
+        "startTime": 36.78,
+        "endTime": 37.5
+      },
+      {
+        "text": " red,",
+        "startTime": 37.5,
+        "endTime": 38.04
+      },
+      {
+        "text": " green,",
+        "startTime": 38.04,
+        "endTime": 38.64
+      },
+      {
+        "text": " and",
+        "startTime": 38.64,
+        "endTime": 38.76
+      },
+      {
+        "text": " blue.",
+        "startTime": 38.76,
+        "endTime": 39.42
+      }
+    ]
+  },
+  {
+    "text": " This",
+    "startTime": 39.48,
+    "endTime": 40.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This",
+        "startTime": 39.48,
+        "endTime": 40.399625
+      }
+    ]
+  },
+  {
+    "text": " This is",
+    "startTime": 39.48,
+    "endTime": 40.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This is",
+        "startTime": 39.48,
+        "endTime": 40.399625
+      }
+    ]
+  },
+  {
+    "text": " This is the",
+    "startTime": 39.48,
+    "endTime": 40.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This is the",
+        "startTime": 39.48,
+        "endTime": 40.399625
+      }
+    ]
+  },
+  {
+    "text": " This is the end",
+    "startTime": 39.48,
+    "endTime": 40.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This is the end",
+        "startTime": 39.48,
+        "endTime": 40.399625
+      }
+    ]
+  },
+  {
+    "text": " This is the end of",
+    "startTime": 39.48,
+    "endTime": 40.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This is the end of",
+        "startTime": 39.48,
+        "endTime": 40.399625
+      }
+    ]
+  },
+  {
+    "text": " This is the end of the",
+    "startTime": 39.48,
+    "endTime": 41.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This is the end of the",
+        "startTime": 39.48,
+        "endTime": 41.399625
+      }
+    ]
+  },
+  {
+    "text": " This is the end of the recording",
+    "startTime": 39.48,
+    "endTime": 41.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This is the end of the recording",
+        "startTime": 39.48,
+        "endTime": 41.399625
+      }
+    ]
+  },
+  {
+    "text": " This is the end of the recording test",
+    "startTime": 39.48,
+    "endTime": 42.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This is the end of the recording test",
+        "startTime": 39.48,
+        "endTime": 42.399625
+      }
+    ]
+  },
+  {
+    "text": " This is the end of the recording test.",
+    "startTime": 39.48,
+    "endTime": 42.399625,
+    "isFinal": false,
+    "resultsFinalizationTime": 39.48,
+    "fragments": [
+      {
+        "text": " This is the end of the recording test.",
+        "startTime": 39.48,
+        "endTime": 42.399625
+      }
+    ]
+  },
+  {
+    "text": " This is the end of the recording test.",
+    "startTime": 39.48,
+    "endTime": 41.46,
+    "isFinal": true,
+    "resultsFinalizationTime": 41.46,
+    "fragments": [
+      {
+        "text": " This",
+        "startTime": 39.48,
+        "endTime": 39.72
+      },
+      {
+        "text": " is",
+        "startTime": 39.72,
+        "endTime": 39.84
+      },
+      {
+        "text": " the",
+        "startTime": 39.84,
+        "endTime": 39.96
+      },
+      {
+        "text": " end",
+        "startTime": 39.96,
+        "endTime": 40.08
+      },
+      {
+        "text": " of",
+        "startTime": 40.08,
+        "endTime": 40.26
+      },
+      {
+        "text": " the",
+        "startTime": 40.26,
+        "endTime": 40.44
+      },
+      {
+        "text": " recording",
+        "startTime": 40.44,
+        "endTime": 40.62
+      },
+      {
+        "text": " test.",
+        "startTime": 40.62,
+        "endTime": 41.4
+      }
+    ]
+  }
+]

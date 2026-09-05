@@ -208,7 +208,7 @@ struct RecordingPipelineTests {
 
         #expect(event == .preview("Hello everyone, my name is"))
         let stableEvents = assembler.advanceStableBoundary(to: 3)
-        guard case let .committed(sentence) = stableEvents.first else {
+        guard case let .committed(sentence, _) = stableEvents.first else {
             Issue.record("Expected a committed sentence.")
             return
         }
@@ -245,7 +245,7 @@ struct RecordingPipelineTests {
         let stableEvents = assembler.advanceStableBoundary(to: 4)
 
         #expect(stableEvents.count == 1)
-        guard case let .committed(sentence) = stableEvents.first else {
+        guard case let .committed(sentence, _) = stableEvents.first else {
             Issue.record("Expected a committed sentence.")
             return
         }
@@ -278,7 +278,7 @@ struct RecordingPipelineTests {
 
         #expect(preview == .preview("Hello everyone, my name is"))
         #expect(stableEvents.count == 1)
-        guard case let .committed(sentence) = stableEvents.first else {
+        guard case let .committed(sentence, _) = stableEvents.first else {
             Issue.record("Expected a committed sentence.")
             return
         }
@@ -382,13 +382,16 @@ struct RecordingPipelineTests {
         )
         let stableEvents = assembler.advanceStableBoundary(to: 5)
 
-        #expect(duplicate == .preview("Hello everyone, my name is Joanna."))
+        #expect(duplicate == .none)
+        #expect(assembler.previewText.isEmpty)
         #expect(stableEvents.count == 1)
-        guard case let .committed(sentence) = stableEvents.first else {
+        guard case let .committed(sentence, _) = stableEvents.first else {
             Issue.record("Expected the newer pending correction to commit.")
             return
         }
-        #expect(sentence.text == "Hello everyone, my name is Joanna.")
+        #expect(sentence.text == "my name is Joanna.")
+        #expect(sentence.startTime == 2)
+        #expect(sentence.endTime == 4)
     }
 
     @Test("speech analyzer assembler commits final updates once")
@@ -423,7 +426,7 @@ struct RecordingPipelineTests {
             )
         )
 
-        guard case let .committed(sentence) = first else {
+        guard case let .committed(sentence, _) = first else {
             Issue.record("Expected a committed sentence.")
             return
         }
@@ -433,6 +436,320 @@ struct RecordingPipelineTests {
         #expect(sentence.translation == "")
         #expect(sentence.confidence == .high)
         #expect(duplicate == .none)
+    }
+
+    @Test("speech analyzer accepts a shorter final correction within the same range")
+    func speechAnalyzerAcceptsShorterFinalCorrection() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("I I I believe this", start: 0, end: 3))
+
+        _ = await store.apply(speechUpdate("I believe this.", start: 0, end: 3, final: true))
+
+        let sentences = await store.snapshot()
+        #expect(sentences.map(\.text) == ["I believe this."])
+        #expect(sentences.first?.confidence == .high)
+    }
+
+    @Test("speech analyzer accepts equal-length volatile corrections")
+    func speechAnalyzerAcceptsEqualLengthVolatileCorrection() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("My name is John.", start: 0, end: 3))
+
+        let events = await store.apply(speechUpdate("My name is Joan.", start: 0, end: 3))
+        _ = await store.finish()
+
+        #expect(events.last == .preview("My name is Joan."))
+        #expect(await store.snapshot().map(\.text) == ["My name is Joan."])
+    }
+
+    @Test("committing one fragment preserves an overlapping pending sentence")
+    func committingFragmentPreservesOverlappingPendingSentence() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("First sentence.", start: 0, end: 2.2))
+        let combined = await store.apply(speechUpdate(
+            "The next sentence has more words.", start: 2.1, end: 5
+        ))
+        #expect(combined.last == .preview("First sentence. The next sentence has more words."))
+
+        let committed = await store.apply(speechUpdate("First sentence.", start: 0, end: 2.2, final: true))
+        #expect(committed.last == .preview("The next sentence has more words."))
+        _ = await store.finish()
+
+        #expect(await store.snapshot().map(\.text) == [
+            "First sentence.", "The next sentence has more words."
+        ])
+    }
+
+    @Test("finalizing a prefix retains its pending suffix without duplication")
+    func finalizingPrefixRetainsPendingSuffixWithoutDuplication() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("A B C D", start: 0, end: 8))
+
+        let prefixEvents = await store.apply(speechUpdate("A B", start: 0, end: 4, final: true))
+        #expect(prefixEvents.last == .preview("C D"))
+        #expect(await store.snapshot().map(\.text) == ["A B"])
+        _ = await store.apply(speechUpdate("C D", start: 4, end: 8, final: true))
+        _ = await store.finish()
+
+        #expect(await store.snapshot().map(\.text) == ["A B", "C D"])
+    }
+
+    @Test("finalizing a suffix retains its pending prefix without duplication")
+    func finalizingSuffixRetainsPendingPrefixWithoutDuplication() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("A B C D", start: 0, end: 8))
+
+        let suffixEvents = await store.apply(speechUpdate("C D", start: 4, end: 8, final: true))
+        #expect(suffixEvents.last == .preview("A B"))
+        _ = await store.apply(speechUpdate("A B", start: 0, end: 4, final: true))
+        _ = await store.finish()
+
+        #expect(await store.snapshot().map(\.text) == ["A B", "C D"])
+    }
+
+    @Test("word timestamps preserve surrounding speech when a final fragment changes wording")
+    func wordTimestampsPreserveSurroundingSpeechDuringCorrection() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        var pending = speechUpdate("Before wrong wording after.", start: 0, end: 8)
+        pending.fragments = [
+            SpeechAnalyzerTranscriptFragment(text: "Before ", startTime: 0, endTime: 2),
+            SpeechAnalyzerTranscriptFragment(text: "wrong wording ", startTime: 2, endTime: 6),
+            SpeechAnalyzerTranscriptFragment(text: "after.", startTime: 6, endTime: 8)
+        ]
+        _ = await store.apply(pending)
+
+        let correction = await store.apply(speechUpdate("corrected words", start: 2, end: 6, final: true))
+        #expect(correction.last == .preview("Before after."))
+        _ = await store.finish()
+
+        #expect(await store.snapshot().map(\.text) == ["Before", "corrected words", "after."])
+    }
+
+    @Test("old pending text cannot overwrite a corrected final sentence")
+    func oldPendingTextCannotOverwriteCorrectedFinalSentence() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("The secondnd topic is translation. More words follow.", start: 0, end: 8))
+        _ = await store.apply(speechUpdate("The second topic is translation.", start: 0, end: 5, final: true))
+        _ = await store.finish()
+
+        let sentences = await store.snapshot()
+        #expect(sentences.contains { $0.text == "The second topic is translation." && $0.confidence == .high })
+    }
+
+    @Test("timed fragments cannot remove characters from inside a word")
+    func timedFragmentsCannotRemoveCharactersInsideWord() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        var pending = speechUpdate("Export notes.", start: 0, end: 4)
+        pending.fragments = [
+            SpeechAnalyzerTranscriptFragment(text: "Ex", startTime: 1, endTime: 2),
+            SpeechAnalyzerTranscriptFragment(text: "p", startTime: 0, endTime: 1),
+            SpeechAnalyzerTranscriptFragment(text: "ort ", startTime: 2, endTime: 3),
+            SpeechAnalyzerTranscriptFragment(text: "notes.", startTime: 3, endTime: 4)
+        ]
+        _ = await store.apply(pending)
+        let events = await store.apply(speechUpdate("An earlier word.", start: 0, end: 1, final: true))
+        _ = await store.finish()
+
+        #expect(events.last == .preview("Export notes."))
+        #expect(!(await store.snapshot()).contains { $0.text.contains("Exort") })
+    }
+
+    @Test("subsecond prefix and suffix keep their source order in snapshots and the session")
+    func subsecondPrefixAndSuffixKeepSourceOrder() async throws {
+        let assemblyStore = SpeechAnalyzerTranscriptAssemblyStore()
+        var sessionStore = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_800))
+        let session = sessionStore.createRecording(named: "Lecture")
+        _ = await assemblyStore.apply(speechUpdate("The next", start: 0.1, end: 0.9))
+        var final = speechUpdate("next", start: 0.5, end: 0.9, final: true)
+        final.resultsFinalizationTime = 0.9
+        for case let .committed(sentence, replacing) in await assemblyStore.apply(final) {
+            try sessionStore.upsertTranscript(in: session.id, sentence: sentence, replacingSentenceIDs: replacing)
+        }
+
+        let snapshot = await assemblyStore.snapshot()
+        #expect(snapshot.map(\.text) == ["The", "next"])
+        #expect(snapshot.map(\.sourceStartTime) == [0.1, 0.5])
+        #expect(snapshot.allSatisfy { $0.startTime == 0 && $0.endTime == 1 })
+        #expect(sessionStore.session(id: session.id)?.transcript.map(\.text) == ["The", "next"])
+    }
+
+    @Test("final words are not suppressed by a longer word with the same characters")
+    func finalWordsAreNotSuppressedByCharacterPrefix() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("Theodore is joining", start: 0, end: 2))
+        _ = await store.apply(speechUpdate("The", start: 0, end: 0.3, final: true))
+
+        #expect(await store.snapshot().map(\.text) == ["The"])
+        #expect(await store.snapshot().first?.confidence == .high)
+    }
+
+    @Test("precise sentence ordering supports legacy libraries and survives saving")
+    func preciseSentenceOrderingSupportsLegacyLibraries() throws {
+        let directory = try temporaryDirectory()
+        defer { try? FileManager.default.removeItem(at: directory) }
+        let fileStore = SessionFileStore(url: directory.appendingPathComponent("sessions.json"))
+        let legacy = """
+        [{"id":"AAAAAAAA-BBBB-CCCC-DDDD-EEEEEEEEEEEE","title":"Lecture","createdAt":"2026-09-05T00:00:00Z","status":{"saved":{"durationSeconds":1}},"transcript":[{"id":"BBBBBBBB-BBBB-CCCC-DDDD-EEEEEEEEEEEE","startTime":0,"endTime":1,"text":"The next","translation":"下一位","confidence":"high"}]}]
+        """
+        try legacy.write(to: fileStore.url, atomically: true, encoding: .utf8)
+        var sessions = try fileStore.load()
+        #expect(sessions.first?.transcript.first?.sourceStartTime == nil)
+        try fileStore.save(sessions)
+        #expect(try fileStore.load() == sessions)
+
+        sessions[0].transcript[0].sourceStartTime = 0.125
+        try fileStore.save(sessions)
+        #expect(try fileStore.load() == sessions)
+        #expect(try fileStore.load().first?.transcript.first?.sourceStartTime == 0.125)
+    }
+
+    @Test("native progressive results retain final corrections without stale duplicate sentences", arguments: [
+        "native-speech-progressive-results", "native-speech-long-progressive-results",
+        "native-speech-acoustic-results"
+    ])
+    func nativeProgressiveResultsRetainFinalCorrections(_ fixtureName: String) async throws {
+        let fixtureURL = try #require(Bundle.module.url(
+            forResource: fixtureName, withExtension: "json", subdirectory: "Fixtures"
+        ))
+        let results = try JSONDecoder().decode([RecordedSpeechResult].self, from: Data(contentsOf: fixtureURL))
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        for result in results {
+            var update = speechUpdate(result.text, start: result.startTime, end: result.endTime, final: result.isFinal)
+            update.resultsFinalizationTime = result.resultsFinalizationTime
+            update.fragments = result.fragments.map {
+                SpeechAnalyzerTranscriptFragment(text: $0.text, startTime: $0.startTime, endTime: $0.endTime)
+            }
+            _ = await store.apply(update)
+        }
+        _ = await store.finish()
+
+        let expected = results.filter(\.isFinal).map { $0.text.trimmingCharacters(in: .whitespacesAndNewlines) }
+        let actual = await store.snapshot().map(\.text)
+        #expect(results.count == (fixtureName.contains("-long-") ? 433 : fixtureName.contains("-acoustic-") ? 143 : 144))
+        #expect(actual == expected)
+        #expect(!actual.contains { $0.contains("secondnd") || $0.contains("thirdrd") || $0.contains("thirdr ") || $0.contains("Exort") })
+    }
+
+    @Test("coarse word splitting corrections retain the following sentence")
+    func coarseWordSplittingCorrectionsRetainFollowingSentence() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("Please keep the in put stream running.", start: 0, end: 5))
+        _ = await store.apply(speechUpdate("The next speaker is ready.", start: 5.1, end: 7))
+        var correction = speechUpdate("Please keep the input stream running.", start: 0, end: 4.5, final: true)
+        correction.resultsFinalizationTime = 5
+        _ = await store.apply(correction)
+        _ = await store.finish()
+
+        #expect(await store.snapshot().map(\.text) == [
+            "Please keep the input stream running.", "The next speaker is ready."
+        ])
+    }
+
+    @Test("coarse phrase matching preserves a real unfinished suffix")
+    func coarsePhraseMatchingPreservesRealSuffix() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("Please keep every recorded sentence visible. Another person starts talking.", start: 0, end: 7))
+        _ = await store.apply(speechUpdate("Please keep every recorded sentence visible.", start: 0, end: 4.5, final: true))
+        _ = await store.finish()
+
+        #expect(await store.snapshot().map(\.text) == [
+            "Please keep every recorded sentence visible.", "Another person starts talking."
+        ])
+    }
+
+    @Test("speech analyzer commits corrections before their result finalization boundary")
+    func speechAnalyzerUsesOrderedResultFinalizationBoundary() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("The wrong name.", start: 0, end: 2))
+        var correction = speechUpdate("The right name.", start: 0, end: 2)
+        correction.resultsFinalizationTime = 2
+
+        let events = await store.apply(correction)
+
+        #expect(await store.snapshot().map(\.text) == ["The right name."])
+        #expect(events.last == .preview(""))
+    }
+
+    @Test("result finalization retains the next pending sentence in the preview")
+    func resultFinalizationRetainsNextPendingSentence() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("First sentence.", start: 0, end: 2))
+        var next = speechUpdate("Next sentence.", start: 2, end: 4)
+        next.resultsFinalizationTime = 2
+
+        let events = await store.apply(next)
+
+        #expect(await store.snapshot().map(\.text) == ["First sentence."])
+        #expect(events.last == .preview("Next sentence."))
+    }
+
+    @Test("range corrections identify every superseded sentence")
+    func rangeCorrectionsIdentifySupersededSentences() async throws {
+        let assemblyStore = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await assemblyStore.apply(speechUpdate("Good", start: 0, end: 1, final: true))
+        _ = await assemblyStore.apply(speechUpdate("morning", start: 1, end: 2, final: true))
+        let originals = await assemblyStore.snapshot()
+        var sessionStore = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_800))
+        let session = sessionStore.createRecording(named: "Lecture")
+        try sessionStore.appendTranscript(to: session.id, sentences: originals)
+
+        let events = await assemblyStore.apply(speechUpdate("Good morning.", start: 0, end: 2, final: true))
+        guard case let .committed(sentence, replacing) = events.first else {
+            Issue.record("Expected the corrected sentence.")
+            return
+        }
+        try sessionStore.upsertTranscript(
+            in: session.id, sentence: sentence, replacingSentenceIDs: replacing
+        )
+
+        #expect(Set(replacing) == Set(originals.map(\.id)))
+        #expect(sentence.id == originals.first?.id)
+        #expect(await assemblyStore.snapshot().map(\.text) == ["Good morning."])
+        #expect(sessionStore.session(id: session.id)?.transcript.map(\.text) == ["Good morning."])
+    }
+
+    @Test("subsecond speech fragments survive identical displayed timestamps")
+    func subsecondFragmentsSurviveIdenticalDisplayedTimestamps() async throws {
+        let assemblyStore = SpeechAnalyzerTranscriptAssemblyStore()
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_800))
+        let session = store.createRecording(named: "Lecture")
+        for update in [
+            speechUpdate("Yes.", start: 0.1, end: 0.4, final: true),
+            speechUpdate("Yes.", start: 0.5, end: 0.9, final: true)
+        ] {
+            for case let .committed(sentence, replacing) in await assemblyStore.apply(update) {
+                try store.upsertTranscript(in: session.id, sentence: sentence, replacingSentenceIDs: replacing)
+            }
+        }
+
+        let sentences = try #require(store.session(id: session.id)?.transcript)
+        #expect(sentences.map(\.text) == ["Yes.", "Yes."])
+        #expect(Set(sentences.map(\.id)).count == 2)
+        #expect(sentences.allSatisfy { $0.startTime == 0 && $0.endTime == 1 })
+    }
+
+    @Test("nearby short audio ranges retain separate recognized words")
+    func nearbyShortAudioRangesRetainSeparateRecognizedWords() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("a", start: 0.10, end: 0.13, final: true))
+        _ = await store.apply(speechUpdate("new", start: 0.14, end: 0.17, final: true))
+
+        #expect(await store.snapshot().map(\.text) == ["a", "new"])
+    }
+
+    @Test("finishing saves pending speech with low confidence and ignores later results")
+    func finishingSavesPendingSpeechAndIgnoresLaterResults() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("Completed sentence.", start: 0, end: 2, final: true))
+        _ = await store.apply(speechUpdate("The latest unfinished thought", start: 2, end: 5))
+
+        _ = await store.finish()
+        let lateEvents = await store.apply(speechUpdate("Unrelated late result.", start: 0, end: 5, final: true))
+
+        let sentences = await store.snapshot()
+        #expect(sentences.map(\.text) == ["Completed sentence.", "The latest unfinished thought"])
+        #expect(sentences.map(\.confidence) == [.high, .low])
+        #expect(lateEvents.isEmpty)
     }
 
     @Test("final transcript segmenter merges phrase-level speech results into readable utterances")
@@ -745,33 +1062,70 @@ struct RecordingPipelineTests {
         #expect(count == 300)
     }
 
+    @Test("cancelled live startup exits before requesting speech access")
+    func cancelledLiveStartupExitsBeforeRequestingSpeechAccess() async {
+        let transcriber = NativeSpeechLiveTranscriber()
+        let events = LiveAudioHandlerProbe()
+        let startTask = Task {
+            try? await Task.sleep(nanoseconds: 10_000_000_000)
+            try await transcriber.start { _ in events.record() }
+        }
+        startTask.cancel()
+
+        do {
+            try await startTask.value
+            Issue.record("Cancelled speech startup must stop before setup.")
+        } catch is CancellationError {
+        } catch {
+            Issue.record("Cancelled speech startup returned an unexpected error: \(error)")
+        }
+
+        #expect(events.count == 0)
+        #expect(await transcriber.finish().isEmpty)
+    }
+
     @Test("live finish drains committed transcript before timeout")
     func liveFinishDrainsCommittedTranscriptBeforeTimeout() async {
-        let store = LiveTranscriptCommitStore()
-        let sentence = TranscriptSentence(
-            startTime: 0,
-            endTime: 3,
-            text: "Final transcript.",
-            translation: "",
-            confidence: .high
-        )
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
         let analysisTask = Task<Void, Never> {
             try? await Task.sleep(nanoseconds: 20_000_000)
         }
         let resultTask = Task<[TranscriptSentence], Never> {
             try? await Task.sleep(nanoseconds: 40_000_000)
-            await store.append(sentence)
+            _ = await store.apply(speechUpdate("Final transcript.", start: 0, end: 3, final: true))
             return await store.snapshot()
         }
 
         let transcript = await NativeSpeechLiveTranscriber.drain(
             analysisTask: analysisTask,
             resultTask: resultTask,
-            commitStore: store,
+            assemblyStore: store,
             timeoutSeconds: 1
         )
 
         #expect(transcript.map(\.text) == ["Final transcript."])
+    }
+
+    @Test("live finish timeout returns before unresponsive analysis completes")
+    func liveFinishTimeoutReturnsBeforeAnalysisCompletes() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        _ = await store.apply(speechUpdate("Already saved.", start: 0, end: 2, final: true))
+        _ = await store.apply(speechUpdate("Last unfinished words", start: 2, end: 5))
+        let analysisTask = Task<Void, Never> {
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
+        }
+        let start = ContinuousClock.now
+
+        let sentences = await NativeSpeechLiveTranscriber.drain(
+            analysisTask: analysisTask, resultTask: nil, assemblyStore: store, timeoutSeconds: 0.1
+        )
+        let elapsed = start.duration(to: .now)
+        analysisTask.cancel()
+        await analysisTask.value
+
+        #expect(elapsed < .seconds(1))
+        #expect(sentences.map(\.text) == ["Already saved.", "Last unfinished words"])
+        #expect(sentences.map(\.confidence) == [.high, .low])
     }
 
     @Test("final transcription uses SpeechAnalyzer file input")
@@ -1099,6 +1453,36 @@ struct RecordingPipelineTests {
             .appendingPathComponent("RecordingPipeline.swift")
         return try String(contentsOf: sourceURL, encoding: .utf8)
     }
+}
+
+private struct RecordedSpeechResult: Decodable {
+    struct Fragment: Decodable {
+        var text: String
+        var startTime: Double
+        var endTime: Double
+    }
+
+    var text: String
+    var startTime: Double
+    var endTime: Double
+    var isFinal: Bool
+    var resultsFinalizationTime: Double
+    var fragments: [Fragment]
+}
+
+private func speechUpdate(
+    _ text: String,
+    start: TimeInterval,
+    end: TimeInterval,
+    final: Bool = false
+) -> SpeechAnalyzerTranscriptUpdate {
+    SpeechAnalyzerTranscriptUpdate(
+        text: text,
+        startTime: start,
+        endTime: end,
+        isFinal: final,
+        confidence: final ? .high : .medium
+    )
 }
 
 private func transcript(_ text: String, start: Int, end: Int) -> TranscriptSentence {

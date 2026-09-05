@@ -101,6 +101,7 @@ public struct TranscriptSentence: Codable, Identifiable, Equatable, Sendable {
     public var text: String
     public var translation: String
     public var confidence: TranscriptConfidence
+    public var sourceStartTime: Double?
 
     public init(
         id: UUID = UUID(),
@@ -108,7 +109,8 @@ public struct TranscriptSentence: Codable, Identifiable, Equatable, Sendable {
         endTime: Int,
         text: String,
         translation: String,
-        confidence: TranscriptConfidence
+        confidence: TranscriptConfidence,
+        sourceStartTime: Double? = nil
     ) {
         self.id = id
         self.startTime = startTime
@@ -116,6 +118,16 @@ public struct TranscriptSentence: Codable, Identifiable, Equatable, Sendable {
         self.text = text
         self.translation = translation
         self.confidence = confidence
+        self.sourceStartTime = sourceStartTime
+    }
+
+    func precedes(_ other: TranscriptSentence) -> Bool {
+        let firstStart = sourceStartTime ?? Double(startTime)
+        let secondStart = other.sourceStartTime ?? Double(other.startTime)
+        if firstStart == secondStart {
+            return endTime < other.endTime
+        }
+        return firstStart < secondStart
     }
 }
 

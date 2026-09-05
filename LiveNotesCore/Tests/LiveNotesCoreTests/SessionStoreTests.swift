@@ -79,14 +79,16 @@ struct SessionStoreTests {
         #expect(transcript.map(\.translation) == ["第一句。", "第二句。"])
     }
 
-    @Test("live transcript upsert replaces overlapping speech ranges")
-    func liveTranscriptUpsertReplacesOverlappingSpeechRanges() throws {
+    @Test("live transcript upsert replaces a revision with the same identity")
+    func liveTranscriptUpsertReplacesSameIdentityRevision() throws {
         var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_800))
         let session = store.createRecording(named: "Lecture")
+        let sentenceID = UUID()
 
         try store.upsertTranscript(
             in: session.id,
             sentence: TranscriptSentence(
+                id: sentenceID,
                 startTime: 0,
                 endTime: 2,
                 text: "Hello.",
@@ -97,6 +99,7 @@ struct SessionStoreTests {
         try store.upsertTranscript(
             in: session.id,
             sentence: TranscriptSentence(
+                id: sentenceID,
                 startTime: 0,
                 endTime: 4,
                 text: "Hello everyone, my name is Joanna.",
@@ -109,14 +112,16 @@ struct SessionStoreTests {
         #expect(transcript.map(\.text) == ["Hello everyone, my name is Joanna."])
     }
 
-    @Test("live transcript upsert keeps longer text over shorter overlapping regressions")
-    func liveTranscriptUpsertKeepsLongerTextOverShorterOverlappingRegressions() throws {
+    @Test("live transcript upsert accepts shorter corrections with the same identity")
+    func liveTranscriptUpsertAcceptsShorterSameIdentityCorrections() throws {
         var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_850))
         let session = store.createRecording(named: "Lecture")
+        let sentenceID = UUID()
 
         try store.upsertTranscript(
             in: session.id,
             sentence: TranscriptSentence(
+                id: sentenceID,
                 startTime: 10,
                 endTime: 17,
                 text: "What you are doing to President Trump is disgusting.",
@@ -127,6 +132,7 @@ struct SessionStoreTests {
         try store.upsertTranscript(
             in: session.id,
             sentence: TranscriptSentence(
+                id: sentenceID,
                 startTime: 10,
                 endTime: 14,
                 text: "What you are doing",
@@ -137,8 +143,40 @@ struct SessionStoreTests {
 
         let transcript = try #require(store.session(id: session.id)?.transcript)
         #expect(transcript.map(\.text) == [
-            "What you are doing to President Trump is disgusting."
+            "What you are doing"
         ])
+    }
+
+    @Test("live transcript upsert keeps distinct sentences with matching rounded ranges")
+    func liveTranscriptUpsertKeepsDistinctIdenticalRanges() throws {
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_850))
+        let session = store.createRecording(named: "Lecture")
+        for text in ["Right.", "Exactly right."] {
+            try store.upsertTranscript(in: session.id, sentence: TranscriptSentence(
+                startTime: 0, endTime: 1, text: text, translation: "", confidence: .high
+            ))
+        }
+
+        #expect(store.session(id: session.id)?.transcript.map(\.text) == ["Right.", "Exactly right."])
+    }
+
+    @Test("same-text speech updates retain completed translations")
+    func sameTextSpeechUpdatesRetainTranslations() throws {
+        var store = SessionStore.clocked(date: Date(timeIntervalSince1970: 2_850))
+        let session = store.createRecording(named: "Lecture")
+        var sentence = TranscriptSentence(
+            startTime: 0, endTime: 2, text: "Good morning.", translation: "早上好。", confidence: .medium
+        )
+        try store.upsertTranscript(in: session.id, sentence: sentence)
+        sentence.translation = ""
+        sentence.confidence = .high
+        try store.upsertTranscript(in: session.id, sentence: sentence)
+
+        #expect(store.session(id: session.id)?.transcript.first?.translation == "早上好。")
+
+        sentence.text = "Good evening."
+        try store.upsertTranscript(in: session.id, sentence: sentence)
+        #expect(store.session(id: session.id)?.transcript.first?.translation == "")
     }
 
     @Test("live transcript upsert keeps adjacent rounded speech ranges")
