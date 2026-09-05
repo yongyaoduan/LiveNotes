@@ -1173,15 +1173,18 @@ struct RecordingPipelineTests {
         #expect(await probe.requestCount == 1)
     }
 
-    @Test("microphone authorizer does not request granted access")
-    func microphoneAuthorizerDoesNotRequestGrantedAccess() async throws {
+    @Test("microphone authorization reuses granted access across calls and instances")
+    func microphoneAuthorizerReusesGrantedAccessAcrossCallsAndInstances() async throws {
         let probe = PermissionRequestProbe(grantsAccess: true)
-        let authorizer = MicrophonePermissionAuthorizer(
-            currentState: { .granted },
-            requestAccess: { await probe.requestAccess() }
-        )
+        for _ in 0..<2 {
+            let authorizer = MicrophonePermissionAuthorizer(
+                currentState: { .granted },
+                requestAccess: { await probe.requestAccess() }
+            )
 
-        try await authorizer.authorize()
+            try await authorizer.authorize()
+            try await authorizer.authorize()
+        }
 
         #expect(await probe.requestCount == 0)
     }
@@ -1235,15 +1238,40 @@ struct RecordingPipelineTests {
         #expect(await probe.requestCount == 1)
     }
 
-    @Test("speech recognition authorizer does not request granted access")
-    func speechRecognitionAuthorizerDoesNotRequestGrantedAccess() async throws {
+    @Test("speech recognition authorization reuses granted access across calls and instances")
+    func speechRecognitionAuthorizerReusesGrantedAccessAcrossCallsAndInstances() async throws {
         let probe = PermissionRequestProbe(grantsAccess: true)
-        let authorizer = SpeechRecognitionPermissionAuthorizer(
-            currentState: { .granted },
-            requestAccess: { await probe.requestAccess() }
-        )
+        for _ in 0..<2 {
+            let authorizer = SpeechRecognitionPermissionAuthorizer(
+                currentState: { .granted },
+                requestAccess: { await probe.requestAccess() }
+            )
 
-        try await authorizer.authorize()
+            try await authorizer.authorize()
+            try await authorizer.authorize()
+        }
+
+        #expect(await probe.requestCount == 0)
+    }
+
+    @Test("speech recognition authorizer does not request denied access")
+    func speechRecognitionAuthorizerDoesNotRequestDeniedAccess() async throws {
+        let probe = PermissionRequestProbe(grantsAccess: true)
+        for _ in 0..<2 {
+            let authorizer = SpeechRecognitionPermissionAuthorizer(
+                currentState: { .denied },
+                requestAccess: { await probe.requestAccess() }
+            )
+
+            for _ in 0..<2 {
+                do {
+                    try await authorizer.authorize()
+                    Issue.record("Expected speech recognition access to be denied.")
+                } catch let error as RecordingPipelineError {
+                    #expect(error.errorDescription == "LiveNotes needs permission to transcribe audio.")
+                }
+            }
+        }
 
         #expect(await probe.requestCount == 0)
     }

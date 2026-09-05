@@ -29,7 +29,6 @@ grep -q 'uninstall quit:' "$CASK_PATH"
 grep -q 'delete: \[' "$CASK_PATH"
 grep -q '~/Library/Application Support/LiveNotes/LiveNotesArtifacts' "$CASK_PATH"
 grep -q '~/Library/Application Support/LiveNotes/Runtime' "$CASK_PATH"
-grep -q 'trash:  "~/Library/Preferences/app.livenotes.mac.plist"' "$CASK_PATH"
 grep -q 'zap trash:' "$CASK_PATH"
 grep -q '~/Library/Application Support/LiveNotes' "$CASK_PATH"
 
@@ -48,10 +47,13 @@ match = re.search(r"uninstall\b(?P<body>.*?)\n\n  zap\b", content, re.S)
 if not match:
     raise SystemExit("Generated cask is missing an uninstall stanza")
 body = match.group("body")
+if "~/Library/Preferences/app.livenotes.mac.plist" not in content[match.end():]:
+    raise SystemExit("Full removal must include LiveNotes preferences")
 preserved_paths = [
     "~/Library/Application Support/LiveNotes/sessions.json",
     "~/Library/Application Support/LiveNotes/Audio",
     "~/Library/Application Support/LiveNotes/Exports",
+    "~/Library/Preferences/app.livenotes.mac.plist",
 ]
 for path in preserved_paths:
     if path in body:

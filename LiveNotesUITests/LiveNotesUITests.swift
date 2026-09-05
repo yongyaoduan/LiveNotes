@@ -68,7 +68,7 @@ final class LiveNotesUITests: XCTestCase {
 
         app.buttons["New Recording"].click()
         XCTAssertTrue(app.staticTexts["Before You Record"].waitForExistence(timeout: 3))
-        app.checkBoxes["I have permission to record this session."].click()
+        app.checkBoxes["I understand that I must have permission to record."].click()
         XCTAssertTrue(app.buttons["Continue"].isEnabled)
         attachScreenshot(named: "recording-consent-enabled", app: app)
         app.buttons["recording-consent-start-button"].click()
@@ -89,7 +89,7 @@ final class LiveNotesUITests: XCTestCase {
 
         app.buttons["New Recording"].click()
         XCTAssertTrue(app.staticTexts["Before You Record"].waitForExistence(timeout: 3))
-        app.checkBoxes["I have permission to record this session."].click()
+        app.checkBoxes["I understand that I must have permission to record."].click()
         app.buttons["recording-consent-start-button"].click()
         XCTAssertTrue(app.staticTexts["New Recording"].waitForExistence(timeout: 3))
         app.buttons["new-recording-start-button"].click()
@@ -106,6 +106,70 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertTrue(app.buttons["Pause"].exists)
 
         attachScreenshot(named: "new-recording-flow", app: app)
+    }
+
+    func testRecordingConsentIsRememberedForTheNextRecording() {
+        let app = launchApp(arguments: ["--ui-state", "empty"])
+        startRecordingThroughConsent(app)
+        XCTAssertTrue(app.buttons["recording-bar-stop-button"].waitForExistence(timeout: 3))
+        app.buttons["recording-bar-stop-button"].click()
+        app.buttons["stop-save-button"].click()
+        XCTAssertTrue(app.buttons["saved-review-export-button"].waitForExistence(timeout: 3))
+
+        app.buttons["New Recording"].click()
+
+        XCTAssertTrue(app.buttons["recording-bar-stop-button"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.staticTexts["Before You Record"].exists)
+        XCTAssertFalse(app.textFields["Recording Name"].exists)
+    }
+
+    func testRecordingConsentPersistsAcrossApplicationLaunches() {
+        let arguments = ["--ui-state", "empty", "--session-store", temporaryStorePath()]
+        let app = launchApp(arguments: arguments)
+        startRecordingThroughConsent(app)
+        XCTAssertTrue(app.buttons["recording-bar-stop-button"].waitForExistence(timeout: 3))
+        app.terminate()
+        let relaunched = launchApp(arguments: arguments)
+
+        relaunched.buttons["New Recording"].click()
+
+        XCTAssertTrue(relaunched.buttons["recording-bar-stop-button"].waitForExistence(timeout: 3))
+        XCTAssertFalse(relaunched.staticTexts["Before You Record"].exists)
+        XCTAssertFalse(relaunched.textFields["Recording Name"].exists)
+    }
+
+    func testCancelledRecordingConsentIsNotRememberedAcrossLaunches() {
+        let arguments = ["--ui-state", "empty", "--session-store", temporaryStorePath()]
+        let app = launchApp(arguments: arguments)
+        app.buttons["New Recording"].click()
+        XCTAssertTrue(app.staticTexts["Before You Record"].waitForExistence(timeout: 3))
+        app.checkBoxes["I understand that I must have permission to record."].click()
+        app.buttons["recording-consent-back-button"].click()
+        app.terminate()
+        let relaunched = launchApp(arguments: arguments)
+
+        relaunched.buttons["New Recording"].click()
+
+        XCTAssertTrue(relaunched.staticTexts["Before You Record"].waitForExistence(timeout: 3))
+        XCTAssertFalse(relaunched.buttons["Continue"].isEnabled)
+    }
+
+    func testCancelledFirstRecordingDoesNotRememberConsentAcrossLaunches() {
+        let arguments = ["--ui-state", "empty", "--session-store", temporaryStorePath()]
+        let app = launchApp(arguments: arguments)
+        app.buttons["New Recording"].click()
+        XCTAssertTrue(app.staticTexts["Before You Record"].waitForExistence(timeout: 3))
+        app.checkBoxes["I understand that I must have permission to record."].click()
+        app.buttons["recording-consent-start-button"].click()
+        XCTAssertTrue(app.buttons["new-recording-cancel-button"].waitForExistence(timeout: 3))
+        app.buttons["new-recording-cancel-button"].click()
+        app.terminate()
+        let relaunched = launchApp(arguments: arguments)
+
+        relaunched.buttons["New Recording"].click()
+
+        XCTAssertTrue(relaunched.staticTexts["Before You Record"].waitForExistence(timeout: 3))
+        XCTAssertFalse(relaunched.buttons["Continue"].isEnabled)
     }
 
     func testNewRecordingClearsStaleLiveSpeechFailure() {
@@ -403,7 +467,7 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertTrue(app.buttons["saved-review-export-button"].waitForExistence(timeout: 3))
         XCTAssertEqual(transcriptRows(storePath: storePath) as NSArray, pausedTranscript as NSArray)
         XCTAssertTrue(app.staticTexts[failureText].exists)
-        startRecordingThroughConsent(app)
+        app.buttons["New Recording"].click()
 
         XCTAssertTrue(app.buttons["recording-bar-pause-button"].waitForExistence(timeout: 3))
         XCTAssertFalse(app.staticTexts[failureText].exists)
@@ -607,13 +671,39 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertTrue(app.buttons["recording-bar-stop-button"].waitForExistence(timeout: 10))
         let liveText = transcriptTexts(storePath: storePath).joined(separator: " ")
         let liveVisibleText = app.staticTexts.allElementsBoundByIndex.map { textValue(of: $0) }.joined(separator: " ")
+        let liveEvidence: [String: Any] = [
+            "fixturePath": fixturePath,
+            "fixtureDurationSeconds": try audioDurationSeconds(at: fixturePath),
+            "inputMode": inputMode,
+            "nativeSpeechRecognition": nativeInference,
+            "expectedPhrases": [expectedPhrase] + expectedPhrases,
+            "minimumDurationSeconds": minimumDuration,
+            "liveSamples": liveSamples,
+            "liveTextBeforeStop": liveText,
+            "visibleTextBeforeStop": liveVisibleText,
+            "sessionStorePath": storePath
+        ]
+        let liveEvidenceData = try JSONSerialization.data(withJSONObject: liveEvidence, options: [.prettyPrinted, .sortedKeys])
+        try liveEvidenceData.write(
+            to: URL(fileURLWithPath: storePath).deletingLastPathComponent()
+                .appendingPathComponent("live-speech-before-save.json"),
+            options: .atomic
+        )
+        let liveEvidenceAttachment = XCTAttachment(data: liveEvidenceData, uniformTypeIdentifier: "public.json")
+        liveEvidenceAttachment.name = "Live speech before saving"
+        liveEvidenceAttachment.lifetime = .keepAlways
+        add(liveEvidenceAttachment)
+        attachScreenshot(named: "production-live-transcript-before-save", app: app)
+        let liveScreenshotAttachment = XCTAttachment(screenshot: app.windows.firstMatch.screenshot())
+        liveScreenshotAttachment.name = "Live transcript before saving"
+        liveScreenshotAttachment.lifetime = .keepAlways
+        add(liveScreenshotAttachment)
         for phrase in [expectedPhrase] + expectedPhrases {
             XCTAssertTrue(
                 normalizedSpeechText(liveText + " " + liveVisibleText).contains(normalizedSpeechText(phrase)),
-                "Live transcript is missing: \(phrase)"
+                "Live transcript is missing: \(phrase). Stored transcript: \(liveText). Visible text: \(liveVisibleText)"
             )
         }
-        attachScreenshot(named: "production-live-transcript-before-save", app: app)
         app.buttons["recording-bar-stop-button"].click()
         XCTAssertTrue(app.staticTexts["Finish Recording?"].waitForExistence(timeout: 5))
         let stopStartedAt = Date()
@@ -1011,7 +1101,7 @@ final class LiveNotesUITests: XCTestCase {
     private func startRecordingThroughConsent(_ app: XCUIApplication) {
         app.buttons["New Recording"].click()
         XCTAssertTrue(app.staticTexts["Before You Record"].waitForExistence(timeout: 3))
-        app.checkBoxes["I have permission to record this session."].click()
+        app.checkBoxes["I understand that I must have permission to record."].click()
         XCTAssertTrue(app.buttons["Continue"].isEnabled)
         app.buttons["recording-consent-start-button"].click()
         XCTAssertTrue(app.staticTexts["New Recording"].waitForExistence(timeout: 3))

@@ -20,6 +20,8 @@ MIN_DURATION_SECONDS="${LIVENOTES_E2E_MIN_DURATION_SECONDS:-20}"
 CONFIGURATION="${LIVENOTES_E2E_CONFIGURATION:-Release}"
 MODE="${LIVENOTES_E2E_MODE:-audio-file}"
 NATIVE_INFERENCE="${LIVENOTES_E2E_NATIVE_INFERENCE:-true}"
+EVIDENCE_DIR="$ROOT_DIR/dist/native-e2e"
+RESULT_BUNDLE_PATH="$EVIDENCE_DIR/LiveNotes.xcresult"
 
 cleanup() {
   rm -rf "$WORK_ROOT"
@@ -162,9 +164,23 @@ elif [[ "$MODE" != "audio-file" ]]; then
   exit 1
 fi
 
+mkdir -p "$EVIDENCE_DIR"
+rm -rf "$RESULT_BUNDLE_PATH"
+cp "$FIXTURE_PATH" "$EVIDENCE_DIR/audio-fixture.wav"
+for config_path in "$FIXTURE_PATH_FILE" "$EXPECTED_PHRASE_FILE" "$EXPECTED_PHRASES_FILE" \
+  "$MIN_DURATION_FILE" "$MODE_FILE" "$NATIVE_INFERENCE_FILE"; do
+  cp "$config_path" "$EVIDENCE_DIR/"
+done
+(
+  cd "$EVIDENCE_DIR"
+  shasum -a 256 audio-fixture.wav > audio-fixture.wav.sha256
+)
+
 xcodebuild test \
   -project "$ROOT_DIR/LiveNotes.xcodeproj" \
   -scheme LiveNotes \
   -configuration "$CONFIGURATION" \
   -destination 'platform=macOS,arch=arm64' \
-  -only-testing:LiveNotesUITests/LiveNotesUITests/testProductionLoopbackRecordsTranscribesSavesAndExports
+  -resultBundlePath "$RESULT_BUNDLE_PATH" \
+  -only-testing:LiveNotesUITests/LiveNotesUITests/testProductionLoopbackRecordsTranscribesSavesAndExports \
+  2>&1 | tee "$EVIDENCE_DIR/xcodebuild.log"

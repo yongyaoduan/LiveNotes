@@ -29,6 +29,8 @@ final class AppModel: ObservableObject {
     @Published var recordingStartFailure: RecordingStartFailure?
 
     private let sessionFileStore: SessionFileStore?
+    private let recordingConsentDefaults: UserDefaults
+    private static let recordingConsentKey = "hasAcceptedRecordingConsent"
     private let fixtureRecordingEnabled: Bool
     private var audioRecorder: AudioRecordingControlling?
     private var inferenceRunner: (any RecordingInferenceRunning)?
@@ -69,6 +71,7 @@ final class AppModel: ObservableObject {
     init(
         store: SessionStore,
         sessionFileStore: SessionFileStore? = nil,
+        recordingConsentDefaults: UserDefaults = .standard,
         recordingEngineStatus: String = "Ready",
         fixtureRecordingEnabled: Bool = false,
         audioRecorder: AudioRecordingControlling? = nil,
@@ -81,6 +84,7 @@ final class AppModel: ObservableObject {
     ) {
         self.store = store
         self.sessionFileStore = sessionFileStore
+        self.recordingConsentDefaults = recordingConsentDefaults
         self.recordingEngineStatus = recordingEngineStatus
         self.fixtureRecordingEnabled = fixtureRecordingEnabled
         self.audioRecorder = audioRecorder
@@ -108,6 +112,7 @@ final class AppModel: ObservableObject {
         let model = AppModel(
             store: store,
             sessionFileStore: fileStore,
+            recordingConsentDefaults: recordingConsentDefaults(arguments: arguments),
             recordingEngineStatus: "Ready",
             audioRecorder: nil,
             inferenceRunner: nil,
@@ -249,6 +254,7 @@ final class AppModel: ObservableObject {
         let model = AppModel(
             store: store,
             sessionFileStore: fileStore,
+            recordingConsentDefaults: recordingConsentDefaults(arguments: arguments),
             fixtureRecordingEnabled: !simulatedRuntime,
             audioRecorder: audioRecorder,
             inferenceRunner: usesNativeInference
@@ -482,7 +488,11 @@ final class AppModel: ObservableObject {
         recordingStartFailure = nil
         recordingName = defaultRecordingName()
         consentAccepted = false
-        consentSheetVisible = true
+        if recordingConsentDefaults.bool(forKey: Self.recordingConsentKey) {
+            startRecording()
+        } else {
+            consentSheetVisible = true
+        }
     }
 
     func continueAfterRecordingConsent() {
@@ -499,7 +509,11 @@ final class AppModel: ObservableObject {
     }
 
     func startRecording() {
-        guard canRequestRecording else { return }
+        guard canRequestRecording,
+              consentAccepted || recordingConsentDefaults.bool(forKey: Self.recordingConsentKey) else {
+            return
+        }
+        recordingConsentDefaults.set(true, forKey: Self.recordingConsentKey)
         clearTransientStatusForNewRecording()
         let title = recordingName.isEmpty ? defaultRecordingName() : recordingName
         let id = UUID()
@@ -1831,6 +1845,17 @@ final class AppModel: ObservableObject {
             return URL(fileURLWithPath: arguments[index + 1])
         }
         return defaultSessionStoreURL()
+    }
+
+    private static func recordingConsentDefaults(arguments: [String]) -> UserDefaults {
+        if let storePath = argumentValue("--session-store", in: arguments) {
+            let identifier = URL(fileURLWithPath: storePath).deletingLastPathComponent().lastPathComponent
+            return UserDefaults(suiteName: "app.livenotes.mac.recordingConsent.\(identifier)")!
+        }
+        if arguments.contains("--ui-test") {
+            return UserDefaults(suiteName: "app.livenotes.mac.recordingConsent.\(UUID().uuidString)")!
+        }
+        return .standard
     }
 
     private static func defaultSessionStoreURL() -> URL {

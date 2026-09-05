@@ -1140,10 +1140,10 @@ private struct ConsentSheet: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Before You Record")
                 .font(.system(size: 22, weight: .semibold))
-            Text("Confirm everyone has agreed to be recorded.")
+            Text("Before recording, make sure everyone has agreed to be recorded. You only need to acknowledge this reminder once.")
                 .font(.system(size: 12))
                 .foregroundStyle(LiveNotesStyle.secondary)
-            Toggle("I have permission to record this session.", isOn: $model.consentAccepted)
+            Toggle("I understand that I must have permission to record.", isOn: $model.consentAccepted)
                 .toggleStyle(.checkbox)
             if !model.consentAccepted {
                 Text("Check the box to continue.")

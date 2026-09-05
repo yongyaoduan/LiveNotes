@@ -126,10 +126,21 @@ jobs:
       - name: Install UI evidence dependencies
         run: brew install ffmpeg
 
+      - name: Test native audio evidence capture
+        run: ./scripts/test-loopback-e2e-evidence.sh
+
       - name: Run audio file end-to-end test
         env:
           LIVENOTES_E2E_CONFIGURATION: Release
         run: ./scripts/run-loopback-e2e-test.sh
+
+      - name: Upload native audio test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: livenotes-native-e2e
+          path: dist/native-e2e
+          if-no-files-found: ignore
 
       - name: Run UI evidence tests
         env:
