@@ -216,7 +216,7 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Pause"].exists)
         XCTAssertFalse(app.buttons["recording-bar-stop-button"].exists)
         XCTAssertFalse(audioDirectoryHasFiles(forStorePath: storePath))
-        app.buttons["preparation-cancel-button"].click()
+        cancelPreparation(app)
 
         XCTAssertTrue(app.staticTexts["No recordings yet"].waitForExistence(timeout: 3))
         XCTAssertTrue(app.buttons["New Recording"].isEnabled)
@@ -671,6 +671,9 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertTrue(app.buttons["recording-bar-stop-button"].waitForExistence(timeout: 10))
         let liveText = transcriptTexts(storePath: storePath).joined(separator: " ")
         let liveVisibleText = app.staticTexts.allElementsBoundByIndex.map { textValue(of: $0) }.joined(separator: " ")
+        let previewTranslationElement = app.staticTexts["live-translation-preview"]
+        let previewTranslationBeforeStop = previewTranslationElement.exists
+            ? textValue(of: previewTranslationElement) : ""
         let liveEvidence: [String: Any] = [
             "fixturePath": fixturePath,
             "fixtureDurationSeconds": try audioDurationSeconds(at: fixturePath),
@@ -681,6 +684,7 @@ final class LiveNotesUITests: XCTestCase {
             "liveSamples": liveSamples,
             "liveTextBeforeStop": liveText,
             "visibleTextBeforeStop": liveVisibleText,
+            "previewTranslationBeforeStop": previewTranslationBeforeStop,
             "sessionStorePath": storePath
         ]
         let liveEvidenceData = try JSONSerialization.data(withJSONObject: liveEvidence, options: [.prettyPrinted, .sortedKeys])
@@ -720,6 +724,11 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertTrue(waitForFile(at: storePath, contains: expectedPhrase, timeout: 3))
         let savedTranscript = transcriptRows(storePath: storePath)
         let savedText = savedTranscript.compactMap { $0["text"] as? String }.joined(separator: " ")
+        let savedTranslations = savedTranscript.compactMap { $0["translation"] as? String }
+            .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+        if !previewTranslationBeforeStop.isEmpty, previewTranslationBeforeStop != "Translating..." {
+            XCTAssertFalse(savedTranslations.isEmpty, "The visible translation was lost while saving.")
+        }
         for phrase in expectedPhrases {
             XCTAssertTrue(
                 normalizedSpeechText(savedText).contains(normalizedSpeechText(phrase)),
@@ -771,7 +780,9 @@ final class LiveNotesUITests: XCTestCase {
             "liveSamples": liveSamples,
             "liveTextBeforeStop": liveText,
             "visibleTextBeforeStop": liveVisibleText,
+            "previewTranslationBeforeStop": previewTranslationBeforeStop,
             "savedText": savedText,
+            "savedTranslations": savedTranslations,
             "stopToSavedSeconds": stopToSavedSeconds,
             "exportedFilesReadySeconds": exportedFilesReadySeconds,
             "exportSeconds": exportSeconds,
@@ -844,6 +855,63 @@ final class LiveNotesUITests: XCTestCase {
         XCTAssertEqual(savedTranscript.last?["translation"] as? String, UITestText.livePreview)
         XCTAssertFalse(app.staticTexts["Translation unavailable."].exists)
         attachScreenshot(named: "final-speech-tail-keeps-visible-translation", app: app)
+    }
+
+    func testFinalSpeechTailKeepsAndExportsVisiblePartialTranslation() {
+        let storePath = temporaryStorePath()
+        let app = launchApp(arguments: [
+            "--ui-state", "live",
+            "--ui-recording-runtime", "simulated",
+            "--ui-live-transcriber", "final-tail-extended",
+            "--ui-translation-mode", "hanging",
+            "--session-store", storePath
+        ])
+        let originalTranscript = transcriptRows(forSessionID: liveSessionID, storePath: storePath)
+        let finalText = String(UITestText.livePreviewEnglish.dropLast()) + " before the recording ends."
+        let partialTranslation = "[Partial translation] " + UITestText.livePreview
+        XCTAssertTrue(app.staticTexts[UITestText.livePreview].waitForExistence(timeout: 3))
+        app.buttons["recording-bar-stop-button"].click()
+        XCTAssertTrue(app.staticTexts["Finish Recording?"].waitForExistence(timeout: 3))
+        app.buttons["stop-save-button"].click()
+
+        XCTAssertTrue(app.buttons["saved-review-export-button"].waitForExistence(timeout: 3))
+        let savedTranscript = transcriptRows(forSessionID: liveSessionID, storePath: storePath)
+        XCTAssertEqual(Array(savedTranscript.prefix(originalTranscript.count)) as NSArray, originalTranscript as NSArray)
+        XCTAssertEqual(savedTranscript.last?["text"] as? String, finalText)
+        XCTAssertEqual(savedTranscript.last?["translation"] as? String, partialTranslation)
+        XCTAssertTrue(app.staticTexts[partialTranslation].exists)
+        let exportPath = exportPath(forStorePath: storePath, title: "Morning Session")
+        app.buttons["saved-review-export-button"].click()
+
+        XCTAssertTrue(waitForFile(at: exportPath, contains: partialTranslation, timeout: 3))
+        XCTAssertTrue(file(at: exportPath, contains: finalText))
+        app.activate()
+        attachScreenshot(named: "final-speech-tail-keeps-visible-partial-translation", app: app)
+    }
+
+    func testRevisedFinalSpeechTailDoesNotInheritAnUnrelatedPreviewTranslation() {
+        for transcriber in ["final-tail-revised", "final-tail-word-revised"] {
+            let storePath = temporaryStorePath()
+            let app = launchApp(arguments: [
+                "--ui-state", "live",
+                "--ui-recording-runtime", "simulated",
+                "--ui-live-transcriber", transcriber,
+                "--ui-translation-mode", "hanging",
+                "--session-store", storePath
+            ])
+            let originalTranscript = transcriptRows(forSessionID: liveSessionID, storePath: storePath)
+            XCTAssertTrue(app.staticTexts[UITestText.livePreview].waitForExistence(timeout: 3))
+            app.buttons["recording-bar-stop-button"].click()
+            XCTAssertTrue(app.staticTexts["Finish Recording?"].waitForExistence(timeout: 3))
+            app.buttons["stop-save-button"].click()
+
+            XCTAssertTrue(app.buttons["saved-review-export-button"].waitForExistence(timeout: 3))
+            let savedTranscript = transcriptRows(forSessionID: liveSessionID, storePath: storePath)
+            XCTAssertEqual(Array(savedTranscript.prefix(originalTranscript.count)) as NSArray, originalTranscript as NSArray)
+            XCTAssertEqual(savedTranscript.last?["translation"] as? String, "")
+            XCTAssertFalse(app.staticTexts[UITestText.livePreview].exists)
+            app.terminate()
+        }
     }
 
     func testExportWithMissingTranslationsSavesCurrentSnapshotWithoutPrompt() {

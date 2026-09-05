@@ -213,9 +213,20 @@ final class AppModel: ObservableObject {
         switch argumentValue("--ui-live-transcriber", in: arguments) {
         case "hanging":
             liveTranscriber = HangingUITestLiveTranscriber()
-        case "final-tail":
+        case "final-tail", "final-tail-extended", "final-tail-revised", "final-tail-word-revised":
+            let tailText: String
+            switch argumentValue("--ui-live-transcriber", in: arguments) {
+            case "final-tail-extended":
+                tailText = String(DemoText.livePreview.dropLast()) + " before the recording ends."
+            case "final-tail-revised":
+                tailText = "We are checking a different microphone and the final transcript has changed."
+            case "final-tail-word-revised":
+                tailText = String(DemoText.livePreview.dropLast()) + "er now."
+            default:
+                tailText = DemoText.livePreview
+            }
             let tail = TranscriptSentence(
-                startTime: 900, endTime: 908, text: DemoText.livePreview,
+                startTime: 900, endTime: 908, text: tailText,
                 translation: "", confidence: .high
             )
             liveTranscriber = FinalUITestLiveTranscriber(transcript: (store.sessions.first?.transcript ?? []) + [tail])
@@ -878,11 +889,15 @@ final class AppModel: ObservableObject {
                         sanitizedTranscript(flushedTranscript, maximumEndTime: finalizingDurations[id]),
                         from: store.session(id: id)?.transcript ?? []
                     )
-                    if !previewTranslation.isEmpty, !previewTranslationSource.isEmpty,
-                       let index = transcript.firstIndex(where: {
-                           $0.translation.isEmpty && normalizedPreview($0.text) == normalizedPreview(previewTranslationSource)
+                    let translatedSource = normalizedPreview(previewTranslationSource)
+                    if !previewTranslation.isEmpty, !translatedSource.isEmpty,
+                       let index = transcript.lastIndex(where: {
+                           let finalText = normalizedPreview($0.text)
+                           return $0.translation.isEmpty
+                               && (finalText == translatedSource || finalText.hasPrefix(translatedSource + " "))
                        }) {
-                        transcript[index].translation = previewTranslation
+                        transcript[index].translation = normalizedPreview(transcript[index].text) == translatedSource
+                            ? previewTranslation : "[Partial translation] " + previewTranslation
                     }
                     var transcriptStore = store
                     try? transcriptStore.replaceGeneratedContent(in: id, transcript: transcript)
