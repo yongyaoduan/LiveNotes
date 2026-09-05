@@ -46,7 +46,7 @@ Preview builds are published through the same Homebrew cask path. Signed and not
 
 Preview builds are not Developer ID signed or notarized. If macOS blocks launch, open System Settings > Privacy & Security and choose Open Anyway.
 
-The first-use recording acknowledgement is remembered; subsequent recordings start directly, including after an app restart. Microphone and speech-recognition requests run only when macOS reports an undetermined permission. Preview builds use ad-hoc signatures, so an update may require system permission again. Reliable permission reuse across updates requires stable Developer ID signing; see the [permission review](docs/validation-2026-09-05.md#权限复用审查).
+The first-use recording acknowledgement is remembered. Every new recording opens the editable name window, including after an app restart; recording begins only when Start Recording is clicked. Microphone and speech-recognition requests run only when macOS reports an undetermined permission. Preview builds use ad-hoc signatures, so an update may require system permission again. Reliable permission reuse across updates requires stable Developer ID signing; see the [permission review](docs/validation-2026-09-05.md#权限复用审查).
 
 Regular uninstall removes the app while preserving preferences, saved recordings, transcripts, and exports. Updates retain the first-use recording acknowledgement:
 

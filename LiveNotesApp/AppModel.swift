@@ -498,9 +498,9 @@ final class AppModel: ObservableObject {
         guard canShowNewRecording else { return }
         recordingStartFailure = nil
         recordingName = defaultRecordingName()
-        consentAccepted = false
-        if recordingConsentDefaults.bool(forKey: Self.recordingConsentKey) {
-            startRecording()
+        consentAccepted = recordingConsentDefaults.bool(forKey: Self.recordingConsentKey)
+        if consentAccepted {
+            newRecordingSheetVisible = true
         } else {
             consentSheetVisible = true
         }
