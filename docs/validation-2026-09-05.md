@@ -111,6 +111,8 @@ GitHub 托管 Mac 的[发布检查](https://github.com/yongyaoduan/LiveNotes/act
 
 因此，本版修复应用确认和偏好保留，但不承诺预览版跨版本系统授权只需一次。正式解决需要持续使用同一团队的 Developer ID Application 身份发布，参见 Apple 的[发行签名说明](https://developer.apple.com/documentation/xcode/creating-distribution-signed-code-for-the-mac/)。从旧 ad-hoc 版首次迁移到正式签名也可能需要再次授权；应用不能覆盖用户手动撤销或系统策略变更。
 
+最终发布包经 Homebrew 安装后，所有应用文件与公开 ZIP 逐一相同，签名完整性验证通过，应用正常启动。该安装版首次尝试录音时，TCC 实际记录 `Failed to match existing code requirement`，随后为 `kTCCServiceMicrophone` 发出新的授权请求，直接验证了上述跨构建身份限制。此次安装版的额外录音检查停在系统确认，未计作麦克风测试通过；前述原生识别、声学测试和保存导出证据仍分别记录其实际构建与测试方式。
+
 ## 翻译与适用范围
 
 译文全部导出，不代表翻译质量合格。声学对照中的苹果原生翻译把本语境中的 `saving our work` 译为“拯救我们的工作”，把 `existing transcript` 译为“现有成绩单”。这些词义错误仍然存在，此次结果不能当作翻译准确率通过。
