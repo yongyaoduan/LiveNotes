@@ -26,9 +26,6 @@ grep -q 'depends_on macos: ">= :tahoe"' "$CASK_PATH"
 grep -q 'Privacy & Security' "$CASK_PATH"
 grep -q 'Open Anyway' "$CASK_PATH"
 grep -q 'uninstall quit:' "$CASK_PATH"
-grep -q 'delete: \[' "$CASK_PATH"
-grep -q '~/Library/Application Support/LiveNotes/LiveNotesArtifacts' "$CASK_PATH"
-grep -q '~/Library/Application Support/LiveNotes/Runtime' "$CASK_PATH"
 grep -q 'zap trash:' "$CASK_PATH"
 grep -q '~/Library/Application Support/LiveNotes' "$CASK_PATH"
 
@@ -47,6 +44,10 @@ match = re.search(r"uninstall\b(?P<body>.*?)\n\n  zap\b", content, re.S)
 if not match:
     raise SystemExit("Generated cask is missing an uninstall stanza")
 body = match.group("body")
+if not re.fullmatch(r'\s+quit:\s*"app\.livenotes\.mac"\s*', body):
+    raise SystemExit("Regular uninstall must only quit LiveNotes without deleting user files")
+if re.search(r"\b(?:sudo|uninstall_preflight|uninstall_postflight|postflight)\b", content):
+    raise SystemExit("The cask must not run privileged commands or uninstall hooks")
 if "~/Library/Preferences/app.livenotes.mac.plist" not in content[match.end():]:
     raise SystemExit("Full removal must include LiveNotes preferences")
 preserved_paths = [

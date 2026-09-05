@@ -48,7 +48,7 @@ Preview builds are not Developer ID signed or notarized. If macOS blocks launch,
 
 The first-use recording acknowledgement is remembered; subsequent recordings start directly, including after an app restart. Microphone and speech-recognition requests run only when macOS reports an undetermined permission. Preview builds use ad-hoc signatures, so an update may require system permission again. Reliable permission reuse across updates requires stable Developer ID signing; see the [permission review](docs/validation-2026-09-05.md#权限复用审查).
 
-Regular uninstall removes the app and any legacy runtime artifacts while preserving preferences, saved recordings, transcripts, and exports. Updates retain the first-use recording acknowledgement:
+Regular uninstall removes the app while preserving preferences, saved recordings, transcripts, and exports. Updates retain the first-use recording acknowledgement:
 
 ```bash
 brew uninstall --cask yongyaoduan/livenotes/livenotes

@@ -36,11 +36,7 @@ cask "livenotes" do
     If macOS blocks launch, open System Settings > Privacy & Security and choose Open Anyway.
   EOS
 
-  uninstall quit:   "app.livenotes.mac",
-            delete: [
-              "~/Library/Application Support/LiveNotes/LiveNotesArtifacts",
-              "~/Library/Application Support/LiveNotes/Runtime",
-            ]
+  uninstall quit: "app.livenotes.mac"
 
   zap trash: [
     "~/Library/Application Support/LiveNotes",
