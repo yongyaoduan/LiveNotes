@@ -30,6 +30,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Download validated native speech evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: livenotes-native-e2e
+          path: dist/native-e2e
+
       - name: Select Xcode with Swift 6
         uses: maxim-lobanov/setup-xcode@v1
         with:
@@ -181,6 +187,7 @@ jobs:
         id: app_zip
         env:
           LIVENOTES_RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          LIVENOTES_NATIVE_EVIDENCE_DIR: ${{ github.workspace }}/dist/native-e2e
           LIVENOTES_REQUIRE_SIGNED_APP: ${{ steps.publish_context.outputs.sign_and_notarize == '1' && '1' || '0' }}
           LIVENOTES_NOTARIZE_APP: ${{ steps.publish_context.outputs.sign_and_notarize == '1' && '1' || '0' }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
@@ -196,6 +203,7 @@ jobs:
         if: steps.version.outputs.publish == '1'
         env:
           LIVENOTES_RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          LIVENOTES_NATIVE_EVIDENCE_DIR: ${{ github.workspace }}/dist/native-e2e
         run: ./scripts/check-release-readiness.sh "${{ steps.app_zip.outputs.zip_path }}" "${{ steps.app_zip.outputs.sha256 }}"
 
       - name: Upload Homebrew app zip artifact

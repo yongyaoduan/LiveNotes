@@ -124,6 +124,35 @@ LIVENOTES_RELEASE_VERSION="0.1.0" \
   "$ROOT_DIR/scripts/check-release-readiness.sh" "$ZIP_PATH" "$ZIP_SHA" >"$ARTIFACT_LOG_PATH" 2>&1
 grep -q 'Release readiness passed.' "$ARTIFACT_LOG_PATH"
 
+# Hosted UI tests may skip ASR only when the separate real-ASR evidence passes.
+NATIVE_EVIDENCE_DIR="$WORK_ROOT/native-evidence"
+mkdir -p "$NATIVE_EVIDENCE_DIR"
+cp "$COMPLETE_UI_LOG_PATH" "$NATIVE_EVIDENCE_DIR/xcodebuild.log"
+sed '/testProductionLoopbackRecordsTranscribesSavesAndExports/s/passed/skipped/' \
+  "$COMPLETE_UI_LOG_PATH" > "$EVIDENCE_DIR/xcodebuild.log"
+for inference in false true; do
+  printf '%s\n' "$inference" > "$NATIVE_EVIDENCE_DIR/livenotes-e2e-native-inference.txt"
+  status=0
+  LIVENOTES_NATIVE_EVIDENCE_DIR="$NATIVE_EVIDENCE_DIR" \
+  LIVENOTES_UI_EVIDENCE_DIR="$EVIDENCE_DIR" LIVENOTES_RELEASE_VERSION="0.1.0" \
+    "$ROOT_DIR/scripts/check-release-readiness.sh" "$ZIP_PATH" "$ZIP_SHA" > "$ARTIFACT_LOG_PATH" 2>&1 || status=$?
+  if [[ "$inference" == true ]]; then
+    test "$status" -eq 0
+  else
+    test "$status" -ne 0
+    grep -q 'must use real inference' "$ARTIFACT_LOG_PATH"
+  fi
+done
+printf '** TEST FAILED **\n' > "$NATIVE_EVIDENCE_DIR/xcodebuild.log"
+if LIVENOTES_NATIVE_EVIDENCE_DIR="$NATIVE_EVIDENCE_DIR" \
+  LIVENOTES_UI_EVIDENCE_DIR="$EVIDENCE_DIR" LIVENOTES_RELEASE_VERSION="0.1.0" \
+  "$ROOT_DIR/scripts/check-release-readiness.sh" "$ZIP_PATH" "$ZIP_SHA" > "$ARTIFACT_LOG_PATH" 2>&1; then
+  echo "Release readiness must reject failed separate native evidence." >&2
+  exit 1
+fi
+grep -q 'native speech test run did not succeed' "$ARTIFACT_LOG_PATH"
+cp "$COMPLETE_UI_LOG_PATH" "$EVIDENCE_DIR/xcodebuild.log"
+
 if grep -Eq 'LIVENOTES_MLX_HELPER|prepare-bundled-artifacts|verify-model-artifacts|mlx_whisper|mlx_lm|local_mlx_inference' \
   "$ROOT_DIR/scripts/check-release-readiness.sh"; then
   echo "Release readiness guard must not use legacy Python MLX gates" >&2

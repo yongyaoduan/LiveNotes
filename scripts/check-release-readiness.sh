@@ -117,8 +117,25 @@ RUBY
       exit 1
     fi
   done
-  if grep -q 'testProductionLoopbackRecordsTranscribesSavesAndExports.*skipped' "$log_path"; then
+  local native_log="$log_path"
+  if [[ -n "${LIVENOTES_NATIVE_EVIDENCE_DIR:-}" ]]; then
+    native_log="$LIVENOTES_NATIVE_EVIDENCE_DIR/xcodebuild.log"
+    require_file "$native_log" "Native speech evidence log is missing."
+    if ! grep -qx 'true' "$LIVENOTES_NATIVE_EVIDENCE_DIR/livenotes-e2e-native-inference.txt"; then
+      echo "Release blocked: native speech evidence must use real inference." >&2
+      exit 1
+    fi
+    if ! grep -q 'TEST SUCCEEDED' "$native_log"; then
+      echo "Release blocked: native speech test run did not succeed." >&2
+      exit 1
+    fi
+  fi
+  if grep -q 'testProductionLoopbackRecordsTranscribesSavesAndExports.*skipped' "$native_log"; then
     echo "Release blocked: production audio end-to-end UI test was skipped." >&2
+    exit 1
+  fi
+  if ! grep -q 'testProductionLoopbackRecordsTranscribesSavesAndExports.*passed' "$native_log"; then
+    echo "Release blocked: production audio end-to-end UI test did not pass." >&2
     exit 1
   fi
 }
