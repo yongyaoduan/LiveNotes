@@ -17,11 +17,6 @@ jobs:
         with:
           xcode-version: latest-stable
 
-      - name: Diagnose native speech capability
-        run: |
-          swiftc -parse-as-library scripts/check-native-speech.swift -o /tmp/livenotes-check-native-speech
-          /tmp/livenotes-check-native-speech
-
       - name: Test build settings
         run: ./scripts/test-build-settings.sh
 
@@ -40,19 +35,6 @@ jobs:
 
       - name: Test native audio evidence capture
         run: ./scripts/test-loopback-e2e-evidence.sh
-
-      - name: Run audio file end-to-end test
-        env:
-          LIVENOTES_E2E_CONFIGURATION: Release
-        run: ./scripts/run-loopback-e2e-test.sh
-
-      - name: Upload native audio test evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: livenotes-native-e2e
-          path: dist/native-e2e
-          if-no-files-found: ignore
 
       - name: Run UI evidence tests
         id: ui-evidence
@@ -79,3 +61,10 @@ jobs:
 
       - name: Test release readiness guard
         run: ./scripts/test-release-readiness.sh
+
+  native-speech:
+    # Never execute pull-request code on a machine with a real user session.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/native-speech.yml
+    permissions:
+      contents: read

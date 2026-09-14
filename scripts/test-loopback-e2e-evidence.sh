@@ -97,13 +97,20 @@ import sys
 from pathlib import Path
 
 root = Path(sys.argv[1])
-for name in ("ci.yml", "release-homebrew.yml"):
+for name in ("native-speech.yml",):
     content = (root / ".github/workflows" / name).read_text()
     match = re.search(r"      - name: Upload native audio test evidence\n(.*?)(?=\n      - name:|\Z)", content, re.S)
     if not match or not all(value in match[1] for value in (
         "if: always()", "actions/upload-artifact@v4", "path: dist/native-e2e"
     )):
         raise SystemExit(f"{name} must retain native audio test evidence after failure.")
+for name in ("ci.yml", "release-homebrew.yml"):
+    content = (root / ".github/workflows" / name).read_text()
+    if "uses: ./.github/workflows/native-speech.yml" not in content:
+        raise SystemExit(f"{name} must call the native speech validation workflow.")
+release = (root / ".github/workflows/release-homebrew.yml").read_text()
+if "needs: native-speech" not in release:
+    raise SystemExit("Publishing must depend on successful native speech validation.")
 PY
 
 printf 'Native audio test evidence checks passed.\n'

@@ -1,0 +1,36 @@
+name: Native speech validation
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+# A real logged-in Mac is required: the hosted macos-26 VM reports
+# SpeechTranscriber.isAvailable == false. Keep this a required, failing gate.
+jobs:
+  native-speech:
+    runs-on: [self-hosted, macOS, ARM64, livenotes-native-speech]
+    timeout-minutes: 20
+    concurrency:
+      group: livenotes-native-speech
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Check native speech capability
+        run: |
+          swiftc -parse-as-library scripts/check-native-speech.swift -o "$RUNNER_TEMP/livenotes-check-native-speech"
+          "$RUNNER_TEMP/livenotes-check-native-speech"
+      - name: Run audio file end-to-end test
+        env:
+          LIVENOTES_E2E_CONFIGURATION: Release
+        run: ./scripts/run-loopback-e2e-test.sh
+      - name: Upload native audio test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: livenotes-native-e2e
+          path: dist/native-e2e
+          if-no-files-found: error
