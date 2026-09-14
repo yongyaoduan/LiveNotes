@@ -22,7 +22,7 @@ ruby -c "$CASK_PATH" >/dev/null
 grep -q 'cask "livenotes"' "$CASK_PATH"
 grep -q 'app "LiveNotes.app"' "$CASK_PATH"
 grep -q 'depends_on arch: :arm64' "$CASK_PATH"
-grep -q 'depends_on macos: ">= :tahoe"' "$CASK_PATH"
+grep -q 'depends_on macos: :tahoe' "$CASK_PATH"
 grep -q 'Privacy & Security' "$CASK_PATH"
 grep -q 'Open Anyway' "$CASK_PATH"
 grep -q 'uninstall quit:' "$CASK_PATH"

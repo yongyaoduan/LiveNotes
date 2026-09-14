@@ -3,11 +3,20 @@ import XCTest
 
 @MainActor
 final class LiveNotesUITests: XCTestCase {
+    private var playbackProcess: Process?
     private static var screenshotIndex = 0
     private let liveSessionID = "11111111-2222-3333-4444-555555555555"
 
     override func setUpWithError() throws {
         continueAfterFailure = false
+    }
+
+    override func tearDownWithError() throws {
+        if let playbackProcess, playbackProcess.isRunning {
+            playbackProcess.terminate()
+            playbackProcess.waitUntilExit()
+        }
+        playbackProcess = nil
     }
 
     func testHomeShowsSessionSidebarAndSavedStates() {
@@ -693,23 +702,24 @@ final class LiveNotesUITests: XCTestCase {
         let playbackStartedAt = Date()
         var liveSamples: [[String: Any]] = []
         var lastSampleTime: TimeInterval = -1
-        func sampleLiveTranscript() {
+        func sampleLiveTranscript() throws {
             let elapsed = Date().timeIntervalSince(playbackStartedAt)
             guard elapsed - lastSampleTime >= 1 else { return }
             lastSampleTime = elapsed
-            let preview = app.staticTexts["live-transcript-preview"]
-            let translation = app.staticTexts["live-translation-preview"]
+            // Volatile views can disappear between an existence query and a read.
+            // Read their values from one immutable accessibility snapshot instead.
+            let texts = staticTextSnapshots(in: try app.snapshot())
             liveSamples.append([
                 "elapsedSeconds": elapsed,
                 "text": transcriptTexts(storePath: storePath).joined(separator: " "),
-                "preview": preview.exists ? textValue(of: preview) : "",
-                "previewTranslation": translation.exists ? textValue(of: translation) : ""
+                "preview": texts.first { $0.identifier == "live-transcript-preview" }.map(snapshotText) ?? "",
+                "previewTranslation": texts.first { $0.identifier == "live-translation-preview" }.map(snapshotText) ?? ""
             ])
         }
         if inputMode == "audio-file" {
             let playbackDeadline = Date().addingTimeInterval(try audioDurationSeconds(at: fixturePath) + 1)
             while Date() < playbackDeadline {
-                sampleLiveTranscript()
+                try sampleLiveTranscript()
                 RunLoop.current.run(until: Date().addingTimeInterval(0.1))
             }
         } else {
@@ -718,10 +728,10 @@ final class LiveNotesUITests: XCTestCase {
         app.activate()
         XCTAssertTrue(app.buttons["recording-bar-stop-button"].waitForExistence(timeout: 10))
         let liveText = transcriptTexts(storePath: storePath).joined(separator: " ")
-        let liveVisibleText = app.staticTexts.allElementsBoundByIndex.map { textValue(of: $0) }.joined(separator: " ")
-        let previewTranslationElement = app.staticTexts["live-translation-preview"]
-        let previewTranslationBeforeStop = previewTranslationElement.exists
-            ? textValue(of: previewTranslationElement) : ""
+        let visibleTexts = staticTextSnapshots(in: try app.snapshot())
+        let liveVisibleText = visibleTexts.map(snapshotText).joined(separator: " ")
+        let previewTranslationBeforeStop = visibleTexts.first { $0.identifier == "live-translation-preview" }
+            .map(snapshotText) ?? ""
         let liveEvidence: [String: Any] = [
             "fixturePath": fixturePath,
             "fixtureDurationSeconds": try audioDurationSeconds(at: fixturePath),
@@ -1352,6 +1362,15 @@ final class LiveNotesUITests: XCTestCase {
         return !elementIsInWindow(element, app: app)
     }
 
+    private func staticTextSnapshots(in snapshot: any XCUIElementSnapshot) -> [any XCUIElementSnapshot] {
+        (snapshot.elementType == .staticText ? [snapshot] : [])
+            + snapshot.children.flatMap { staticTextSnapshots(in: $0) }
+    }
+
+    private func snapshotText(_ snapshot: any XCUIElementSnapshot) -> String {
+        (snapshot.value as? String) ?? snapshot.label
+    }
+
     private func textValue(of element: XCUIElement) -> String {
         (element.value as? String) ?? element.label
     }
@@ -1447,7 +1466,7 @@ final class LiveNotesUITests: XCTestCase {
         return element.staticTexts.matching(promptPredicate).firstMatch.exists
     }
 
-    private func playAudioFixture(at path: String, sample: (() -> Void)? = nil) throws {
+    private func playAudioFixture(at path: String, sample: (() throws -> Void)? = nil) throws {
         let process = Process()
         let errorPipe = Pipe()
         process.standardError = errorPipe
@@ -1475,17 +1494,20 @@ final class LiveNotesUITests: XCTestCase {
             ]
         }
         let duration = try audioDurationSeconds(at: path)
+        playbackProcess = process
         try process.run()
         let deadline = Date().addingTimeInterval(duration + 3)
         while process.isRunning, Date() < deadline {
-            sample?()
+            try sample?()
             RunLoop.current.run(until: Date().addingTimeInterval(0.1))
         }
         if process.isRunning {
             process.terminate()
             process.waitUntilExit()
+            XCTFail("Audio playback did not finish within its expected duration.")
             return
         }
+        playbackProcess = nil
         let errorOutput = String(
             data: errorPipe.fileHandleForReading.readDataToEndOfFile(),
             encoding: .utf8

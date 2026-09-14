@@ -1,0 +1,3125 @@
+[
+  {
+    "endTime": 7.7884375,
+    "fragments": [
+      {
+        "endTime": 7.7884375,
+        "startTime": 0,
+        "text": "special"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "startTime": 0,
+    "text": "special"
+  },
+  {
+    "endTime": 7.8,
+    "fragments": [
+      {
+        "endTime": 7.74,
+        "startTime": 6,
+        "text": "special."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 7.8,
+    "startTime": 6,
+    "text": "special."
+  },
+  {
+    "endTime": 12.58675,
+    "fragments": [
+      {
+        "endTime": 12.58675,
+        "startTime": 7.8,
+        "text": " here"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 7.8,
+    "startTime": 7.8,
+    "text": " here"
+  },
+  {
+    "endTime": 12.58675,
+    "fragments": [
+      {
+        "endTime": 12.58675,
+        "startTime": 7.8,
+        "text": " here."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 7.8,
+    "startTime": 7.8,
+    "text": " here."
+  },
+  {
+    "endTime": 12,
+    "fragments": [
+      {
+        "endTime": 11.94,
+        "startTime": 10.8,
+        "text": " here."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 12,
+    "startTime": 10.8,
+    "text": " here."
+  },
+  {
+    "endTime": 14.4799375,
+    "fragments": [
+      {
+        "endTime": 14.4799375,
+        "startTime": 12,
+        "text": "."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 12,
+    "startTime": 12,
+    "text": "."
+  },
+  {
+    "endTime": 13.86,
+    "fragments": [
+      {
+        "endTime": 13.74,
+        "startTime": 12.48,
+        "text": "."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 13.86,
+    "startTime": 12,
+    "text": "."
+  },
+  {
+    "endTime": 19.27825,
+    "fragments": [
+      {
+        "endTime": 19.27825,
+        "startTime": 13.86,
+        "text": "."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 13.86,
+    "startTime": 13.86,
+    "text": "."
+  },
+  {
+    "endTime": 18.6,
+    "fragments": [
+      {
+        "endTime": 18.54,
+        "startTime": 17.1,
+        "text": " Good."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 18.6,
+    "startTime": 16.86,
+    "text": " Good."
+  },
+  {
+    "endTime": 22.183375,
+    "fragments": [
+      {
+        "endTime": 22.183375,
+        "startTime": 18.6,
+        "text": " comfort"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 18.6,
+    "startTime": 18.6,
+    "text": " comfort"
+  },
+  {
+    "endTime": 22.183375,
+    "fragments": [
+      {
+        "endTime": 22.183375,
+        "startTime": 18.6,
+        "text": " comfort."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 18.6,
+    "startTime": 18.6,
+    "text": " comfort."
+  },
+  {
+    "endTime": 21.9,
+    "fragments": [
+      {
+        "endTime": 19.5,
+        "startTime": 18.6,
+        "text": " All"
+      },
+      {
+        "endTime": 20.22,
+        "startTime": 19.5,
+        "text": " right."
+      },
+      {
+        "endTime": 20.4,
+        "startTime": 20.22,
+        "text": " So,"
+      },
+      {
+        "endTime": 20.82,
+        "startTime": 20.4,
+        "text": " wait."
+      },
+      {
+        "endTime": 21.24,
+        "startTime": 20.82,
+        "text": " Comfort"
+      },
+      {
+        "endTime": 21.36,
+        "startTime": 21.24,
+        "text": " about"
+      },
+      {
+        "endTime": 21.48,
+        "startTime": 21.36,
+        "text": " that"
+      },
+      {
+        "endTime": 21.6,
+        "startTime": 21.48,
+        "text": " for"
+      },
+      {
+        "endTime": 21.84,
+        "startTime": 21.6,
+        "text": " me."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 21.9,
+    "startTime": 18.6,
+    "text": " All right. So, wait. Comfort about that for me."
+  },
+  {
+    "endTime": 22.183375,
+    "fragments": [
+      {
+        "endTime": 22.183375,
+        "startTime": 21.9,
+        "text": " I"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 21.9,
+    "startTime": 21.9,
+    "text": " I"
+  },
+  {
+    "endTime": 22.183375,
+    "fragments": [
+      {
+        "endTime": 22.183375,
+        "startTime": 21.9,
+        "text": " I'"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 21.9,
+    "startTime": 21.9,
+    "text": " I'"
+  },
+  {
+    "endTime": 23.1953125,
+    "fragments": [
+      {
+        "endTime": 23.1953125,
+        "startTime": 21.9,
+        "text": " I'm"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 21.9,
+    "startTime": 21.9,
+    "text": " I'm"
+  },
+  {
+    "endTime": 23.1953125,
+    "fragments": [
+      {
+        "endTime": 23.1953125,
+        "startTime": 21.9,
+        "text": " I'm just"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 21.9,
+    "startTime": 21.9,
+    "text": " I'm just"
+  },
+  {
+    "endTime": 23.1953125,
+    "fragments": [
+      {
+        "endTime": 23.1953125,
+        "startTime": 21.9,
+        "text": " I'm just here"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 21.9,
+    "startTime": 21.9,
+    "text": " I'm just here"
+  },
+  {
+    "endTime": 23.1953125,
+    "fragments": [
+      {
+        "endTime": 23.1953125,
+        "startTime": 21.9,
+        "text": " I'm just here."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 21.9,
+    "startTime": 21.9,
+    "text": " I'm just here."
+  },
+  {
+    "endTime": 22.8,
+    "fragments": [
+      {
+        "endTime": 22.14,
+        "startTime": 21.9,
+        "text": " I'm"
+      },
+      {
+        "endTime": 22.2,
+        "startTime": 22.14,
+        "text": " just"
+      },
+      {
+        "endTime": 22.32,
+        "startTime": 22.2,
+        "text": " starting"
+      },
+      {
+        "endTime": 22.74,
+        "startTime": 22.32,
+        "text": " here."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 22.8,
+    "startTime": 21.9,
+    "text": " I'm just starting here."
+  },
+  {
+    "endTime": 32.7919375,
+    "fragments": [
+      {
+        "endTime": 32.7919375,
+        "startTime": 22.8,
+        "text": " car"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 22.8,
+    "startTime": 22.8,
+    "text": " car"
+  },
+  {
+    "endTime": 32.7919375,
+    "fragments": [
+      {
+        "endTime": 32.7919375,
+        "startTime": 22.8,
+        "text": " car back"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 22.8,
+    "startTime": 22.8,
+    "text": " car back"
+  },
+  {
+    "endTime": 32.7919375,
+    "fragments": [
+      {
+        "endTime": 32.7919375,
+        "startTime": 22.8,
+        "text": " car back."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 22.8,
+    "startTime": 22.8,
+    "text": " car back."
+  },
+  {
+    "endTime": 32.4,
+    "fragments": [
+      {
+        "endTime": 31.98,
+        "startTime": 31.8,
+        "text": " car"
+      },
+      {
+        "endTime": 32.34,
+        "startTime": 31.98,
+        "text": " back."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 32.4,
+    "startTime": 31.8,
+    "text": " car back."
+  },
+  {
+    "endTime": 35.5890625,
+    "fragments": [
+      {
+        "endTime": 35.5890625,
+        "startTime": 32.4,
+        "text": "."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 32.4,
+    "startTime": 32.4,
+    "text": "."
+  },
+  {
+    "endTime": 35.04,
+    "fragments": [
+      {
+        "endTime": 34.98,
+        "startTime": 32.4,
+        "text": " Oh."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 32.4,
+    "text": " Oh."
+  },
+  {
+    "endTime": 43.2925,
+    "fragments": [
+      {
+        "endTime": 43.2925,
+        "startTime": 35.04,
+        "text": " like"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like"
+  },
+  {
+    "endTime": 43.2925,
+    "fragments": [
+      {
+        "endTime": 43.2925,
+        "startTime": 35.04,
+        "text": " like this"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this"
+  },
+  {
+    "endTime": 43.2925,
+    "fragments": [
+      {
+        "endTime": 43.2925,
+        "startTime": 35.04,
+        "text": " like this idea"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea"
+  },
+  {
+    "endTime": 43.2925,
+    "fragments": [
+      {
+        "endTime": 43.2925,
+        "startTime": 35.04,
+        "text": " like this idea of"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of"
+  },
+  {
+    "endTime": 43.2925,
+    "fragments": [
+      {
+        "endTime": 43.2925,
+        "startTime": 35.04,
+        "text": " like this idea of taking"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of taking"
+  },
+  {
+    "endTime": 44.28175,
+    "fragments": [
+      {
+        "endTime": 44.28175,
+        "startTime": 35.04,
+        "text": " like this idea of taking this"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of taking this"
+  },
+  {
+    "endTime": 46.197625,
+    "fragments": [
+      {
+        "endTime": 46.197625,
+        "startTime": 35.04,
+        "text": " like this idea of taking this the"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of taking this the"
+  },
+  {
+    "endTime": 46.197625,
+    "fragments": [
+      {
+        "endTime": 46.197625,
+        "startTime": 35.04,
+        "text": " like this idea of taking this the other"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of taking this the other"
+  },
+  {
+    "endTime": 47.186875,
+    "fragments": [
+      {
+        "endTime": 47.186875,
+        "startTime": 35.04,
+        "text": " like this idea of taking this the other each"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of taking this the other each"
+  },
+  {
+    "endTime": 47.186875,
+    "fragments": [
+      {
+        "endTime": 47.186875,
+        "startTime": 35.04,
+        "text": " like this idea of taking this the other each do"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of taking this the other each do"
+  },
+  {
+    "endTime": 47.186875,
+    "fragments": [
+      {
+        "endTime": 47.186875,
+        "startTime": 35.04,
+        "text": " like this idea of taking this the other each do what"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of taking this the other each do what"
+  },
+  {
+    "endTime": 48.0908125,
+    "fragments": [
+      {
+        "endTime": 48.0908125,
+        "startTime": 35.04,
+        "text": " like this idea of taking this the other each do what."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 35.04,
+    "startTime": 35.04,
+    "text": " like this idea of taking this the other each do what."
+  },
+  {
+    "endTime": 47.16,
+    "fragments": [
+      {
+        "endTime": 41.94,
+        "startTime": 41.04,
+        "text": " I"
+      },
+      {
+        "endTime": 42.36,
+        "startTime": 41.94,
+        "text": " like"
+      },
+      {
+        "endTime": 42.48,
+        "startTime": 42.36,
+        "text": " this"
+      },
+      {
+        "endTime": 42.6,
+        "startTime": 42.48,
+        "text": " idea"
+      },
+      {
+        "endTime": 42.78,
+        "startTime": 42.6,
+        "text": " of"
+      },
+      {
+        "endTime": 43.38,
+        "startTime": 42.78,
+        "text": " taking,"
+      },
+      {
+        "endTime": 43.68,
+        "startTime": 43.38,
+        "text": " you"
+      },
+      {
+        "endTime": 43.8,
+        "startTime": 43.68,
+        "text": " know,"
+      },
+      {
+        "endTime": 43.92,
+        "startTime": 43.8,
+        "text": " this"
+      },
+      {
+        "endTime": 44.4,
+        "startTime": 43.92,
+        "text": " one,"
+      },
+      {
+        "endTime": 44.52,
+        "startTime": 44.4,
+        "text": " this"
+      },
+      {
+        "endTime": 44.82,
+        "startTime": 44.52,
+        "text": " one,"
+      },
+      {
+        "endTime": 45.24,
+        "startTime": 44.82,
+        "text": " and"
+      },
+      {
+        "endTime": 45.3,
+        "startTime": 45.24,
+        "text": " the"
+      },
+      {
+        "endTime": 45.54,
+        "startTime": 45.3,
+        "text": " other,"
+      },
+      {
+        "endTime": 45.66,
+        "startTime": 45.54,
+        "text": " letting"
+      },
+      {
+        "endTime": 46.2,
+        "startTime": 45.66,
+        "text": " each"
+      },
+      {
+        "endTime": 46.32,
+        "startTime": 46.2,
+        "text": " do"
+      },
+      {
+        "endTime": 46.5,
+        "startTime": 46.32,
+        "text": " what"
+      },
+      {
+        "endTime": 46.62,
+        "startTime": 46.5,
+        "text": " it"
+      },
+      {
+        "endTime": 47.1,
+        "startTime": 46.62,
+        "text": " doesn't."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 41.04,
+    "text": " I like this idea of taking, you know, this one, this one, and the other, letting each do what it doesn't."
+  },
+  {
+    "endTime": 48.1988125,
+    "fragments": [
+      {
+        "endTime": 48.1988125,
+        "startTime": 47.16,
+        "text": " I"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I"
+  },
+  {
+    "endTime": 48.1988125,
+    "fragments": [
+      {
+        "endTime": 48.1988125,
+        "startTime": 47.16,
+        "text": " I think"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think"
+  },
+  {
+    "endTime": 48.1988125,
+    "fragments": [
+      {
+        "endTime": 48.1988125,
+        "startTime": 47.16,
+        "text": " I think there"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there"
+  },
+  {
+    "endTime": 48.1988125,
+    "fragments": [
+      {
+        "endTime": 48.1988125,
+        "startTime": 47.16,
+        "text": " I think there'"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there'"
+  },
+  {
+    "endTime": 48.1988125,
+    "fragments": [
+      {
+        "endTime": 48.1988125,
+        "startTime": 47.16,
+        "text": " I think there's"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's"
+  },
+  {
+    "endTime": 48.1988125,
+    "fragments": [
+      {
+        "endTime": 48.1988125,
+        "startTime": 47.16,
+        "text": " I think there's still"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still"
+  },
+  {
+    "endTime": 48.1988125,
+    "fragments": [
+      {
+        "endTime": 48.1988125,
+        "startTime": 47.16,
+        "text": " I think there's still something"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something"
+  },
+  {
+    "endTime": 49.0800625,
+    "fragments": [
+      {
+        "endTime": 49.0800625,
+        "startTime": 47.16,
+        "text": " I think there's still something really"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really"
+  },
+  {
+    "endTime": 50.092,
+    "fragments": [
+      {
+        "endTime": 50.092,
+        "startTime": 47.16,
+        "text": " I think there's still something really this"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this"
+  },
+  {
+    "endTime": 50.092,
+    "fragments": [
+      {
+        "endTime": 50.092,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country"
+  },
+  {
+    "endTime": 50.092,
+    "fragments": [
+      {
+        "endTime": 50.092,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country of"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country of"
+  },
+  {
+    "endTime": 50.9959375,
+    "fragments": [
+      {
+        "endTime": 50.9959375,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country of paper"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country of paper"
+  },
+  {
+    "endTime": 50.9959375,
+    "fragments": [
+      {
+        "endTime": 50.9959375,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country of paper in"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country of paper in"
+  },
+  {
+    "endTime": 50.9959375,
+    "fragments": [
+      {
+        "endTime": 50.9959375,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country of paper in your"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country of paper in your"
+  },
+  {
+    "endTime": 50.9959375,
+    "fragments": [
+      {
+        "endTime": 50.9959375,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country of paper in your al"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country of paper in your al"
+  },
+  {
+    "endTime": 51.9851875,
+    "fragments": [
+      {
+        "endTime": 51.9851875,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country of paper in your alab"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country of paper in your alab"
+  },
+  {
+    "endTime": 51.9851875,
+    "fragments": [
+      {
+        "endTime": 51.9851875,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country of paper in your alabet"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country of paper in your alabet"
+  },
+  {
+    "endTime": 51.9851875,
+    "fragments": [
+      {
+        "endTime": 51.9851875,
+        "startTime": 47.16,
+        "text": " I think there's still something really this country of paper in your alabet."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 47.16,
+    "startTime": 47.16,
+    "text": " I think there's still something really this country of paper in your alabet."
+  },
+  {
+    "endTime": 51.24,
+    "fragments": [
+      {
+        "endTime": 47.28,
+        "startTime": 47.16,
+        "text": " I"
+      },
+      {
+        "endTime": 47.4,
+        "startTime": 47.28,
+        "text": " think"
+      },
+      {
+        "endTime": 47.58,
+        "startTime": 47.4,
+        "text": " there's"
+      },
+      {
+        "endTime": 47.64,
+        "startTime": 47.58,
+        "text": " still"
+      },
+      {
+        "endTime": 47.76,
+        "startTime": 47.64,
+        "text": " something"
+      },
+      {
+        "endTime": 49.02,
+        "startTime": 47.76,
+        "text": " really,"
+      },
+      {
+        "endTime": 49.08,
+        "startTime": 49.02,
+        "text": " that"
+      },
+      {
+        "endTime": 49.26,
+        "startTime": 49.08,
+        "text": " this"
+      },
+      {
+        "endTime": 49.44,
+        "startTime": 49.26,
+        "text": " country"
+      },
+      {
+        "endTime": 49.74,
+        "startTime": 49.44,
+        "text": " of"
+      },
+      {
+        "endTime": 50.1,
+        "startTime": 49.74,
+        "text": " paper"
+      },
+      {
+        "endTime": 50.4,
+        "startTime": 50.1,
+        "text": " is"
+      },
+      {
+        "endTime": 50.52,
+        "startTime": 50.4,
+        "text": " your"
+      },
+      {
+        "endTime": 51.18,
+        "startTime": 50.52,
+        "text": " alphabet."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 47.16,
+    "text": " I think there's still something really, that this country of paper is your alphabet."
+  },
+  {
+    "endTime": 51.9851875,
+    "fragments": [
+      {
+        "endTime": 51.9851875,
+        "startTime": 51.24,
+        "text": " the"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the"
+  },
+  {
+    "endTime": 51.9851875,
+    "fragments": [
+      {
+        "endTime": 51.9851875,
+        "startTime": 51.24,
+        "text": " the that"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the that"
+  },
+  {
+    "endTime": 51.9851875,
+    "fragments": [
+      {
+        "endTime": 51.9851875,
+        "startTime": 51.24,
+        "text": " the that'"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the that'"
+  },
+  {
+    "endTime": 52.889125,
+    "fragments": [
+      {
+        "endTime": 52.889125,
+        "startTime": 51.24,
+        "text": " the that'sability"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the that'sability"
+  },
+  {
+    "endTime": 52.889125,
+    "fragments": [
+      {
+        "endTime": 52.889125,
+        "startTime": 51.24,
+        "text": " the that'sability makes"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the that'sability makes"
+  },
+  {
+    "endTime": 52.889125,
+    "fragments": [
+      {
+        "endTime": 52.889125,
+        "startTime": 51.24,
+        "text": " the that'sability makes us"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the that'sability makes us"
+  },
+  {
+    "endTime": 52.889125,
+    "fragments": [
+      {
+        "endTime": 52.889125,
+        "startTime": 51.24,
+        "text": " the that'sability makes us a"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the that'sability makes us a"
+  },
+  {
+    "endTime": 52.889125,
+    "fragments": [
+      {
+        "endTime": 52.889125,
+        "startTime": 51.24,
+        "text": " the that'sability makes us a completely"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the that'sability makes us a completely"
+  },
+  {
+    "endTime": 53.878375,
+    "fragments": [
+      {
+        "endTime": 53.878375,
+        "startTime": 51.24,
+        "text": " the that'sability makes us a completely."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 51.24,
+    "startTime": 51.24,
+    "text": " the that'sability makes us a completely."
+  },
+  {
+    "endTime": 52.92,
+    "fragments": [
+      {
+        "endTime": 51.3,
+        "startTime": 51.24,
+        "text": " The"
+      },
+      {
+        "endTime": 51.48,
+        "startTime": 51.3,
+        "text": " latter"
+      },
+      {
+        "endTime": 51.54,
+        "startTime": 51.48,
+        "text": " of"
+      },
+      {
+        "endTime": 51.84,
+        "startTime": 51.54,
+        "text": " that's,"
+      },
+      {
+        "endTime": 52.02,
+        "startTime": 51.84,
+        "text": " it"
+      },
+      {
+        "endTime": 52.2,
+        "startTime": 52.02,
+        "text": " makes"
+      },
+      {
+        "endTime": 52.32,
+        "startTime": 52.2,
+        "text": " us"
+      },
+      {
+        "endTime": 52.44,
+        "startTime": 52.32,
+        "text": " a"
+      },
+      {
+        "endTime": 52.86,
+        "startTime": 52.44,
+        "text": " firm."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 51.24,
+    "text": " The latter of that's, it makes us a firm."
+  },
+  {
+    "endTime": 53.878375,
+    "fragments": [
+      {
+        "endTime": 53.878375,
+        "startTime": 52.92,
+        "text": " It"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It"
+  },
+  {
+    "endTime": 53.878375,
+    "fragments": [
+      {
+        "endTime": 53.878375,
+        "startTime": 52.92,
+        "text": " It'"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It'"
+  },
+  {
+    "endTime": 53.878375,
+    "fragments": [
+      {
+        "endTime": 53.878375,
+        "startTime": 52.92,
+        "text": " It's"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's"
+  },
+  {
+    "endTime": 53.878375,
+    "fragments": [
+      {
+        "endTime": 53.878375,
+        "startTime": 52.92,
+        "text": " It's like"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like"
+  },
+  {
+    "endTime": 53.878375,
+    "fragments": [
+      {
+        "endTime": 53.878375,
+        "startTime": 52.92,
+        "text": " It's like,"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like,"
+  },
+  {
+    "endTime": 53.878375,
+    "fragments": [
+      {
+        "endTime": 53.878375,
+        "startTime": 52.92,
+        "text": " It's like, so"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so"
+  },
+  {
+    "endTime": 54.8903125,
+    "fragments": [
+      {
+        "endTime": 54.8903125,
+        "startTime": 52.92,
+        "text": " It's like, so I"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I"
+  },
+  {
+    "endTime": 54.8903125,
+    "fragments": [
+      {
+        "endTime": 54.8903125,
+        "startTime": 52.92,
+        "text": " It's like, so I mean"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I mean"
+  },
+  {
+    "endTime": 54.8903125,
+    "fragments": [
+      {
+        "endTime": 54.8903125,
+        "startTime": 52.92,
+        "text": " It's like, so I mean like"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I mean like"
+  },
+  {
+    "endTime": 54.8903125,
+    "fragments": [
+      {
+        "endTime": 54.8903125,
+        "startTime": 52.92,
+        "text": " It's like, so I mean like techn"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I mean like techn"
+  },
+  {
+    "endTime": 54.8903125,
+    "fragments": [
+      {
+        "endTime": 54.8903125,
+        "startTime": 52.92,
+        "text": " It's like, so I mean like technology"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I mean like technology"
+  },
+  {
+    "endTime": 55.79425,
+    "fragments": [
+      {
+        "endTime": 55.79425,
+        "startTime": 52.92,
+        "text": " It's like, so I mean like technologys"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I mean like technologys"
+  },
+  {
+    "endTime": 55.79425,
+    "fragments": [
+      {
+        "endTime": 55.79425,
+        "startTime": 52.92,
+        "text": " It's like, so I mean like technologys actually"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I mean like technologys actually"
+  },
+  {
+    "endTime": 55.79425,
+    "fragments": [
+      {
+        "endTime": 55.79425,
+        "startTime": 52.92,
+        "text": " It's like, so I mean like technologys actually mer"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I mean like technologys actually mer"
+  },
+  {
+    "endTime": 58.699375,
+    "fragments": [
+      {
+        "endTime": 58.699375,
+        "startTime": 52.92,
+        "text": " It's like, so I mean like technologys actually mer."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 52.92,
+    "startTime": 52.92,
+    "text": " It's like, so I mean like technologys actually mer."
+  },
+  {
+    "endTime": 57.78,
+    "fragments": [
+      {
+        "endTime": 53.22,
+        "startTime": 52.92,
+        "text": " Like,"
+      },
+      {
+        "endTime": 53.34,
+        "startTime": 53.22,
+        "text": " oh,"
+      },
+      {
+        "endTime": 53.76,
+        "startTime": 53.34,
+        "text": " so,"
+      },
+      {
+        "endTime": 53.82,
+        "startTime": 53.76,
+        "text": " I"
+      },
+      {
+        "endTime": 54,
+        "startTime": 53.82,
+        "text": " mean,"
+      },
+      {
+        "endTime": 54.06,
+        "startTime": 54,
+        "text": " like"
+      },
+      {
+        "endTime": 54.24,
+        "startTime": 54.06,
+        "text": " on"
+      },
+      {
+        "endTime": 54.54,
+        "startTime": 54.24,
+        "text": " technology,"
+      },
+      {
+        "endTime": 54.78,
+        "startTime": 54.54,
+        "text": " it's"
+      },
+      {
+        "endTime": 54.84,
+        "startTime": 54.78,
+        "text": " actually"
+      },
+      {
+        "endTime": 57.66,
+        "startTime": 54.84,
+        "text": " nurtured."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 57.78,
+    "startTime": 52.92,
+    "text": " Like, oh, so, I mean, like on technology, it's actually nurtured."
+  },
+  {
+    "endTime": 67.2840625,
+    "fragments": [
+      {
+        "endTime": 67.2840625,
+        "startTime": 57.78,
+        "text": "."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 57.78,
+    "startTime": 57.78,
+    "text": "."
+  },
+  {
+    "endTime": 66.84,
+    "fragments": [
+      {
+        "endTime": 66.78,
+        "startTime": 65.16,
+        "text": " Yeah."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 65.16,
+    "text": " Yeah."
+  },
+  {
+    "endTime": 68.296,
+    "fragments": [
+      {
+        "endTime": 68.296,
+        "startTime": 66.84,
+        "text": " 35"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35"
+  },
+  {
+    "endTime": 69.28525,
+    "fragments": [
+      {
+        "endTime": 69.28525,
+        "startTime": 66.84,
+        "text": " 35 years"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years"
+  },
+  {
+    "endTime": 69.28525,
+    "fragments": [
+      {
+        "endTime": 69.28525,
+        "startTime": 66.84,
+        "text": " 35 years ago"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago"
+  },
+  {
+    "endTime": 69.28525,
+    "fragments": [
+      {
+        "endTime": 69.28525,
+        "startTime": 66.84,
+        "text": " 35 years ago specific"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific"
+  },
+  {
+    "endTime": 70.1891875,
+    "fragments": [
+      {
+        "endTime": 70.1891875,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when"
+  },
+  {
+    "endTime": 70.1891875,
+    "fragments": [
+      {
+        "endTime": 70.1891875,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I"
+  },
+  {
+    "endTime": 70.1891875,
+    "fragments": [
+      {
+        "endTime": 70.1891875,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was"
+  },
+  {
+    "endTime": 70.1891875,
+    "fragments": [
+      {
+        "endTime": 70.1891875,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my"
+  },
+  {
+    "endTime": 71.1784375,
+    "fragments": [
+      {
+        "endTime": 71.1784375,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my there"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my there"
+  },
+  {
+    "endTime": 71.1784375,
+    "fragments": [
+      {
+        "endTime": 71.1784375,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my there was"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my there was"
+  },
+  {
+    "endTime": 71.1784375,
+    "fragments": [
+      {
+        "endTime": 71.1784375,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my there was a"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my there was a"
+  },
+  {
+    "endTime": 71.1784375,
+    "fragments": [
+      {
+        "endTime": 71.1784375,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my there was a guy"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my there was a guy"
+  },
+  {
+    "endTime": 71.1784375,
+    "fragments": [
+      {
+        "endTime": 71.1784375,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my there was a guy in"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my there was a guy in"
+  },
+  {
+    "endTime": 71.1784375,
+    "fragments": [
+      {
+        "endTime": 71.1784375,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my there was a guy in my"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my there was a guy in my"
+  },
+  {
+    "endTime": 71.1784375,
+    "fragments": [
+      {
+        "endTime": 71.1784375,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my there was a guy in my l"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my there was a guy in my l"
+  },
+  {
+    "endTime": 71.1784375,
+    "fragments": [
+      {
+        "endTime": 71.1784375,
+        "startTime": 66.84,
+        "text": " 35 years ago specific when I was my there was a guy in my lap"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 66.84,
+    "startTime": 66.84,
+    "text": " 35 years ago specific when I was my there was a guy in my lap"
+  },
+  {
+    "endTime": 71.82,
+    "fragments": [
+      {
+        "endTime": 67.68,
+        "startTime": 66.84,
+        "text": " So,"
+      },
+      {
+        "endTime": 68.04,
+        "startTime": 67.68,
+        "text": " 35"
+      },
+      {
+        "endTime": 68.28,
+        "startTime": 68.04,
+        "text": " years"
+      },
+      {
+        "endTime": 68.52,
+        "startTime": 68.28,
+        "text": " ago,"
+      },
+      {
+        "endTime": 68.58,
+        "startTime": 68.52,
+        "text": " and"
+      },
+      {
+        "endTime": 69.24,
+        "startTime": 68.58,
+        "text": " specifically,"
+      },
+      {
+        "endTime": 69.42,
+        "startTime": 69.24,
+        "text": " when"
+      },
+      {
+        "endTime": 69.48,
+        "startTime": 69.42,
+        "text": " I"
+      },
+      {
+        "endTime": 69.6,
+        "startTime": 69.48,
+        "text": " was"
+      },
+      {
+        "endTime": 69.72,
+        "startTime": 69.6,
+        "text": " in"
+      },
+      {
+        "endTime": 69.84,
+        "startTime": 69.72,
+        "text": " my"
+      },
+      {
+        "endTime": 70.14,
+        "startTime": 69.84,
+        "text": " case,"
+      },
+      {
+        "endTime": 70.26,
+        "startTime": 70.14,
+        "text": " there"
+      },
+      {
+        "endTime": 70.32,
+        "startTime": 70.26,
+        "text": " was"
+      },
+      {
+        "endTime": 70.44,
+        "startTime": 70.32,
+        "text": " a"
+      },
+      {
+        "endTime": 70.5,
+        "startTime": 70.44,
+        "text": " guy"
+      },
+      {
+        "endTime": 70.62,
+        "startTime": 70.5,
+        "text": " in"
+      },
+      {
+        "endTime": 70.68,
+        "startTime": 70.62,
+        "text": " my"
+      },
+      {
+        "endTime": 70.92,
+        "startTime": 70.68,
+        "text": " lap,"
+      },
+      {
+        "endTime": 71.1,
+        "startTime": 70.92,
+        "text": " you"
+      },
+      {
+        "endTime": 71.28,
+        "startTime": 71.1,
+        "text": " know,"
+      },
+      {
+        "endTime": 71.34,
+        "startTime": 71.28,
+        "text": " at"
+      },
+      {
+        "endTime": 71.52,
+        "startTime": 71.34,
+        "text": " the"
+      },
+      {
+        "endTime": 71.76,
+        "startTime": 71.52,
+        "text": " best."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 71.82,
+    "startTime": 66.84,
+    "text": " So, 35 years ago, and specifically, when I was in my case, there was a guy in my lap, you know, at the best."
+  },
+  {
+    "endTime": 73.0943125,
+    "fragments": [
+      {
+        "endTime": 73.0943125,
+        "startTime": 71.82,
+        "text": " This"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 71.82,
+    "startTime": 71.82,
+    "text": " This"
+  },
+  {
+    "endTime": 73.0943125,
+    "fragments": [
+      {
+        "endTime": 73.0943125,
+        "startTime": 71.82,
+        "text": " This is"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 71.82,
+    "startTime": 71.82,
+    "text": " This is"
+  },
+  {
+    "endTime": 73.0943125,
+    "fragments": [
+      {
+        "endTime": 73.0943125,
+        "startTime": 71.82,
+        "text": " This is dogs"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 71.82,
+    "startTime": 71.82,
+    "text": " This is dogs"
+  },
+  {
+    "endTime": 72.78,
+    "fragments": [
+      {
+        "endTime": 72.06,
+        "startTime": 71.82,
+        "text": " This"
+      },
+      {
+        "endTime": 72.24,
+        "startTime": 72.06,
+        "text": " is"
+      },
+      {
+        "endTime": 72.36,
+        "startTime": 72.24,
+        "text": " 3"
+      },
+      {
+        "endTime": 72.72,
+        "startTime": 72.36,
+        "text": " dogs."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 72.78,
+    "startTime": 71.82,
+    "text": " This is 3 dogs."
+  },
+  {
+    "endTime": 73.0943125,
+    "fragments": [
+      {
+        "endTime": 73.0943125,
+        "startTime": 72.78,
+        "text": " this"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 72.78,
+    "startTime": 72.78,
+    "text": " this"
+  },
+  {
+    "endTime": 73.0943125,
+    "fragments": [
+      {
+        "endTime": 73.0943125,
+        "startTime": 72.78,
+        "text": " this is"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 72.78,
+    "startTime": 72.78,
+    "text": " this is"
+  },
+  {
+    "endTime": 73.99825,
+    "fragments": [
+      {
+        "endTime": 73.99825,
+        "startTime": 72.78,
+        "text": " this is pretty"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 72.78,
+    "startTime": 72.78,
+    "text": " this is pretty"
+  },
+  {
+    "endTime": 75.9994375,
+    "fragments": [
+      {
+        "endTime": 75.9994375,
+        "startTime": 72.78,
+        "text": " this is pretty 12"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 72.78,
+    "startTime": 72.78,
+    "text": " this is pretty 12"
+  },
+  {
+    "endTime": 75.9994375,
+    "fragments": [
+      {
+        "endTime": 75.9994375,
+        "startTime": 72.78,
+        "text": " this is pretty 12 to"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 72.78,
+    "startTime": 72.78,
+    "text": " this is pretty 12 to"
+  },
+  {
+    "endTime": 75.9994375,
+    "fragments": [
+      {
+        "endTime": 75.9994375,
+        "startTime": 72.78,
+        "text": " this is pretty 12 to 50"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 72.78,
+    "startTime": 72.78,
+    "text": " this is pretty 12 to 50"
+  },
+  {
+    "endTime": 76.8806875,
+    "fragments": [
+      {
+        "endTime": 76.8806875,
+        "startTime": 72.78,
+        "text": " this is pretty 12 to 50."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 72.78,
+    "startTime": 72.78,
+    "text": " this is pretty 12 to 50."
+  },
+  {
+    "endTime": 76.08,
+    "fragments": [
+      {
+        "endTime": 72.84,
+        "startTime": 72.78,
+        "text": " This"
+      },
+      {
+        "endTime": 72.9,
+        "startTime": 72.84,
+        "text": " is"
+      },
+      {
+        "endTime": 73.14,
+        "startTime": 72.9,
+        "text": " pretty"
+      },
+      {
+        "endTime": 75,
+        "startTime": 73.14,
+        "text": " 12"
+      },
+      {
+        "endTime": 75.18,
+        "startTime": 75,
+        "text": " to"
+      },
+      {
+        "endTime": 76.02,
+        "startTime": 75.18,
+        "text": " 50."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 72.78,
+    "text": " This is pretty 12 to 50."
+  },
+  {
+    "endTime": 76.8806875,
+    "fragments": [
+      {
+        "endTime": 76.8806875,
+        "startTime": 76.08,
+        "text": " He"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He"
+  },
+  {
+    "endTime": 76.8806875,
+    "fragments": [
+      {
+        "endTime": 76.8806875,
+        "startTime": 76.08,
+        "text": " He was"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was"
+  },
+  {
+    "endTime": 77.892625,
+    "fragments": [
+      {
+        "endTime": 77.892625,
+        "startTime": 76.08,
+        "text": " He was he"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he"
+  },
+  {
+    "endTime": 77.892625,
+    "fragments": [
+      {
+        "endTime": 77.892625,
+        "startTime": 76.08,
+        "text": " He was he built"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built"
+  },
+  {
+    "endTime": 78.7965625,
+    "fragments": [
+      {
+        "endTime": 78.7965625,
+        "startTime": 76.08,
+        "text": " He was he built this"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this"
+  },
+  {
+    "endTime": 78.7965625,
+    "fragments": [
+      {
+        "endTime": 78.7965625,
+        "startTime": 76.08,
+        "text": " He was he built this next"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next"
+  },
+  {
+    "endTime": 79.7858125,
+    "fragments": [
+      {
+        "endTime": 79.7858125,
+        "startTime": 76.08,
+        "text": " He was he built this next and"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and"
+  },
+  {
+    "endTime": 80.79775,
+    "fragments": [
+      {
+        "endTime": 80.79775,
+        "startTime": 76.08,
+        "text": " He was he built this next and he"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he"
+  },
+  {
+    "endTime": 81.679,
+    "fragments": [
+      {
+        "endTime": 81.679,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built"
+  },
+  {
+    "endTime": 81.679,
+    "fragments": [
+      {
+        "endTime": 81.679,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the"
+  },
+  {
+    "endTime": 81.679,
+    "fragments": [
+      {
+        "endTime": 81.679,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system"
+  },
+  {
+    "endTime": 81.679,
+    "fragments": [
+      {
+        "endTime": 81.679,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that"
+  },
+  {
+    "endTime": 82.6909375,
+    "fragments": [
+      {
+        "endTime": 82.6909375,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that ess"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that ess"
+  },
+  {
+    "endTime": 82.6909375,
+    "fragments": [
+      {
+        "endTime": 82.6909375,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essent"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essent"
+  },
+  {
+    "endTime": 83.594875,
+    "fragments": [
+      {
+        "endTime": 83.594875,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially comb"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially comb"
+  },
+  {
+    "endTime": 83.594875,
+    "fragments": [
+      {
+        "endTime": 83.594875,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided"
+  },
+  {
+    "endTime": 83.594875,
+    "fragments": [
+      {
+        "endTime": 83.594875,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never"
+  },
+  {
+    "endTime": 83.594875,
+    "fragments": [
+      {
+        "endTime": 83.594875,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never prot"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never prot"
+  },
+  {
+    "endTime": 83.594875,
+    "fragments": [
+      {
+        "endTime": 83.594875,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protect"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protect"
+  },
+  {
+    "endTime": 84.584125,
+    "fragments": [
+      {
+        "endTime": 84.584125,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected"
+  },
+  {
+    "endTime": 84.584125,
+    "fragments": [
+      {
+        "endTime": 84.584125,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and"
+  },
+  {
+    "endTime": 84.584125,
+    "fragments": [
+      {
+        "endTime": 84.584125,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then"
+  },
+  {
+    "endTime": 84.584125,
+    "fragments": [
+      {
+        "endTime": 84.584125,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it"
+  },
+  {
+    "endTime": 84.584125,
+    "fragments": [
+      {
+        "endTime": 84.584125,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes"
+  },
+  {
+    "endTime": 85.5960625,
+    "fragments": [
+      {
+        "endTime": 85.5960625,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2"
+  },
+  {
+    "endTime": 85.5960625,
+    "fragments": [
+      {
+        "endTime": 85.5960625,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids"
+  },
+  {
+    "endTime": 85.5960625,
+    "fragments": [
+      {
+        "endTime": 85.5960625,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that"
+  },
+  {
+    "endTime": 85.5960625,
+    "fragments": [
+      {
+        "endTime": 85.5960625,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it"
+  },
+  {
+    "endTime": 85.5960625,
+    "fragments": [
+      {
+        "endTime": 85.5960625,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could"
+  },
+  {
+    "endTime": 85.5960625,
+    "fragments": [
+      {
+        "endTime": 85.5960625,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very"
+  },
+  {
+    "endTime": 85.5960625,
+    "fragments": [
+      {
+        "endTime": 85.5960625,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very eas"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very eas"
+  },
+  {
+    "endTime": 86.4773125,
+    "fragments": [
+      {
+        "endTime": 86.4773125,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily"
+  },
+  {
+    "endTime": 86.4773125,
+    "fragments": [
+      {
+        "endTime": 86.4773125,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create"
+  },
+  {
+    "endTime": 86.4773125,
+    "fragments": [
+      {
+        "endTime": 86.4773125,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to"
+  },
+  {
+    "endTime": 87.48925,
+    "fragments": [
+      {
+        "endTime": 87.48925,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to reg"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to reg"
+  },
+  {
+    "endTime": 87.48925,
+    "fragments": [
+      {
+        "endTime": 87.48925,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to register"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to register"
+  },
+  {
+    "endTime": 87.48925,
+    "fragments": [
+      {
+        "endTime": 87.48925,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to register v"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to register v"
+  },
+  {
+    "endTime": 87.48925,
+    "fragments": [
+      {
+        "endTime": 87.48925,
+        "startTime": 76.08,
+        "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to register v."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 76.08,
+    "startTime": 76.08,
+    "text": " He was he built this next and he built the system that essentially combided never protected and then it goes 2 kids that it could very easily create to register v."
+  },
+  {
+    "endTime": 87,
+    "fragments": [
+      {
+        "endTime": 76.5,
+        "startTime": 76.08,
+        "text": " He"
+      },
+      {
+        "endTime": 77.22,
+        "startTime": 76.5,
+        "text": " was,"
+      },
+      {
+        "endTime": 77.34,
+        "startTime": 77.22,
+        "text": " he"
+      },
+      {
+        "endTime": 77.52,
+        "startTime": 77.34,
+        "text": " built"
+      },
+      {
+        "endTime": 77.82,
+        "startTime": 77.52,
+        "text": " his"
+      },
+      {
+        "endTime": 77.88,
+        "startTime": 77.82,
+        "text": " own"
+      },
+      {
+        "endTime": 78.18,
+        "startTime": 77.88,
+        "text": " man,"
+      },
+      {
+        "endTime": 78.36,
+        "startTime": 78.18,
+        "text": " first,"
+      },
+      {
+        "endTime": 78.66,
+        "startTime": 78.36,
+        "text": " next,"
+      },
+      {
+        "endTime": 78.78,
+        "startTime": 78.66,
+        "text": " to"
+      },
+      {
+        "endTime": 78.84,
+        "startTime": 78.78,
+        "text": " the"
+      },
+      {
+        "endTime": 79.32,
+        "startTime": 78.84,
+        "text": " release,"
+      },
+      {
+        "endTime": 79.56,
+        "startTime": 79.32,
+        "text": " and"
+      },
+      {
+        "endTime": 79.86,
+        "startTime": 79.56,
+        "text": " he"
+      },
+      {
+        "endTime": 80.76,
+        "startTime": 79.86,
+        "text": " built"
+      },
+      {
+        "endTime": 80.94,
+        "startTime": 80.76,
+        "text": " the"
+      },
+      {
+        "endTime": 81.06,
+        "startTime": 80.94,
+        "text": " system"
+      },
+      {
+        "endTime": 81.3,
+        "startTime": 81.06,
+        "text": " that"
+      },
+      {
+        "endTime": 82.32,
+        "startTime": 81.3,
+        "text": " essentially"
+      },
+      {
+        "endTime": 82.62,
+        "startTime": 82.32,
+        "text": " a"
+      },
+      {
+        "endTime": 82.86,
+        "startTime": 82.62,
+        "text": " provider"
+      },
+      {
+        "endTime": 83.04,
+        "startTime": 82.86,
+        "text": " never"
+      },
+      {
+        "endTime": 83.76,
+        "startTime": 83.04,
+        "text": " protected,"
+      },
+      {
+        "endTime": 83.82,
+        "startTime": 83.76,
+        "text": " and"
+      },
+      {
+        "endTime": 83.94,
+        "startTime": 83.82,
+        "text": " then"
+      },
+      {
+        "endTime": 84.06,
+        "startTime": 83.94,
+        "text": " it"
+      },
+      {
+        "endTime": 84.18,
+        "startTime": 84.06,
+        "text": " goes"
+      },
+      {
+        "endTime": 84.54,
+        "startTime": 84.18,
+        "text": " 2"
+      },
+      {
+        "endTime": 84.78,
+        "startTime": 84.54,
+        "text": " kids,"
+      },
+      {
+        "endTime": 84.84,
+        "startTime": 84.78,
+        "text": " then"
+      },
+      {
+        "endTime": 84.96,
+        "startTime": 84.84,
+        "text": " it"
+      },
+      {
+        "endTime": 85.08,
+        "startTime": 84.96,
+        "text": " goes"
+      },
+      {
+        "endTime": 85.26,
+        "startTime": 85.08,
+        "text": " very"
+      },
+      {
+        "endTime": 85.62,
+        "startTime": 85.26,
+        "text": " easily,"
+      },
+      {
+        "endTime": 85.86,
+        "startTime": 85.62,
+        "text": " create"
+      },
+      {
+        "endTime": 86.1,
+        "startTime": 85.86,
+        "text": " and"
+      },
+      {
+        "endTime": 86.46,
+        "startTime": 86.1,
+        "text": " practice"
+      },
+      {
+        "endTime": 86.58,
+        "startTime": 86.46,
+        "text": " as"
+      },
+      {
+        "endTime": 86.7,
+        "startTime": 86.58,
+        "text": " a"
+      },
+      {
+        "endTime": 86.94,
+        "startTime": 86.7,
+        "text": " vet."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 87,
+    "startTime": 76.08,
+    "text": " He was, he built his own man, first, next, to the release, and he built the system that essentially a provider never protected, and then it goes 2 kids, then it goes very easily, create and practice as a vet."
+  },
+  {
+    "endTime": 87.6825625,
+    "fragments": [
+      {
+        "endTime": 87.6825625,
+        "startTime": 87,
+        "text": " So"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87,
+    "startTime": 87,
+    "text": " So"
+  },
+  {
+    "endTime": 88.3931875,
+    "fragments": [
+      {
+        "endTime": 88.3931875,
+        "startTime": 87,
+        "text": " So I"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87,
+    "startTime": 87,
+    "text": " So I"
+  },
+  {
+    "endTime": 88.3931875,
+    "fragments": [
+      {
+        "endTime": 88.3931875,
+        "startTime": 87,
+        "text": " So I can"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87,
+    "startTime": 87,
+    "text": " So I can"
+  },
+  {
+    "endTime": 88.3931875,
+    "fragments": [
+      {
+        "endTime": 88.3931875,
+        "startTime": 87,
+        "text": " So I can do"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87,
+    "startTime": 87,
+    "text": " So I can do"
+  },
+  {
+    "endTime": 88.3931875,
+    "fragments": [
+      {
+        "endTime": 88.3931875,
+        "startTime": 87,
+        "text": " So I can do that"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87,
+    "startTime": 87,
+    "text": " So I can do that"
+  },
+  {
+    "endTime": 88.3931875,
+    "fragments": [
+      {
+        "endTime": 88.3931875,
+        "startTime": 87,
+        "text": " So I can do that."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87,
+    "startTime": 87,
+    "text": " So I can do that."
+  },
+  {
+    "endTime": 87.96,
+    "fragments": [
+      {
+        "endTime": 87.12,
+        "startTime": 87,
+        "text": " So"
+      },
+      {
+        "endTime": 87.48,
+        "startTime": 87.12,
+        "text": " I"
+      },
+      {
+        "endTime": 87.6,
+        "startTime": 87.48,
+        "text": " can"
+      },
+      {
+        "endTime": 87.72,
+        "startTime": 87.6,
+        "text": " do"
+      },
+      {
+        "endTime": 87.9,
+        "startTime": 87.72,
+        "text": " that."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87,
+    "text": " So I can do that."
+  },
+  {
+    "endTime": 88.3931875,
+    "fragments": [
+      {
+        "endTime": 88.3931875,
+        "startTime": 87.96,
+        "text": " That"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That"
+  },
+  {
+    "endTime": 88.3931875,
+    "fragments": [
+      {
+        "endTime": 88.3931875,
+        "startTime": 87.96,
+        "text": " That'"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That'"
+  },
+  {
+    "endTime": 88.3931875,
+    "fragments": [
+      {
+        "endTime": 88.3931875,
+        "startTime": 87.96,
+        "text": " That's"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's"
+  },
+  {
+    "endTime": 89.3824375,
+    "fragments": [
+      {
+        "endTime": 89.3824375,
+        "startTime": 87.96,
+        "text": " That's stri"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's stri"
+  },
+  {
+    "endTime": 89.3824375,
+    "fragments": [
+      {
+        "endTime": 89.3824375,
+        "startTime": 87.96,
+        "text": " That's striing"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's striing"
+  },
+  {
+    "endTime": 89.3824375,
+    "fragments": [
+      {
+        "endTime": 89.3824375,
+        "startTime": 87.96,
+        "text": " That's striing and"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's striing and"
+  },
+  {
+    "endTime": 89.3824375,
+    "fragments": [
+      {
+        "endTime": 89.3824375,
+        "startTime": 87.96,
+        "text": " That's striing and you"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's striing and you"
+  },
+  {
+    "endTime": 89.9551875,
+    "fragments": [
+      {
+        "endTime": 89.9551875,
+        "startTime": 87.96,
+        "text": " That's striing and you can"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's striing and you can"
+  },
+  {
+    "endTime": 89.9551875,
+    "fragments": [
+      {
+        "endTime": 89.9551875,
+        "startTime": 87.96,
+        "text": " That's striing and you can do"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's striing and you can do"
+  },
+  {
+    "endTime": 89.9551875,
+    "fragments": [
+      {
+        "endTime": 89.9551875,
+        "startTime": 87.96,
+        "text": " That's striing and you can do the"
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's striing and you can do the"
+  },
+  {
+    "endTime": 89.9551875,
+    "fragments": [
+      {
+        "endTime": 89.9551875,
+        "startTime": 87.96,
+        "text": " That's striing and you can do the."
+      }
+    ],
+    "isFinal": false,
+    "resultsFinalizationTime": 87.96,
+    "startTime": 87.96,
+    "text": " That's striing and you can do the."
+  },
+  {
+    "endTime": 89.9551875,
+    "fragments": [
+      {
+        "endTime": 88.2,
+        "startTime": 87.96,
+        "text": " That's"
+      },
+      {
+        "endTime": 88.74,
+        "startTime": 88.2,
+        "text": " striking,"
+      },
+      {
+        "endTime": 88.8,
+        "startTime": 88.74,
+        "text": " and"
+      },
+      {
+        "endTime": 89.16,
+        "startTime": 88.8,
+        "text": " you"
+      },
+      {
+        "endTime": 89.4,
+        "startTime": 89.16,
+        "text": " can"
+      },
+      {
+        "endTime": 89.52,
+        "startTime": 89.4,
+        "text": " do"
+      },
+      {
+        "endTime": 89.9551875,
+        "startTime": 89.52,
+        "text": " that."
+      }
+    ],
+    "isFinal": true,
+    "resultsFinalizationTime": 89.9551875,
+    "startTime": 87.96,
+    "text": " That's striking, and you can do that."
+  }
+]

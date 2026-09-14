@@ -738,8 +738,9 @@ struct SpeechAnalyzerTranscriptAssembler: Sendable {
     private mutating func storePending(_ update: PendingUpdate, isFinal: Bool) -> PendingUpdate {
         if isFinal {
             pendingUpdates = pendingUpdates.flatMap { existing -> [PendingUpdate] in
+                if let remaining = Self.remainingFragments(of: existing, after: update) { return remaining }
                 if Self.isCorrectedCoarsePhrase(existing, update) { return [] }
-                return Self.remainingFragments(of: existing, after: update) ?? [existing]
+                return [existing]
             }
         }
         if let existing = pendingUpdates.first(where: { Self.shouldKeep($0, over: update) }) {
@@ -755,11 +756,25 @@ struct SpeechAnalyzerTranscriptAssembler: Sendable {
     }
 
     private static func isCorrectedCoarsePhrase(_ existing: PendingUpdate, _ update: PendingUpdate) -> Bool {
-        guard rangeContains(existing, update),
-              existing.fragments.allSatisfy({
+        guard existing.fragments.allSatisfy({
                   abs($0.startTime - existing.startTime) <= rangeTolerance
                       && abs($0.endTime - existing.endTime) <= rangeTolerance
               }) else { return false }
+        // Native progressive results can timestamp an entire hypothesis as one
+        // atomic run, including surrounding silence. The final word-timed result
+        // replaces that run even when several words (or a short utterance) change.
+        // Recover any identifiable prefix/suffix before retiring this coarse run.
+        // Empty fragments are legacy/unattributed input, not evidence of this case.
+        // Both boundaries can move after silence is trimmed and the last word
+        // completes. Require substantial overlap, not merely touching adjacent
+        // speech, when the final range extends beyond the coarse hypothesis.
+        let overlap = min(existing.endTime, update.endTime) - max(existing.startTime, update.startTime)
+        let shorterDuration = min(existing.endTime - existing.startTime, update.endTime - update.startTime)
+        if !existing.fragments.isEmpty, !update.fragments.isEmpty,
+           overlap > max(Self.rangeTolerance, shorterDuration / 2) {
+            return true
+        }
+        guard rangeContains(existing, update) else { return false }
         let oldWords = normalized(existing.text).split(separator: " ")
         let newWords = normalized(update.text).split(separator: " ")
         guard min(oldWords.count, newWords.count) >= 3 else { return false }
@@ -1487,128 +1502,6 @@ extension SpeechAnalyzerTranscriptUpdate {
     private static func safeSeconds(_ seconds: Double, fallback: Double) -> Double {
         seconds.isFinite ? max(0, seconds) : fallback
     }
-}
-
-public struct LiveTranscriptSegmentBuffer: Sendable {
-    private var startTime: Int
-    private var partialText = ""
-
-    public init(startTime: Int = 0) {
-        self.startTime = max(0, startTime)
-    }
-
-    @discardableResult
-    public mutating func updatePartial(_ text: String) -> String? {
-        let cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleaned.isEmpty else { return nil }
-        partialText = cleaned
-        return cleaned
-    }
-
-    public mutating func finishSegment(endTime: Int) -> [TranscriptSentence] {
-        let cleaned = partialText.trimmingCharacters(in: .whitespacesAndNewlines)
-        let safeEndTime = max(startTime + 1, endTime)
-        guard !cleaned.isEmpty else {
-            startTime = safeEndTime
-            return []
-        }
-        let sentence = TranscriptSentence(
-            startTime: startTime,
-            endTime: safeEndTime,
-            text: cleaned,
-            translation: "",
-            confidence: .low
-        )
-        startTime = safeEndTime
-        partialText = ""
-        return [sentence]
-    }
-}
-
-public enum LiveTranscriptPreviewDisplayPolicy {
-    public static func displayedText(current: String, incoming: String) -> String {
-        let cleanedCurrent = current.trimmingCharacters(in: .whitespacesAndNewlines)
-        let cleanedIncoming = incoming.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !cleanedIncoming.isEmpty else { return cleanedCurrent }
-        guard !shouldKeepCurrent(current: cleanedCurrent, incoming: cleanedIncoming) else {
-            return cleanedCurrent
-        }
-        return cleanedIncoming
-    }
-
-    public static func shouldClearAfterCommit(preview: String, committed: String) -> Bool {
-        let normalizedPreview = normalized(preview)
-        let normalizedCommitted = normalized(committed)
-        guard !normalizedPreview.isEmpty, !normalizedCommitted.isEmpty else {
-            return false
-        }
-        return normalizedPreview == normalizedCommitted
-            || normalizedPreview.hasPrefix(normalizedCommitted)
-            || normalizedCommitted.hasPrefix(normalizedPreview)
-    }
-
-    private static func shouldKeepCurrent(current: String, incoming: String) -> Bool {
-        let normalizedCurrent = normalized(current)
-        let normalizedIncoming = normalized(incoming)
-        guard !normalizedCurrent.isEmpty,
-              !normalizedIncoming.isEmpty,
-              normalizedCurrent != normalizedIncoming,
-              normalizedCurrent.hasPrefix(normalizedIncoming) else {
-            return false
-        }
-        return wordCount(current) >= wordCount(incoming)
-            && normalizedCurrent.count > normalizedIncoming.count
-    }
-
-    private static func normalized(_ text: String) -> String {
-        text.lowercased()
-            .split(whereSeparator: \.isWhitespace)
-            .map {
-                String($0).trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
-            }
-            .filter { !$0.isEmpty }
-            .joined(separator: " ")
-    }
-
-    private static func wordCount(_ text: String) -> Int {
-        text.split(whereSeparator: \.isWhitespace).count
-    }
-}
-
-public enum TranscriptCoverage {
-    public static func mergedLiveFallback(
-        existing: [TranscriptSentence],
-        previewText: String,
-        previewTranslation: String,
-        durationSeconds: Int
-    ) -> [TranscriptSentence] {
-        let safeDuration = max(1, durationSeconds)
-        _ = previewText
-        _ = previewTranslation
-        return bounded(existing, durationSeconds: safeDuration)
-    }
-
-    private static func bounded(
-        _ transcript: [TranscriptSentence],
-        durationSeconds: Int
-    ) -> [TranscriptSentence] {
-        transcript.compactMap { sentence in
-            let text = sentence.text.trimmingCharacters(in: .whitespacesAndNewlines)
-            guard !text.isEmpty else { return nil }
-            let start = min(max(0, sentence.startTime), max(0, durationSeconds - 1))
-            let end = min(max(start + 1, sentence.endTime), durationSeconds)
-            return TranscriptSentence(
-                id: sentence.id,
-                startTime: start,
-                endTime: max(start + 1, end),
-                text: text,
-                translation: sentence.translation.trimmingCharacters(in: .whitespacesAndNewlines),
-                confidence: sentence.confidence,
-                sourceStartTime: sentence.sourceStartTime
-            )
-        }
-    }
-
 }
 
 public enum TranscriptFinalizationPolicy {

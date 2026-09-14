@@ -191,7 +191,7 @@ if grep -Eq 'NativeTopicSummarizer|Topic Notes|topic notes|topic summaries' "$RO
   exit 1
 fi
 
-if grep -Eq 'depends_on macos: ">= :(sonoma|sequoia)"' "$ROOT_DIR/scripts/write-homebrew-cask.sh"; then
+if grep -Eq 'depends_on macos: (">= )?:(sonoma|sequoia)' "$ROOT_DIR/scripts/write-homebrew-cask.sh"; then
   echo "Homebrew cask must not advertise macOS 14 or macOS 15 support" >&2
   exit 1
 fi

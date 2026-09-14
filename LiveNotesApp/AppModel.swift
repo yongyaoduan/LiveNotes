@@ -330,7 +330,8 @@ final class AppModel: ObservableObject {
             model.liveTranscriptPreview = DemoText.livePreview
             model.liveTranslationPreview = DemoTranslation.livePreview
             model.liveTranslationPreviewSource = DemoText.livePreview
-            model.liveAudioLevel = 0.58
+            // A quiet input can still have an actively changing hypothesis.
+            model.liveAudioLevel = argumentValue("--ui-state", in: arguments) == "live-preview-only" ? 0.01 : 0.58
         }
         return model
     }

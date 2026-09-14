@@ -446,7 +446,7 @@ private struct TranscriptColumn: View {
                         }
 
                         if let preview = model.selectedLiveSpeechPreview {
-                            LiveSpeechPreviewView(preview: preview, level: model.liveAudioLevel)
+                            LiveSpeechPreviewView(preview: preview, level: model.liveAudioLevel, paused: session.status.isPausedForDisplay)
                                 .id(livePreviewID)
                         }
 
@@ -567,6 +567,7 @@ private struct InputActivityMeter: View {
 private struct LiveSpeechPreviewView: View {
     var preview: LiveSpeechPreview
     var level: Double
+    var paused: Bool
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -589,7 +590,7 @@ private struct LiveSpeechPreviewView: View {
                 .accessibilityIdentifier("live-translation-preview")
                 .font(.system(size: 16))
                 .foregroundStyle(preview.translation.isEmpty ? LiveNotesStyle.secondary : LiveNotesStyle.graphite)
-            InputActivityMeter(level: level, paused: false)
+            InputActivityMeter(level: level, paused: paused)
                 .padding(.top, 4)
         }
         .padding(14)
@@ -598,7 +599,7 @@ private struct LiveSpeechPreviewView: View {
     }
 
     private var liveStatus: String {
-        level > 0.08 ? "Transcribing" : "Waiting for speech"
+        paused ? "Paused" : "Transcribing"
     }
 }
 
@@ -670,10 +671,13 @@ private struct RecordingBar: View {
                 model.confirmStop()
             } label: {
                 Label("Finish & Save", systemImage: "checkmark")
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(LiveNotesStyle.recording, in: RoundedRectangle(cornerRadius: 6))
             }
-            .buttonStyle(.borderedProminent)
-            .controlSize(.regular)
-            .tint(LiveNotesStyle.graphite)
+            .buttonStyle(.plain)
             .accessibilityIdentifier("recording-bar-stop-button")
         }
         .padding(.horizontal, 24)

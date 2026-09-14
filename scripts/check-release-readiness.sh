@@ -154,7 +154,7 @@ validate_app_zip() {
     "$cask_path" >/dev/null
   ruby -c "$cask_path" >/dev/null
   require_grep 'app "LiveNotes.app"' "$cask_path" "Generated cask must install LiveNotes.app."
-  require_grep 'depends_on macos: ">= :tahoe"' "$cask_path" "Homebrew cask must require macOS 26 or newer."
+  require_grep 'depends_on macos: :tahoe' "$cask_path" "Homebrew cask must require macOS 26 or newer."
   require_grep 'Privacy & Security' "$cask_path" "Preview cask must explain unsigned launch recovery."
   reject_grep 'python@3\.12|Runtime/bin/python3|venv|pip install|mlx|postflight do|curl|LiveNotes local MLX runtime|topic notes' \
     "$cask_path" \
@@ -258,7 +258,7 @@ CASK_PATH="$WORK_ROOT/livenotes.rb"
   "$CASK_PATH" >/dev/null
 
 ruby -c "$CASK_PATH" >/dev/null
-require_grep 'depends_on macos: ">= :tahoe"' "$CASK_PATH" "Homebrew cask must require macOS 26 or newer."
+require_grep 'depends_on macos: :tahoe' "$CASK_PATH" "Homebrew cask must require macOS 26 or newer."
 require_grep 'Privacy & Security' "$CASK_PATH" "Preview cask must explain unsigned launch recovery."
 reject_grep 'python@3\.12|Runtime/bin/python3|venv|pip install|mlx|postflight do|curl|LiveNotes local MLX runtime' \
   "$CASK_PATH" \

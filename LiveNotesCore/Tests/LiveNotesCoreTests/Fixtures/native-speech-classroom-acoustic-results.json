@@ -1,0 +1,3711 @@
+[
+  {
+    "startTime": 0,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "startTime": 0,
+        "text": "think",
+        "endTime": 46.199625
+      }
+    ],
+    "text": "think",
+    "endTime": 46.199625
+  },
+  {
+    "startTime": 0,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "startTime": 0,
+        "text": "I",
+        "endTime": 46.199625
+      }
+    ],
+    "text": "I",
+    "endTime": 46.199625
+  },
+  {
+    "startTime": 0,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "startTime": 0,
+        "text": "I'",
+        "endTime": 46.199625
+      }
+    ],
+    "text": "I'",
+    "endTime": 46.199625
+  },
+  {
+    "startTime": 0,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "startTime": 0,
+        "text": "I'm going",
+        "endTime": 46.199625
+      }
+    ],
+    "text": "I'm going",
+    "endTime": 46.199625
+  },
+  {
+    "startTime": 0,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "startTime": 0,
+        "endTime": 46.199625,
+        "text": "I'm going to"
+      }
+    ],
+    "text": "I'm going to",
+    "endTime": 46.199625
+  },
+  {
+    "startTime": 0,
+    "isFinal": false,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "startTime": 0,
+        "endTime": 46.199625,
+        "text": "I'm going to ret"
+      }
+    ],
+    "text": "I'm going to ret",
+    "endTime": 46.199625
+  },
+  {
+    "text": "I'm going to ret because",
+    "startTime": 0,
+    "isFinal": false,
+    "endTime": 48.199625,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "endTime": 48.199625,
+        "startTime": 0,
+        "text": "I'm going to ret because"
+      }
+    ]
+  },
+  {
+    "text": "I'm going to ret because when",
+    "startTime": 0,
+    "isFinal": false,
+    "endTime": 48.199625,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "endTime": 48.199625,
+        "startTime": 0,
+        "text": "I'm going to ret because when"
+      }
+    ]
+  },
+  {
+    "text": "I'm going to ret because when it",
+    "startTime": 0,
+    "isFinal": false,
+    "endTime": 48.199625,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "endTime": 48.199625,
+        "startTime": 0,
+        "text": "I'm going to ret because when it"
+      }
+    ]
+  },
+  {
+    "text": "I'm going to ret because when it try",
+    "startTime": 0,
+    "isFinal": false,
+    "endTime": 49.199625,
+    "resultsFinalizationTime": 0,
+    "fragments": [
+      {
+        "endTime": 49.199625,
+        "text": "I'm going to ret because when it try",
+        "startTime": 0
+      }
+    ]
+  },
+  {
+    "text": "I think I'm going to retry posing IT before, because when it try, it starts in ITE6.",
+    "startTime": 45,
+    "isFinal": true,
+    "endTime": 50.22,
+    "resultsFinalizationTime": 50.22,
+    "fragments": [
+      {
+        "startTime": 45,
+        "endTime": 45.18,
+        "text": "I"
+      },
+      {
+        "text": " think",
+        "startTime": 45.18,
+        "endTime": 45.24
+      },
+      {
+        "endTime": 45.54,
+        "startTime": 45.24,
+        "text": " I'm"
+      },
+      {
+        "endTime": 45.6,
+        "startTime": 45.54,
+        "text": " going"
+      },
+      {
+        "startTime": 45.6,
+        "text": " to",
+        "endTime": 45.66
+      },
+      {
+        "text": " retry",
+        "startTime": 45.66,
+        "endTime": 45.96
+      },
+      {
+        "endTime": 46.38,
+        "startTime": 45.96,
+        "text": " posing"
+      },
+      {
+        "endTime": 46.62,
+        "text": " IT",
+        "startTime": 46.38
+      },
+      {
+        "endTime": 47.1,
+        "startTime": 46.62,
+        "text": " before,"
+      },
+      {
+        "endTime": 47.22,
+        "startTime": 47.1,
+        "text": " because"
+      },
+      {
+        "startTime": 47.22,
+        "text": " when",
+        "endTime": 47.76
+      },
+      {
+        "startTime": 47.76,
+        "endTime": 47.88,
+        "text": " it"
+      },
+      {
+        "startTime": 47.88,
+        "endTime": 48.36,
+        "text": " try,"
+      },
+      {
+        "text": " it",
+        "startTime": 48.36,
+        "endTime": 48.42
+      },
+      {
+        "text": " starts",
+        "startTime": 48.42,
+        "endTime": 49.02
+      },
+      {
+        "text": " in",
+        "startTime": 49.02,
+        "endTime": 49.14
+      },
+      {
+        "text": " ITE6.",
+        "startTime": 49.14,
+        "endTime": 50.1
+      }
+    ]
+  },
+  {
+    "text": " It",
+    "startTime": 50.22,
+    "isFinal": false,
+    "endTime": 50.999625,
+    "resultsFinalizationTime": 50.22,
+    "fragments": [
+      {
+        "text": " It",
+        "startTime": 50.22,
+        "endTime": 50.999625
+      }
+    ]
+  },
+  {
+    "startTime": 50.22,
+    "endTime": 51.999625,
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 51.999625,
+        "text": " It an",
+        "startTime": 50.22
+      }
+    ],
+    "resultsFinalizationTime": 50.22,
+    "text": " It an"
+  },
+  {
+    "startTime": 50.22,
+    "endTime": 51.999625,
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 51.999625,
+        "startTime": 50.22,
+        "text": " It an It"
+      }
+    ],
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It"
+  },
+  {
+    "startTime": 50.22,
+    "endTime": 51.999625,
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " It an It'",
+        "startTime": 50.22,
+        "endTime": 51.999625
+      }
+    ],
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'"
+  },
+  {
+    "startTime": 50.22,
+    "endTime": 51.999625,
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 51.999625,
+        "text": " It an It's",
+        "startTime": 50.22
+      }
+    ],
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It's"
+  },
+  {
+    "startTime": 50.22,
+    "endTime": 52.999625,
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 52.999625,
+        "text": " It an It'siction",
+        "startTime": 50.22
+      }
+    ]
+  },
+  {
+    "isFinal": false,
+    "endTime": 55.799625,
+    "fragments": [
+      {
+        "startTime": 50.22,
+        "endTime": 55.799625,
+        "text": " It an It'siction morning"
+      }
+    ],
+    "startTime": 50.22,
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning"
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 56.799625,
+        "text": " It an It'siction morning trying",
+        "startTime": 50.22
+      }
+    ],
+    "endTime": 56.799625,
+    "text": " It an It'siction morning trying",
+    "isFinal": false,
+    "startTime": 50.22,
+    "resultsFinalizationTime": 50.22
+  },
+  {
+    "startTime": 50.22,
+    "endTime": 56.799625,
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " It an It'siction morning trying to",
+        "startTime": 50.22,
+        "endTime": 56.799625
+      }
+    ],
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to"
+  },
+  {
+    "startTime": 50.22,
+    "endTime": 56.799625,
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " It an It'siction morning trying to fix",
+        "startTime": 50.22,
+        "endTime": 56.799625
+      }
+    ],
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix"
+  },
+  {
+    "startTime": 50.22,
+    "endTime": 56.799625,
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " It an It'siction morning trying to fix it",
+        "startTime": 50.22,
+        "endTime": 56.799625
+      }
+    ],
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it"
+  },
+  {
+    "endTime": 57.799625,
+    "text": " It an It'siction morning trying to fix it and",
+    "fragments": [
+      {
+        "endTime": 57.799625,
+        "text": " It an It'siction morning trying to fix it and",
+        "startTime": 50.22
+      }
+    ],
+    "isFinal": false,
+    "startTime": 50.22,
+    "resultsFinalizationTime": 50.22
+  },
+  {
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 50.22,
+        "text": " It an It'siction morning trying to fix it and I",
+        "endTime": 57.799625
+      }
+    ],
+    "endTime": 57.799625,
+    "startTime": 50.22
+  },
+  {
+    "isFinal": false,
+    "endTime": 57.799625,
+    "fragments": [
+      {
+        "endTime": 57.799625,
+        "text": " It an It'siction morning trying to fix it and I'",
+        "startTime": 50.22
+      }
+    ],
+    "startTime": 50.22,
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'"
+  },
+  {
+    "isFinal": false,
+    "endTime": 57.799625,
+    "fragments": [
+      {
+        "text": " It an It'siction morning trying to fix it and I'm",
+        "endTime": 57.799625,
+        "startTime": 50.22
+      }
+    ],
+    "startTime": 50.22,
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm"
+  },
+  {
+    "isFinal": false,
+    "endTime": 57.799625,
+    "fragments": [
+      {
+        "endTime": 57.799625,
+        "text": " It an It'siction morning trying to fix it and I'm quite",
+        "startTime": 50.22
+      }
+    ],
+    "startTime": 50.22,
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite"
+  },
+  {
+    "isFinal": false,
+    "endTime": 58.799625,
+    "fragments": [
+      {
+        "endTime": 58.799625,
+        "text": " It an It'siction morning trying to fix it and I'm quite sure",
+        "startTime": 50.22
+      }
+    ],
+    "startTime": 50.22,
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite sure"
+  },
+  {
+    "isFinal": false,
+    "endTime": 58.799625,
+    "fragments": [
+      {
+        "endTime": 58.799625,
+        "text": " It an It'siction morning trying to fix it and I'm quite sure my",
+        "startTime": 50.22
+      }
+    ],
+    "startTime": 50.22,
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite sure my"
+  },
+  {
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite sure my ag",
+    "fragments": [
+      {
+        "text": " It an It'siction morning trying to fix it and I'm quite sure my ag",
+        "startTime": 50.22,
+        "endTime": 59.599625
+      }
+    ],
+    "isFinal": false,
+    "endTime": 59.599625,
+    "startTime": 50.22
+  },
+  {
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite sure my agent",
+    "fragments": [
+      {
+        "endTime": 59.599625,
+        "text": " It an It'siction morning trying to fix it and I'm quite sure my agent",
+        "startTime": 50.22
+      }
+    ],
+    "isFinal": false,
+    "endTime": 59.599625,
+    "startTime": 50.22
+  },
+  {
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite sure my agent will",
+    "fragments": [
+      {
+        "startTime": 50.22,
+        "endTime": 59.599625,
+        "text": " It an It'siction morning trying to fix it and I'm quite sure my agent will"
+      }
+    ],
+    "isFinal": false,
+    "endTime": 59.599625,
+    "startTime": 50.22
+  },
+  {
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite sure my agent will fix",
+    "fragments": [
+      {
+        "text": " It an It'siction morning trying to fix it and I'm quite sure my agent will fix",
+        "startTime": 50.22,
+        "endTime": 59.599625
+      }
+    ],
+    "isFinal": false,
+    "endTime": 59.599625,
+    "startTime": 50.22
+  },
+  {
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite sure my agent will fix it",
+    "fragments": [
+      {
+        "endTime": 59.599625,
+        "text": " It an It'siction morning trying to fix it and I'm quite sure my agent will fix it",
+        "startTime": 50.22
+      }
+    ],
+    "isFinal": false,
+    "endTime": 59.599625,
+    "startTime": 50.22
+  },
+  {
+    "resultsFinalizationTime": 50.22,
+    "text": " It an It'siction morning trying to fix it and I'm quite sure my agent will fix it.",
+    "fragments": [
+      {
+        "endTime": 59.599625,
+        "text": " It an It'siction morning trying to fix it and I'm quite sure my agent will fix it.",
+        "startTime": 50.22
+      }
+    ],
+    "isFinal": false,
+    "endTime": 59.599625,
+    "startTime": 50.22
+  },
+  {
+    "fragments": [
+      {
+        "text": " It",
+        "endTime": 50.82,
+        "startTime": 50.22
+      },
+      {
+        "text": " was",
+        "startTime": 50.82,
+        "endTime": 51
+      },
+      {
+        "endTime": 51.06,
+        "text": " an",
+        "startTime": 51
+      },
+      {
+        "endTime": 51.36,
+        "text": " error?",
+        "startTime": 51.06
+      },
+      {
+        "text": " It's",
+        "startTime": 51.36,
+        "endTime": 51.66
+      },
+      {
+        "startTime": 51.66,
+        "endTime": 52.08,
+        "text": " fixingly"
+      },
+      {
+        "startTime": 52.08,
+        "endTime": 53.1,
+        "text": " without..."
+      },
+      {
+        "startTime": 53.1,
+        "text": " Yeah,",
+        "endTime": 53.52
+      },
+      {
+        "endTime": 53.88,
+        "text": " yeah,",
+        "startTime": 53.52
+      },
+      {
+        "text": " yeah.",
+        "startTime": 53.88,
+        "endTime": 54.48
+      },
+      {
+        "text": " Now",
+        "startTime": 54.48,
+        "endTime": 54.9
+      },
+      {
+        "endTime": 55.02,
+        "text": " in",
+        "startTime": 54.9
+      },
+      {
+        "text": " the",
+        "endTime": 55.14,
+        "startTime": 55.02
+      },
+      {
+        "text": " morning,",
+        "startTime": 55.14,
+        "endTime": 55.38
+      },
+      {
+        "text": " me",
+        "startTime": 55.38,
+        "endTime": 55.44
+      },
+      {
+        "startTime": 55.44,
+        "endTime": 55.8,
+        "text": " is"
+      },
+      {
+        "text": " trying",
+        "endTime": 55.98,
+        "startTime": 55.8
+      },
+      {
+        "text": " to",
+        "startTime": 55.98,
+        "endTime": 56.1
+      },
+      {
+        "startTime": 56.1,
+        "endTime": 56.22,
+        "text": " fix"
+      },
+      {
+        "startTime": 56.22,
+        "text": " it,",
+        "endTime": 56.46
+      },
+      {
+        "text": " and",
+        "startTime": 56.46,
+        "endTime": 56.7
+      },
+      {
+        "endTime": 57,
+        "text": " I'm",
+        "startTime": 56.7
+      },
+      {
+        "startTime": 57,
+        "text": " quite",
+        "endTime": 57.12
+      },
+      {
+        "endTime": 57.66,
+        "text": " sure",
+        "startTime": 57.12
+      },
+      {
+        "endTime": 58.26,
+        "text": " my",
+        "startTime": 57.66
+      },
+      {
+        "startTime": 58.26,
+        "endTime": 58.68,
+        "text": " agent"
+      },
+      {
+        "startTime": 58.68,
+        "text": " will",
+        "endTime": 58.8
+      },
+      {
+        "startTime": 58.8,
+        "endTime": 58.98,
+        "text": " fix"
+      },
+      {
+        "text": " it.",
+        "startTime": 58.98,
+        "endTime": 59.22
+      }
+    ],
+    "endTime": 59.28,
+    "text": " It was an error? It's fixingly without... Yeah, yeah, yeah. Now in the morning, me is trying to fix it, and I'm quite sure my agent will fix it.",
+    "isFinal": true,
+    "startTime": 50.22,
+    "resultsFinalizationTime": 59.28
+  },
+  {
+    "isFinal": false,
+    "endTime": 61.599625,
+    "startTime": 59.28,
+    "text": " Right",
+    "resultsFinalizationTime": 59.28,
+    "fragments": [
+      {
+        "startTime": 59.28,
+        "endTime": 61.599625,
+        "text": " Right"
+      }
+    ]
+  },
+  {
+    "fragments": [
+      {
+        "text": " Right?",
+        "startTime": 59.28,
+        "endTime": 61.599625
+      }
+    ],
+    "endTime": 61.599625,
+    "resultsFinalizationTime": 59.28,
+    "startTime": 59.28,
+    "isFinal": false,
+    "text": " Right?"
+  },
+  {
+    "text": " Right?",
+    "fragments": [
+      {
+        "endTime": 60.96,
+        "text": " Right?",
+        "startTime": 59.58
+      }
+    ],
+    "startTime": 59.28,
+    "endTime": 61.02,
+    "resultsFinalizationTime": 61.02,
+    "isFinal": true
+  },
+  {
+    "text": " So",
+    "fragments": [
+      {
+        "endTime": 61.599625,
+        "text": " So",
+        "startTime": 61.02
+      }
+    ],
+    "startTime": 61.02,
+    "endTime": 61.599625,
+    "resultsFinalizationTime": 61.02,
+    "isFinal": false
+  },
+  {
+    "resultsFinalizationTime": 61.02,
+    "text": " So if",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 62.599625,
+        "text": " So if",
+        "startTime": 61.02
+      }
+    ],
+    "startTime": 61.02,
+    "endTime": 62.599625
+  },
+  {
+    "resultsFinalizationTime": 61.02,
+    "text": " So if you",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 62.599625,
+        "text": " So if you",
+        "startTime": 61.02
+      }
+    ],
+    "startTime": 61.02,
+    "endTime": 62.599625
+  },
+  {
+    "resultsFinalizationTime": 61.02,
+    "text": " So if you are",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 62.599625,
+        "text": " So if you are",
+        "startTime": 61.02
+      }
+    ],
+    "startTime": 61.02,
+    "endTime": 62.599625
+  },
+  {
+    "resultsFinalizationTime": 61.02,
+    "text": " So if you are still",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 62.599625,
+        "text": " So if you are still",
+        "startTime": 61.02
+      }
+    ],
+    "startTime": 61.02,
+    "endTime": 62.599625
+  },
+  {
+    "resultsFinalizationTime": 61.02,
+    "text": " So if you are still stuck",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 62.599625,
+        "text": " So if you are still stuck",
+        "startTime": 61.02
+      }
+    ],
+    "startTime": 61.02,
+    "endTime": 62.599625
+  },
+  {
+    "endTime": 63.599625,
+    "resultsFinalizationTime": 61.02,
+    "fragments": [
+      {
+        "startTime": 61.02,
+        "text": " So if you are still stuck,",
+        "endTime": 63.599625
+      }
+    ],
+    "text": " So if you are still stuck,",
+    "startTime": 61.02,
+    "isFinal": false
+  },
+  {
+    "endTime": 63.599625,
+    "resultsFinalizationTime": 61.02,
+    "fragments": [
+      {
+        "text": " So if you are still stuck, use",
+        "startTime": 61.02,
+        "endTime": 63.599625
+      }
+    ],
+    "text": " So if you are still stuck, use",
+    "startTime": 61.02,
+    "isFinal": false
+  },
+  {
+    "endTime": 63.599625,
+    "resultsFinalizationTime": 61.02,
+    "fragments": [
+      {
+        "startTime": 61.02,
+        "text": " So if you are still stuck, use this",
+        "endTime": 63.599625
+      }
+    ],
+    "text": " So if you are still stuck, use this",
+    "startTime": 61.02,
+    "isFinal": false
+  },
+  {
+    "endTime": 63.599625,
+    "resultsFinalizationTime": 61.02,
+    "fragments": [
+      {
+        "text": " So if you are still stuck, use this met",
+        "endTime": 63.599625,
+        "startTime": 61.02
+      }
+    ],
+    "text": " So if you are still stuck, use this met",
+    "startTime": 61.02,
+    "isFinal": false
+  },
+  {
+    "endTime": 63.599625,
+    "resultsFinalizationTime": 61.02,
+    "fragments": [
+      {
+        "endTime": 63.599625,
+        "text": " So if you are still stuck, use this meth",
+        "startTime": 61.02
+      }
+    ],
+    "text": " So if you are still stuck, use this meth",
+    "startTime": 61.02,
+    "isFinal": false
+  },
+  {
+    "resultsFinalizationTime": 61.02,
+    "text": " So if you are still stuck, use this method.",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 65.399625,
+        "startTime": 61.02,
+        "text": " So if you are still stuck, use this method."
+      }
+    ],
+    "startTime": 61.02,
+    "endTime": 65.399625
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "fragments": [
+      {
+        "startTime": 61.02,
+        "endTime": 61.38,
+        "text": " So"
+      },
+      {
+        "startTime": 61.38,
+        "text": " if",
+        "endTime": 61.62
+      },
+      {
+        "endTime": 61.68,
+        "text": " you",
+        "startTime": 61.62
+      },
+      {
+        "startTime": 61.68,
+        "text": " are",
+        "endTime": 61.8
+      },
+      {
+        "text": " still",
+        "startTime": 61.8,
+        "endTime": 61.92
+      },
+      {
+        "startTime": 61.92,
+        "endTime": 62.52,
+        "text": " stuck,"
+      },
+      {
+        "text": " use",
+        "startTime": 62.52,
+        "endTime": 62.64
+      },
+      {
+        "text": " this",
+        "startTime": 62.64,
+        "endTime": 62.82
+      },
+      {
+        "text": " method.",
+        "endTime": 63.42,
+        "startTime": 62.82
+      }
+    ],
+    "endTime": 64.74,
+    "text": " So if you are still stuck, use this method.",
+    "startTime": 61.02,
+    "isFinal": true
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "fragments": [
+      {
+        "text": " I",
+        "endTime": 65.399625,
+        "startTime": 64.74
+      }
+    ],
+    "endTime": 65.399625,
+    "text": " I",
+    "startTime": 64.74,
+    "isFinal": false
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "fragments": [
+      {
+        "text": " I mean",
+        "endTime": 65.399625,
+        "startTime": 64.74
+      }
+    ],
+    "endTime": 65.399625,
+    "text": " I mean",
+    "startTime": 64.74,
+    "isFinal": false
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "fragments": [
+      {
+        "text": " I mean,",
+        "startTime": 64.74,
+        "endTime": 65.399625
+      }
+    ],
+    "endTime": 65.399625,
+    "text": " I mean,",
+    "startTime": 64.74,
+    "isFinal": false
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "fragments": [
+      {
+        "text": " I mean, you",
+        "startTime": 64.74,
+        "endTime": 65.399625
+      }
+    ],
+    "endTime": 65.399625,
+    "text": " I mean, you",
+    "startTime": 64.74,
+    "isFinal": false
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "fragments": [
+      {
+        "text": " I mean, you can",
+        "startTime": 64.74,
+        "endTime": 65.399625
+      }
+    ],
+    "endTime": 65.399625,
+    "text": " I mean, you can",
+    "startTime": 64.74,
+    "isFinal": false
+  },
+  {
+    "endTime": 66.399625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "text": " I mean, you can ask",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 66.399625,
+        "text": " I mean, you can ask",
+        "startTime": 64.74
+      }
+    ]
+  },
+  {
+    "endTime": 66.399625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "text": " I mean, you can ask that",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 66.399625,
+        "text": " I mean, you can ask that",
+        "startTime": 64.74
+      }
+    ]
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "text": " I mean, you can ask that,",
+    "isFinal": false,
+    "endTime": 67.399625,
+    "fragments": [
+      {
+        "text": " I mean, you can ask that,",
+        "startTime": 64.74,
+        "endTime": 67.399625
+      }
+    ],
+    "startTime": 64.74
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "text": " I mean, you can ask that, you",
+    "isFinal": false,
+    "endTime": 67.399625,
+    "fragments": [
+      {
+        "text": " I mean, you can ask that, you",
+        "startTime": 64.74,
+        "endTime": 67.399625
+      }
+    ],
+    "startTime": 64.74
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "text": " I mean, you can ask that, you know",
+    "isFinal": false,
+    "endTime": 67.399625,
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 67.399625,
+        "text": " I mean, you can ask that, you know"
+      }
+    ],
+    "startTime": 64.74
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 67.399625,
+        "text": " I mean, you can ask that, you know,"
+      }
+    ],
+    "endTime": 67.399625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "isFinal": false,
+    "text": " I mean, you can ask that, you know,"
+  },
+  {
+    "startTime": 64.74,
+    "resultsFinalizationTime": 64.74,
+    "endTime": 68.399625,
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 68.399625,
+        "text": " I mean, you can ask that, you know,'"
+      }
+    ],
+    "text": " I mean, you can ask that, you know,'",
+    "isFinal": false
+  },
+  {
+    "startTime": 64.74,
+    "resultsFinalizationTime": 64.74,
+    "endTime": 68.399625,
+    "fragments": [
+      {
+        "text": " I mean, you can ask that, you know,'m",
+        "startTime": 64.74,
+        "endTime": 68.399625
+      }
+    ],
+    "text": " I mean, you can ask that, you know,'m",
+    "isFinal": false
+  },
+  {
+    "startTime": 64.74,
+    "resultsFinalizationTime": 64.74,
+    "endTime": 68.399625,
+    "fragments": [
+      {
+        "text": " I mean, you can ask that, you know,'m going",
+        "startTime": 64.74,
+        "endTime": 68.399625
+      }
+    ],
+    "text": " I mean, you can ask that, you know,'m going",
+    "isFinal": false
+  },
+  {
+    "startTime": 64.74,
+    "resultsFinalizationTime": 64.74,
+    "endTime": 68.399625,
+    "fragments": [
+      {
+        "endTime": 68.399625,
+        "text": " I mean, you can ask that, you know,'m going to",
+        "startTime": 64.74
+      }
+    ],
+    "text": " I mean, you can ask that, you know,'m going to",
+    "isFinal": false
+  },
+  {
+    "startTime": 64.74,
+    "resultsFinalizationTime": 64.74,
+    "endTime": 68.399625,
+    "fragments": [
+      {
+        "endTime": 68.399625,
+        "text": " I mean, you can ask that, you know,'m going to run",
+        "startTime": 64.74
+      }
+    ],
+    "text": " I mean, you can ask that, you know,'m going to run",
+    "isFinal": false
+  },
+  {
+    "startTime": 64.74,
+    "resultsFinalizationTime": 64.74,
+    "endTime": 68.399625,
+    "fragments": [
+      {
+        "text": " I mean, you can ask that, you know,'m going to run Tes",
+        "startTime": 64.74,
+        "endTime": 68.399625
+      }
+    ],
+    "text": " I mean, you can ask that, you know,'m going to run Tes",
+    "isFinal": false
+  },
+  {
+    "isFinal": false,
+    "endTime": 69.199625,
+    "startTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map",
+    "resultsFinalizationTime": 64.74,
+    "fragments": [
+      {
+        "text": " I mean, you can ask that, you know,'m going to run Tes map",
+        "startTime": 64.74,
+        "endTime": 69.199625
+      }
+    ]
+  },
+  {
+    "isFinal": false,
+    "endTime": 69.199625,
+    "startTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight",
+    "resultsFinalizationTime": 64.74,
+    "fragments": [
+      {
+        "endTime": 69.199625,
+        "startTime": 64.74,
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight"
+      }
+    ]
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 70.199625,
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and"
+      }
+    ],
+    "endTime": 70.199625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "isFinal": false,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and"
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 70.199625,
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please"
+      }
+    ],
+    "endTime": 70.199625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "isFinal": false,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please"
+  },
+  {
+    "endTime": 71.199625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 71.199625,
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change"
+      }
+    ]
+  },
+  {
+    "endTime": 71.199625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 71.199625,
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the"
+      }
+    ]
+  },
+  {
+    "endTime": 71.199625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 71.199625,
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings"
+      }
+    ]
+  },
+  {
+    "endTime": 71.199625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings of",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 64.74,
+        "endTime": 71.199625,
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings of"
+      }
+    ]
+  },
+  {
+    "endTime": 71.199625,
+    "resultsFinalizationTime": 64.74,
+    "startTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings of your",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 71.199625,
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings of your",
+        "startTime": 64.74
+      }
+    ]
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings of your window",
+    "isFinal": false,
+    "endTime": 72.199625,
+    "fragments": [
+      {
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings of your window",
+        "startTime": 64.74,
+        "endTime": 72.199625
+      }
+    ],
+    "startTime": 64.74
+  },
+  {
+    "resultsFinalizationTime": 64.74,
+    "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings of your window.",
+    "isFinal": false,
+    "endTime": 72.199625,
+    "fragments": [
+      {
+        "text": " I mean, you can ask that, you know,'m going to run Tes map tonight and please change the settings of your window.",
+        "startTime": 64.74,
+        "endTime": 72.199625
+      }
+    ],
+    "startTime": 64.74
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 64.8,
+        "text": " I",
+        "startTime": 64.74
+      },
+      {
+        "endTime": 64.98,
+        "startTime": 64.8,
+        "text": " mean,"
+      },
+      {
+        "text": " you",
+        "startTime": 64.98,
+        "endTime": 65.04
+      },
+      {
+        "endTime": 65.16,
+        "text": " can",
+        "startTime": 65.04
+      },
+      {
+        "text": " ask",
+        "startTime": 65.16,
+        "endTime": 65.34
+      },
+      {
+        "text": " that,",
+        "endTime": 66.36,
+        "startTime": 65.34
+      },
+      {
+        "startTime": 66.36,
+        "endTime": 66.78,
+        "text": " you"
+      },
+      {
+        "startTime": 66.78,
+        "endTime": 67.02,
+        "text": " know,"
+      },
+      {
+        "startTime": 67.02,
+        "text": " I'm",
+        "endTime": 67.32
+      },
+      {
+        "endTime": 67.38,
+        "text": " going",
+        "startTime": 67.32
+      },
+      {
+        "text": " to",
+        "startTime": 67.38,
+        "endTime": 67.44
+      },
+      {
+        "text": " run",
+        "endTime": 67.5,
+        "startTime": 67.44
+      },
+      {
+        "startTime": 67.5,
+        "endTime": 67.92,
+        "text": " Tesco"
+      },
+      {
+        "endTime": 68.22,
+        "text": " map",
+        "startTime": 67.92
+      },
+      {
+        "startTime": 68.22,
+        "endTime": 68.52,
+        "text": " tonight"
+      },
+      {
+        "text": " and",
+        "endTime": 69.24,
+        "startTime": 68.52
+      },
+      {
+        "endTime": 69.42,
+        "text": " please",
+        "startTime": 69.24
+      },
+      {
+        "startTime": 69.42,
+        "endTime": 70.14,
+        "text": " change"
+      },
+      {
+        "text": " the",
+        "endTime": 70.38,
+        "startTime": 70.14
+      },
+      {
+        "startTime": 70.38,
+        "text": " settings",
+        "endTime": 70.44
+      },
+      {
+        "startTime": 70.44,
+        "endTime": 70.74,
+        "text": " of"
+      },
+      {
+        "text": " your",
+        "startTime": 70.74,
+        "endTime": 70.92
+      },
+      {
+        "startTime": 70.92,
+        "endTime": 71.4,
+        "text": " window."
+      }
+    ],
+    "endTime": 71.46,
+    "resultsFinalizationTime": 71.46,
+    "startTime": 64.74,
+    "isFinal": true,
+    "text": " I mean, you can ask that, you know, I'm going to run Tesco map tonight and please change the settings of your window."
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 71.46,
+        "endTime": 72.199625,
+        "text": " So"
+      }
+    ],
+    "endTime": 72.199625,
+    "resultsFinalizationTime": 71.46,
+    "startTime": 71.46,
+    "isFinal": false,
+    "text": " So"
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 71.46,
+        "endTime": 72.199625,
+        "text": " So now"
+      }
+    ],
+    "endTime": 72.199625,
+    "resultsFinalizationTime": 71.46,
+    "startTime": 71.46,
+    "isFinal": false,
+    "text": " So now"
+  },
+  {
+    "resultsFinalizationTime": 71.46,
+    "text": " So now see",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So now see",
+        "startTime": 71.46,
+        "endTime": 73.199625
+      }
+    ],
+    "startTime": 71.46,
+    "endTime": 73.199625
+  },
+  {
+    "resultsFinalizationTime": 71.46,
+    "text": " So now see br",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So now see br",
+        "startTime": 71.46,
+        "endTime": 73.199625
+      }
+    ],
+    "startTime": 71.46,
+    "endTime": 73.199625
+  },
+  {
+    "resultsFinalizationTime": 71.46,
+    "text": " So now see brand",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So now see brand",
+        "startTime": 71.46,
+        "endTime": 73.199625
+      }
+    ],
+    "startTime": 71.46,
+    "endTime": 73.199625
+  },
+  {
+    "resultsFinalizationTime": 71.46,
+    "text": " So now see brand all",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So now see brand all",
+        "startTime": 71.46,
+        "endTime": 73.199625
+      }
+    ],
+    "startTime": 71.46,
+    "endTime": 73.199625
+  },
+  {
+    "resultsFinalizationTime": 71.46,
+    "text": " So now see brand all back",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So now see brand all back",
+        "startTime": 71.46,
+        "endTime": 73.199625
+      }
+    ],
+    "startTime": 71.46,
+    "endTime": 73.199625
+  },
+  {
+    "startTime": 71.46,
+    "isFinal": false,
+    "resultsFinalizationTime": 71.46,
+    "fragments": [
+      {
+        "endTime": 73.999625,
+        "text": " So now see brand all back down",
+        "startTime": 71.46
+      }
+    ],
+    "text": " So now see brand all back down",
+    "endTime": 73.999625
+  },
+  {
+    "startTime": 71.46,
+    "isFinal": false,
+    "resultsFinalizationTime": 71.46,
+    "fragments": [
+      {
+        "endTime": 73.999625,
+        "text": " So now see brand all back down of",
+        "startTime": 71.46
+      }
+    ],
+    "text": " So now see brand all back down of",
+    "endTime": 73.999625
+  },
+  {
+    "startTime": 71.46,
+    "isFinal": false,
+    "resultsFinalizationTime": 71.46,
+    "fragments": [
+      {
+        "text": " So now see brand all back down of today",
+        "startTime": 71.46,
+        "endTime": 73.999625
+      }
+    ],
+    "text": " So now see brand all back down of today",
+    "endTime": 73.999625
+  },
+  {
+    "startTime": 71.46,
+    "isFinal": false,
+    "resultsFinalizationTime": 71.46,
+    "fragments": [
+      {
+        "text": " So now see brand all back down of today.",
+        "startTime": 71.46,
+        "endTime": 73.999625
+      }
+    ],
+    "text": " So now see brand all back down of today.",
+    "endTime": 73.999625
+  },
+  {
+    "resultsFinalizationTime": 73.56,
+    "fragments": [
+      {
+        "endTime": 71.58,
+        "text": " So",
+        "startTime": 71.46
+      },
+      {
+        "text": " now",
+        "endTime": 71.7,
+        "startTime": 71.58
+      },
+      {
+        "endTime": 72.06,
+        "startTime": 71.7,
+        "text": " see"
+      },
+      {
+        "text": " brand",
+        "startTime": 72.06,
+        "endTime": 72.42
+      },
+      {
+        "text": " all",
+        "startTime": 72.42,
+        "endTime": 72.6
+      },
+      {
+        "endTime": 72.78,
+        "text": " back",
+        "startTime": 72.6
+      },
+      {
+        "startTime": 72.78,
+        "text": " down",
+        "endTime": 73.2
+      },
+      {
+        "startTime": 73.2,
+        "endTime": 73.26,
+        "text": " of"
+      },
+      {
+        "startTime": 73.26,
+        "endTime": 73.5,
+        "text": " today."
+      }
+    ],
+    "endTime": 73.56,
+    "text": " So now see brand all back down of today.",
+    "startTime": 71.46,
+    "isFinal": true
+  },
+  {
+    "text": " We",
+    "endTime": 75.999625,
+    "resultsFinalizationTime": 73.56,
+    "isFinal": false,
+    "startTime": 73.56,
+    "fragments": [
+      {
+        "startTime": 73.56,
+        "endTime": 75.999625,
+        "text": " We"
+      }
+    ]
+  },
+  {
+    "text": " We have",
+    "endTime": 75.999625,
+    "resultsFinalizationTime": 73.56,
+    "isFinal": false,
+    "startTime": 73.56,
+    "fragments": [
+      {
+        "endTime": 75.999625,
+        "text": " We have",
+        "startTime": 73.56
+      }
+    ]
+  },
+  {
+    "text": " We have hand",
+    "endTime": 75.999625,
+    "resultsFinalizationTime": 73.56,
+    "isFinal": false,
+    "startTime": 73.56,
+    "fragments": [
+      {
+        "startTime": 73.56,
+        "endTime": 75.999625,
+        "text": " We have hand"
+      }
+    ]
+  },
+  {
+    "startTime": 73.56,
+    "isFinal": false,
+    "resultsFinalizationTime": 73.56,
+    "fragments": [
+      {
+        "startTime": 73.56,
+        "endTime": 77.999625,
+        "text": " We have hand Give"
+      }
+    ],
+    "text": " We have hand Give",
+    "endTime": 77.999625
+  },
+  {
+    "startTime": 73.56,
+    "isFinal": false,
+    "resultsFinalizationTime": 73.56,
+    "fragments": [
+      {
+        "startTime": 73.56,
+        "endTime": 77.999625,
+        "text": " We have hand Give code"
+      }
+    ],
+    "text": " We have hand Give code",
+    "endTime": 77.999625
+  },
+  {
+    "text": " You have to have a handle. Can I... Give me a code, right?",
+    "endTime": 79.68,
+    "startTime": 73.68,
+    "resultsFinalizationTime": 79.68,
+    "fragments": [
+      {
+        "endTime": 74.94,
+        "text": " You",
+        "startTime": 73.68
+      },
+      {
+        "startTime": 74.94,
+        "endTime": 75.06,
+        "text": " have"
+      },
+      {
+        "text": " to",
+        "startTime": 75.06,
+        "endTime": 75.12
+      },
+      {
+        "startTime": 75.12,
+        "text": " have",
+        "endTime": 75.3
+      },
+      {
+        "startTime": 75.3,
+        "text": " a",
+        "endTime": 75.42
+      },
+      {
+        "text": " handle.",
+        "endTime": 75.84,
+        "startTime": 75.42
+      },
+      {
+        "endTime": 76.02,
+        "text": " Can",
+        "startTime": 75.84
+      },
+      {
+        "startTime": 76.02,
+        "text": " I...",
+        "endTime": 77.16
+      },
+      {
+        "startTime": 77.16,
+        "endTime": 77.28,
+        "text": " Give"
+      },
+      {
+        "text": " me",
+        "startTime": 77.28,
+        "endTime": 77.4
+      },
+      {
+        "startTime": 77.4,
+        "endTime": 77.46,
+        "text": " a"
+      },
+      {
+        "endTime": 77.7,
+        "text": " code,",
+        "startTime": 77.46
+      },
+      {
+        "endTime": 78.3,
+        "text": " right?",
+        "startTime": 77.7
+      }
+    ],
+    "isFinal": true
+  },
+  {
+    "endTime": 80.799625,
+    "startTime": 79.68,
+    "isFinal": false,
+    "resultsFinalizationTime": 79.68,
+    "text": " you",
+    "fragments": [
+      {
+        "text": " you",
+        "endTime": 80.799625,
+        "startTime": 79.68
+      }
+    ]
+  },
+  {
+    "endTime": 80.799625,
+    "startTime": 79.68,
+    "isFinal": false,
+    "resultsFinalizationTime": 79.68,
+    "text": " you know",
+    "fragments": [
+      {
+        "text": " you know",
+        "endTime": 80.799625,
+        "startTime": 79.68
+      }
+    ]
+  },
+  {
+    "endTime": 80.799625,
+    "startTime": 79.68,
+    "isFinal": false,
+    "resultsFinalizationTime": 79.68,
+    "text": " you know when",
+    "fragments": [
+      {
+        "text": " you know when",
+        "endTime": 80.799625,
+        "startTime": 79.68
+      }
+    ]
+  },
+  {
+    "endTime": 80.799625,
+    "startTime": 79.68,
+    "isFinal": false,
+    "resultsFinalizationTime": 79.68,
+    "text": " you know when you",
+    "fragments": [
+      {
+        "text": " you know when you",
+        "endTime": 80.799625,
+        "startTime": 79.68
+      }
+    ]
+  },
+  {
+    "endTime": 80.799625,
+    "startTime": 79.68,
+    "isFinal": false,
+    "resultsFinalizationTime": 79.68,
+    "text": " you know when you run",
+    "fragments": [
+      {
+        "endTime": 80.799625,
+        "text": " you know when you run",
+        "startTime": 79.68
+      }
+    ]
+  },
+  {
+    "endTime": 80.799625,
+    "startTime": 79.68,
+    "isFinal": false,
+    "resultsFinalizationTime": 79.68,
+    "text": " you know when you run to",
+    "fragments": [
+      {
+        "endTime": 80.799625,
+        "text": " you know when you run to",
+        "startTime": 79.68
+      }
+    ]
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 82.799625,
+        "text": " you know when you run to some",
+        "startTime": 79.68
+      }
+    ],
+    "endTime": 82.799625,
+    "text": " you know when you run to some",
+    "isFinal": false,
+    "startTime": 79.68,
+    "resultsFinalizationTime": 79.68
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 79.68,
+        "endTime": 82.799625,
+        "text": " you know when you run to some you"
+      }
+    ],
+    "endTime": 82.799625,
+    "text": " you know when you run to some you",
+    "isFinal": false,
+    "startTime": 79.68,
+    "resultsFinalizationTime": 79.68
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 82.799625,
+        "startTime": 79.68,
+        "text": " you know when you run to some you get"
+      }
+    ],
+    "endTime": 82.799625,
+    "text": " you know when you run to some you get",
+    "isFinal": false,
+    "startTime": 79.68,
+    "resultsFinalizationTime": 79.68
+  },
+  {
+    "fragments": [
+      {
+        "text": " you know when you run to some you get some",
+        "startTime": 79.68,
+        "endTime": 82.799625
+      }
+    ],
+    "endTime": 82.799625,
+    "text": " you know when you run to some you get some",
+    "isFinal": false,
+    "startTime": 79.68,
+    "resultsFinalizationTime": 79.68
+  },
+  {
+    "resultsFinalizationTime": 79.68,
+    "text": " you know when you run to some you get some as",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 83.599625,
+        "text": " you know when you run to some you get some as",
+        "startTime": 79.68
+      }
+    ],
+    "endTime": 83.599625,
+    "startTime": 79.68
+  },
+  {
+    "resultsFinalizationTime": 79.68,
+    "text": " you know when you run to some you get some as well",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 83.599625,
+        "text": " you know when you run to some you get some as well",
+        "startTime": 79.68
+      }
+    ],
+    "endTime": 83.599625,
+    "startTime": 79.68
+  },
+  {
+    "resultsFinalizationTime": 79.68,
+    "text": " you know when you run to some you get some as well.",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 83.599625,
+        "text": " you know when you run to some you get some as well.",
+        "startTime": 79.68
+      }
+    ],
+    "endTime": 83.599625,
+    "startTime": 79.68
+  },
+  {
+    "startTime": 79.68,
+    "endTime": 83.16,
+    "isFinal": true,
+    "text": " You know, when you run to the map, you get some details as well.",
+    "resultsFinalizationTime": 83.16,
+    "fragments": [
+      {
+        "text": " You",
+        "startTime": 79.68,
+        "endTime": 79.74
+      },
+      {
+        "text": " know,",
+        "startTime": 79.74,
+        "endTime": 79.92
+      },
+      {
+        "startTime": 79.92,
+        "endTime": 80.04,
+        "text": " when"
+      },
+      {
+        "text": " you",
+        "startTime": 80.04,
+        "endTime": 80.16
+      },
+      {
+        "startTime": 80.16,
+        "endTime": 80.28,
+        "text": " run"
+      },
+      {
+        "startTime": 80.28,
+        "endTime": 80.52,
+        "text": " to"
+      },
+      {
+        "text": " the",
+        "startTime": 80.52,
+        "endTime": 80.7
+      },
+      {
+        "startTime": 80.7,
+        "text": " map,",
+        "endTime": 81.42
+      },
+      {
+        "text": " you",
+        "startTime": 81.42,
+        "endTime": 82.08
+      },
+      {
+        "endTime": 82.26,
+        "startTime": 82.08,
+        "text": " get"
+      },
+      {
+        "text": " some",
+        "endTime": 82.44,
+        "startTime": 82.26
+      },
+      {
+        "text": " details",
+        "startTime": 82.44,
+        "endTime": 82.68
+      },
+      {
+        "endTime": 82.92,
+        "startTime": 82.68,
+        "text": " as"
+      },
+      {
+        "startTime": 82.92,
+        "endTime": 83.1,
+        "text": " well."
+      }
+    ]
+  },
+  {
+    "text": " It",
+    "startTime": 83.16,
+    "fragments": [
+      {
+        "startTime": 83.16,
+        "text": " It",
+        "endTime": 84.599625
+      }
+    ],
+    "endTime": 84.599625,
+    "resultsFinalizationTime": 83.16,
+    "isFinal": false
+  },
+  {
+    "text": " It is",
+    "startTime": 83.16,
+    "fragments": [
+      {
+        "endTime": 84.599625,
+        "startTime": 83.16,
+        "text": " It is"
+      }
+    ],
+    "endTime": 84.599625,
+    "resultsFinalizationTime": 83.16,
+    "isFinal": false
+  },
+  {
+    "isFinal": false,
+    "resultsFinalizationTime": 83.16,
+    "startTime": 83.16,
+    "text": " It is giving",
+    "endTime": 84.599625,
+    "fragments": [
+      {
+        "endTime": 84.599625,
+        "startTime": 83.16,
+        "text": " It is giving"
+      }
+    ]
+  },
+  {
+    "text": " It is giving you",
+    "startTime": 83.16,
+    "fragments": [
+      {
+        "endTime": 84.599625,
+        "startTime": 83.16,
+        "text": " It is giving you"
+      }
+    ],
+    "endTime": 84.599625,
+    "resultsFinalizationTime": 83.16,
+    "isFinal": false
+  },
+  {
+    "endTime": 85.599625,
+    "resultsFinalizationTime": 83.16,
+    "fragments": [
+      {
+        "startTime": 83.16,
+        "text": " It is giving you the",
+        "endTime": 85.599625
+      }
+    ],
+    "text": " It is giving you the",
+    "startTime": 83.16,
+    "isFinal": false
+  },
+  {
+    "endTime": 85.599625,
+    "text": " It is giving you the ex",
+    "startTime": 83.16,
+    "isFinal": false,
+    "resultsFinalizationTime": 83.16,
+    "fragments": [
+      {
+        "startTime": 83.16,
+        "endTime": 85.599625,
+        "text": " It is giving you the ex"
+      }
+    ]
+  },
+  {
+    "endTime": 85.599625,
+    "text": " It is giving you the exact",
+    "startTime": 83.16,
+    "isFinal": false,
+    "resultsFinalizationTime": 83.16,
+    "fragments": [
+      {
+        "startTime": 83.16,
+        "endTime": 85.599625,
+        "text": " It is giving you the exact"
+      }
+    ]
+  },
+  {
+    "endTime": 85.599625,
+    "text": " It is giving you the exact out",
+    "startTime": 83.16,
+    "isFinal": false,
+    "resultsFinalizationTime": 83.16,
+    "fragments": [
+      {
+        "startTime": 83.16,
+        "text": " It is giving you the exact out",
+        "endTime": 85.599625
+      }
+    ]
+  },
+  {
+    "startTime": 83.16,
+    "endTime": 86.599625,
+    "isFinal": false,
+    "text": " It is giving you the exact out of",
+    "resultsFinalizationTime": 83.16,
+    "fragments": [
+      {
+        "text": " It is giving you the exact out of",
+        "endTime": 86.599625,
+        "startTime": 83.16
+      }
+    ]
+  },
+  {
+    "text": " It is giving you the exact out of a",
+    "startTime": 83.16,
+    "fragments": [
+      {
+        "endTime": 87.599625,
+        "text": " It is giving you the exact out of a",
+        "startTime": 83.16
+      }
+    ],
+    "endTime": 87.599625,
+    "resultsFinalizationTime": 83.16,
+    "isFinal": false
+  },
+  {
+    "text": " It is giving you the exact out of a she",
+    "startTime": 83.16,
+    "fragments": [
+      {
+        "endTime": 87.599625,
+        "text": " It is giving you the exact out of a she",
+        "startTime": 83.16
+      }
+    ],
+    "endTime": 87.599625,
+    "resultsFinalizationTime": 83.16,
+    "isFinal": false
+  },
+  {
+    "text": " It is giving you the exact out of a she.",
+    "startTime": 83.16,
+    "fragments": [
+      {
+        "text": " It is giving you the exact out of a she.",
+        "startTime": 83.16,
+        "endTime": 87.599625
+      }
+    ],
+    "endTime": 87.599625,
+    "resultsFinalizationTime": 83.16,
+    "isFinal": false
+  },
+  {
+    "resultsFinalizationTime": 87,
+    "text": " It is giving you the exact out of, I don't have a shelf.",
+    "isFinal": true,
+    "fragments": [
+      {
+        "endTime": 83.58,
+        "text": " It",
+        "startTime": 83.16
+      },
+      {
+        "startTime": 83.58,
+        "endTime": 83.76,
+        "text": " is"
+      },
+      {
+        "startTime": 83.76,
+        "endTime": 83.94,
+        "text": " giving"
+      },
+      {
+        "text": " you",
+        "startTime": 83.94,
+        "endTime": 84.18
+      },
+      {
+        "text": " the",
+        "startTime": 84.18,
+        "endTime": 84.54
+      },
+      {
+        "endTime": 84.72,
+        "startTime": 84.54,
+        "text": " exact"
+      },
+      {
+        "text": " out",
+        "startTime": 84.72,
+        "endTime": 84.9
+      },
+      {
+        "endTime": 85.92,
+        "text": " of,",
+        "startTime": 84.9
+      },
+      {
+        "startTime": 85.92,
+        "endTime": 86.04,
+        "text": " I"
+      },
+      {
+        "endTime": 86.28,
+        "text": " don't",
+        "startTime": 86.04
+      },
+      {
+        "text": " have",
+        "endTime": 86.52,
+        "startTime": 86.28
+      },
+      {
+        "endTime": 86.58,
+        "text": " a",
+        "startTime": 86.52
+      },
+      {
+        "endTime": 86.94,
+        "startTime": 86.58,
+        "text": " shelf."
+      }
+    ],
+    "startTime": 83.16,
+    "endTime": 87
+  },
+  {
+    "resultsFinalizationTime": 87,
+    "text": " about",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 88.399625,
+        "text": " about",
+        "startTime": 87
+      }
+    ],
+    "endTime": 88.399625,
+    "startTime": 87
+  },
+  {
+    "resultsFinalizationTime": 87,
+    "text": " about you",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 88.399625,
+        "text": " about you",
+        "startTime": 87
+      }
+    ],
+    "endTime": 88.399625,
+    "startTime": 87
+  },
+  {
+    "resultsFinalizationTime": 87,
+    "text": " about you?",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 88.399625,
+        "text": " about you?",
+        "startTime": 87
+      }
+    ],
+    "endTime": 88.399625,
+    "startTime": 87
+  },
+  {
+    "resultsFinalizationTime": 88.02,
+    "text": " It's all about you?",
+    "fragments": [
+      {
+        "startTime": 87,
+        "endTime": 87.6,
+        "text": " It's"
+      },
+      {
+        "text": " all",
+        "startTime": 87.6,
+        "endTime": 87.66
+      },
+      {
+        "text": " about",
+        "startTime": 87.66,
+        "endTime": 87.72
+      },
+      {
+        "startTime": 87.72,
+        "text": " you?",
+        "endTime": 87.96
+      }
+    ],
+    "isFinal": true,
+    "endTime": 88.02,
+    "startTime": 87
+  },
+  {
+    "resultsFinalizationTime": 88.02,
+    "text": " So",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So",
+        "startTime": 88.02,
+        "endTime": 90.399625
+      }
+    ],
+    "endTime": 90.399625,
+    "startTime": 88.02
+  },
+  {
+    "resultsFinalizationTime": 88.02,
+    "text": " So I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 90.399625,
+        "text": " So I"
+      }
+    ],
+    "endTime": 90.399625,
+    "startTime": 88.02
+  },
+  {
+    "resultsFinalizationTime": 88.02,
+    "text": " So I'",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So I'",
+        "startTime": 88.02,
+        "endTime": 90.399625
+      }
+    ],
+    "endTime": 90.399625,
+    "startTime": 88.02
+  },
+  {
+    "resultsFinalizationTime": 88.02,
+    "text": " So I'm",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So I'm",
+        "startTime": 88.02,
+        "endTime": 90.399625
+      }
+    ],
+    "endTime": 90.399625,
+    "startTime": 88.02
+  },
+  {
+    "endTime": 91.399625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 91.399625,
+        "text": " So I'm move",
+        "startTime": 88.02
+      }
+    ]
+  },
+  {
+    "startTime": 88.02,
+    "isFinal": false,
+    "resultsFinalizationTime": 88.02,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 91.399625,
+        "text": " So I'm move on"
+      }
+    ],
+    "text": " So I'm move on",
+    "endTime": 91.399625
+  },
+  {
+    "endTime": 91.399625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 91.399625,
+        "text": " So I'm move on because"
+      }
+    ]
+  },
+  {
+    "endTime": 91.399625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 91.399625,
+        "text": " So I'm move on because there"
+      }
+    ]
+  },
+  {
+    "endTime": 91.399625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 91.399625,
+        "text": " So I'm move on because there are"
+      }
+    ]
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 92.399625,
+        "text": " So I'm move on because there are a"
+      }
+    ],
+    "text": " So I'm move on because there are a",
+    "isFinal": false,
+    "startTime": 88.02,
+    "endTime": 92.399625,
+    "resultsFinalizationTime": 88.02
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 92.399625,
+        "text": " So I'm move on because there are a few"
+      }
+    ],
+    "startTime": 88.02,
+    "isFinal": false,
+    "resultsFinalizationTime": 88.02,
+    "endTime": 92.399625,
+    "text": " So I'm move on because there are a few"
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 92.399625,
+        "startTime": 88.02,
+        "text": " So I'm move on because there are a few people"
+      }
+    ],
+    "startTime": 88.02,
+    "isFinal": false,
+    "resultsFinalizationTime": 88.02,
+    "endTime": 92.399625,
+    "text": " So I'm move on because there are a few people"
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 92.399625,
+        "text": " So I'm move on because there are a few people morning"
+      }
+    ],
+    "startTime": 88.02,
+    "isFinal": false,
+    "resultsFinalizationTime": 88.02,
+    "endTime": 92.399625,
+    "text": " So I'm move on because there are a few people morning"
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 93.199625,
+        "text": " So I'm move on because there are a few people morning us"
+      }
+    ],
+    "text": " So I'm move on because there are a few people morning us",
+    "isFinal": false,
+    "startTime": 88.02,
+    "endTime": 93.199625,
+    "resultsFinalizationTime": 88.02
+  },
+  {
+    "resultsFinalizationTime": 88.02,
+    "text": " So I'm move on because there are a few people us us",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So I'm move on because there are a few people us us",
+        "startTime": 88.02,
+        "endTime": 93.199625
+      }
+    ],
+    "endTime": 93.199625,
+    "startTime": 88.02
+  },
+  {
+    "fragments": [
+      {
+        "text": " So I'm move on because there are a few people morning us",
+        "startTime": 88.02,
+        "endTime": 93.199625
+      }
+    ],
+    "text": " So I'm move on because there are a few people morning us",
+    "isFinal": false,
+    "startTime": 88.02,
+    "endTime": 93.199625,
+    "resultsFinalizationTime": 88.02
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 93.199625,
+        "text": " So I'm move on because there are a few people us us",
+        "startTime": 88.02
+      }
+    ],
+    "text": " So I'm move on because there are a few people us us",
+    "isFinal": false,
+    "startTime": 88.02,
+    "endTime": 93.199625,
+    "resultsFinalizationTime": 88.02
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 93.199625,
+        "text": " So I'm move on because there are a few people morning us",
+        "startTime": 88.02
+      }
+    ],
+    "text": " So I'm move on because there are a few people morning us",
+    "isFinal": false,
+    "startTime": 88.02,
+    "endTime": 93.199625,
+    "resultsFinalizationTime": 88.02
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people us us",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "text": " So I'm move on because there are a few people us us",
+        "endTime": 94.199625
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 94.199625,
+        "startTime": 88.02,
+        "text": " So I'm move on because there are a few people morning us"
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us Yeah",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 94.199625,
+        "startTime": 88.02,
+        "text": " So I'm move on because there are a few people morning us Yeah"
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us Yeah, I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 94.199625,
+        "startTime": 88.02,
+        "text": " So I'm move on because there are a few people morning us Yeah, I"
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us I I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So I'm move on because there are a few people morning us I I",
+        "startTime": 88.02,
+        "endTime": 94.199625
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us Yeah, I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So I'm move on because there are a few people morning us Yeah, I",
+        "startTime": 88.02,
+        "endTime": 94.199625
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us I I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 94.199625,
+        "startTime": 88.02,
+        "text": " So I'm move on because there are a few people morning us I I"
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us Yeah, I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 94.199625,
+        "text": " So I'm move on because there are a few people morning us Yeah, I",
+        "startTime": 88.02
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people us Yeah, I I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "text": " So I'm move on because there are a few people us Yeah, I I",
+        "endTime": 94.199625
+      }
+    ]
+  },
+  {
+    "endTime": 94.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us Yeah, I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 94.199625,
+        "text": " So I'm move on because there are a few people morning us Yeah, I",
+        "startTime": 88.02
+      }
+    ]
+  },
+  {
+    "endTime": 95.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people us Yeah, I I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 95.199625,
+        "text": " So I'm move on because there are a few people us Yeah, I I"
+      }
+    ]
+  },
+  {
+    "endTime": 95.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us Yeah, I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 88.02,
+        "endTime": 95.199625,
+        "text": " So I'm move on because there are a few people morning us Yeah, I"
+      }
+    ]
+  },
+  {
+    "endTime": 95.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people us Yeah, I I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So I'm move on because there are a few people us Yeah, I I",
+        "startTime": 88.02,
+        "endTime": 95.199625
+      }
+    ]
+  },
+  {
+    "endTime": 95.199625,
+    "resultsFinalizationTime": 88.02,
+    "startTime": 88.02,
+    "text": " So I'm move on because there are a few people morning us Yeah, I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "text": " So I'm move on because there are a few people morning us Yeah, I",
+        "startTime": 88.02,
+        "endTime": 95.199625
+      }
+    ]
+  },
+  {
+    "startTime": 88.62,
+    "resultsFinalizationTime": 94.62,
+    "endTime": 94.62,
+    "fragments": [
+      {
+        "text": " So,",
+        "startTime": 88.62,
+        "endTime": 89.94
+      },
+      {
+        "startTime": 89.94,
+        "endTime": 90.12,
+        "text": " I'm"
+      },
+      {
+        "startTime": 90.12,
+        "endTime": 90.18,
+        "text": " gonna"
+      },
+      {
+        "endTime": 90.42,
+        "text": " move",
+        "startTime": 90.18
+      },
+      {
+        "text": " on,",
+        "startTime": 90.42,
+        "endTime": 90.72
+      },
+      {
+        "endTime": 90.84,
+        "text": " because",
+        "startTime": 90.72
+      },
+      {
+        "startTime": 90.84,
+        "text": " there",
+        "endTime": 90.96
+      },
+      {
+        "text": " are",
+        "endTime": 91.08,
+        "startTime": 90.96
+      },
+      {
+        "text": " a",
+        "startTime": 91.08,
+        "endTime": 91.26
+      },
+      {
+        "text": " few",
+        "startTime": 91.26,
+        "endTime": 91.32
+      },
+      {
+        "startTime": 91.32,
+        "endTime": 91.5,
+        "text": " people"
+      },
+      {
+        "startTime": 91.5,
+        "endTime": 91.74,
+        "text": " from"
+      },
+      {
+        "endTime": 91.92,
+        "startTime": 91.74,
+        "text": " morning"
+      },
+      {
+        "endTime": 92.22,
+        "startTime": 91.92,
+        "text": " to"
+      },
+      {
+        "endTime": 92.52,
+        "startTime": 92.22,
+        "text": " us."
+      },
+      {
+        "endTime": 93.36,
+        "text": " Yeah,",
+        "startTime": 92.52
+      },
+      {
+        "endTime": 93.42,
+        "startTime": 93.36,
+        "text": " I"
+      },
+      {
+        "startTime": 93.42,
+        "text": " do.",
+        "endTime": 94.56
+      }
+    ],
+    "text": " So, I'm gonna move on, because there are a few people from morning to us. Yeah, I do.",
+    "isFinal": true
+  },
+  {
+    "startTime": 94.62,
+    "endTime": 97.999625,
+    "text": " back",
+    "isFinal": false,
+    "resultsFinalizationTime": 94.62,
+    "fragments": [
+      {
+        "startTime": 94.62,
+        "text": " back",
+        "endTime": 97.999625
+      }
+    ]
+  },
+  {
+    "endTime": 99.999625,
+    "startTime": 94.62,
+    "resultsFinalizationTime": 94.62,
+    "text": " back.",
+    "fragments": [
+      {
+        "endTime": 99.999625,
+        "text": " back.",
+        "startTime": 94.62
+      }
+    ],
+    "isFinal": false
+  },
+  {
+    "text": " to this post travel.",
+    "fragments": [
+      {
+        "startTime": 97.62,
+        "endTime": 97.98,
+        "text": " to"
+      },
+      {
+        "startTime": 97.98,
+        "endTime": 98.04,
+        "text": " this"
+      },
+      {
+        "startTime": 98.04,
+        "text": " post",
+        "endTime": 98.22
+      },
+      {
+        "startTime": 98.22,
+        "endTime": 99,
+        "text": " travel."
+      }
+    ],
+    "endTime": 99.06,
+    "resultsFinalizationTime": 99.06,
+    "startTime": 97.62,
+    "isFinal": true
+  },
+  {
+    "resultsFinalizationTime": 99.06,
+    "text": " I",
+    "isFinal": false,
+    "fragments": [
+      {
+        "startTime": 99.06,
+        "text": " I",
+        "endTime": 100.999625
+      }
+    ],
+    "endTime": 100.999625,
+    "startTime": 99.06
+  },
+  {
+    "resultsFinalizationTime": 99.06,
+    "text": " I take",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 100.999625,
+        "startTime": 99.06,
+        "text": " I take"
+      }
+    ],
+    "endTime": 100.999625,
+    "startTime": 99.06
+  },
+  {
+    "resultsFinalizationTime": 99.06,
+    "text": " I take back",
+    "isFinal": false,
+    "fragments": [
+      {
+        "endTime": 100.999625,
+        "startTime": 99.06,
+        "text": " I take back"
+      }
+    ],
+    "endTime": 100.999625,
+    "startTime": 99.06
+  },
+  {
+    "resultsFinalizationTime": 99.06,
+    "fragments": [
+      {
+        "text": " I take back far",
+        "startTime": 99.06,
+        "endTime": 101.999625
+      }
+    ],
+    "endTime": 101.999625,
+    "text": " I take back far",
+    "startTime": 99.06,
+    "isFinal": false
+  },
+  {
+    "isFinal": true,
+    "endTime": 102.3,
+    "startTime": 99.06,
+    "text": " I have to take you back. So far enough.",
+    "resultsFinalizationTime": 102.3,
+    "fragments": [
+      {
+        "endTime": 99.9,
+        "startTime": 99.06,
+        "text": " I"
+      },
+      {
+        "text": " have",
+        "startTime": 99.9,
+        "endTime": 99.96
+      },
+      {
+        "startTime": 99.96,
+        "text": " to",
+        "endTime": 100.02
+      },
+      {
+        "text": " take",
+        "startTime": 100.02,
+        "endTime": 100.08
+      },
+      {
+        "endTime": 100.2,
+        "text": " you",
+        "startTime": 100.08
+      },
+      {
+        "endTime": 100.38,
+        "startTime": 100.2,
+        "text": " back."
+      },
+      {
+        "text": " So",
+        "endTime": 101.46,
+        "startTime": 100.38
+      },
+      {
+        "startTime": 101.46,
+        "endTime": 101.64,
+        "text": " far"
+      },
+      {
+        "startTime": 101.64,
+        "text": " enough.",
+        "endTime": 102.24
+      }
+    ]
+  },
+  {
+    "startTime": 102.3,
+    "endTime": 104.799625,
+    "text": " F",
+    "isFinal": false,
+    "resultsFinalizationTime": 102.3,
+    "fragments": [
+      {
+        "startTime": 102.3,
+        "endTime": 104.799625,
+        "text": " F"
+      }
+    ]
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 105.799625,
+        "text": " F Fin",
+        "startTime": 102.3
+      }
+    ],
+    "startTime": 102.3,
+    "isFinal": false,
+    "resultsFinalizationTime": 102.3,
+    "endTime": 105.799625,
+    "text": " F Fin"
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 102.48,
+        "endTime": 104.1,
+        "text": " Fine."
+      },
+      {
+        "text": " Finally,",
+        "endTime": 104.88,
+        "startTime": 104.1
+      },
+      {
+        "startTime": 104.88,
+        "endTime": 105.06,
+        "text": " you"
+      },
+      {
+        "text": " have...",
+        "startTime": 105.06,
+        "endTime": 108.18
+      },
+      {
+        "text": " Why",
+        "startTime": 108.18,
+        "endTime": 109.62
+      },
+      {
+        "endTime": 109.8,
+        "text": " would",
+        "startTime": 109.62
+      },
+      {
+        "startTime": 109.8,
+        "text": " I",
+        "endTime": 110.04
+      },
+      {
+        "startTime": 110.04,
+        "endTime": 110.46,
+        "text": " learn"
+      },
+      {
+        "startTime": 110.46,
+        "endTime": 110.52,
+        "text": " to"
+      },
+      {
+        "text": " ask?",
+        "startTime": 110.52,
+        "endTime": 110.64
+      }
+    ],
+    "startTime": 102.48,
+    "isFinal": true,
+    "resultsFinalizationTime": 110.7,
+    "endTime": 110.7,
+    "text": " Fine. Finally, you have... Why would I learn to ask?"
+  },
+  {
+    "endTime": 112.56,
+    "startTime": 111.24,
+    "fragments": [],
+    "text": "",
+    "isFinal": true,
+    "resultsFinalizationTime": 112.56
+  },
+  {
+    "endTime": 113.399625,
+    "startTime": 112.56,
+    "fragments": [
+      {
+        "text": " You",
+        "startTime": 112.56,
+        "endTime": 113.399625
+      }
+    ],
+    "text": " You",
+    "isFinal": false,
+    "resultsFinalizationTime": 112.56
+  },
+  {
+    "endTime": 113.399625,
+    "startTime": 112.56,
+    "fragments": [
+      {
+        "text": " You have",
+        "endTime": 113.399625,
+        "startTime": 112.56
+      }
+    ],
+    "text": " You have",
+    "isFinal": false,
+    "resultsFinalizationTime": 112.56
+  },
+  {
+    "endTime": 113.399625,
+    "startTime": 112.56,
+    "fragments": [
+      {
+        "text": " You have a",
+        "endTime": 113.399625,
+        "startTime": 112.56
+      }
+    ],
+    "text": " You have a",
+    "isFinal": false,
+    "resultsFinalizationTime": 112.56
+  },
+  {
+    "fragments": [
+      {
+        "startTime": 112.56,
+        "endTime": 114.399625,
+        "text": " You have arill"
+      }
+    ],
+    "text": " You have arill",
+    "resultsFinalizationTime": 112.56,
+    "endTime": 114.399625,
+    "startTime": 112.56,
+    "isFinal": false
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 112.74,
+        "startTime": 112.56,
+        "text": " You"
+      },
+      {
+        "startTime": 112.74,
+        "text": " have",
+        "endTime": 112.92
+      },
+      {
+        "endTime": 113.1,
+        "text": " a",
+        "startTime": 112.92
+      },
+      {
+        "startTime": 113.1,
+        "endTime": 113.58,
+        "text": " brilliant,"
+      },
+      {
+        "text": " you",
+        "endTime": 113.64,
+        "startTime": 113.58
+      },
+      {
+        "startTime": 113.64,
+        "endTime": 114.36,
+        "text": " don't."
+      }
+    ],
+    "text": " You have a brilliant, you don't.",
+    "resultsFinalizationTime": 114.42,
+    "endTime": 114.42,
+    "startTime": 112.56,
+    "isFinal": true
+  },
+  {
+    "text": " Huh",
+    "fragments": [
+      {
+        "startTime": 114.42,
+        "endTime": 117.199625,
+        "text": " Huh"
+      }
+    ],
+    "endTime": 117.199625,
+    "startTime": 114.42,
+    "resultsFinalizationTime": 114.42,
+    "isFinal": false
+  },
+  {
+    "isFinal": true,
+    "endTime": 116.64,
+    "startTime": 114.42,
+    "text": " Huh?",
+    "resultsFinalizationTime": 116.64,
+    "fragments": [
+      {
+        "endTime": 116.58,
+        "startTime": 115.14,
+        "text": " Huh?"
+      }
+    ]
+  },
+  {
+    "isFinal": false,
+    "resultsFinalizationTime": 116.64,
+    "text": " Nothing",
+    "endTime": 121.199625,
+    "startTime": 116.64,
+    "fragments": [
+      {
+        "endTime": 121.199625,
+        "text": " Nothing",
+        "startTime": 116.64
+      }
+    ]
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 120.84,
+        "text": " Nothing.",
+        "startTime": 119.64
+      }
+    ],
+    "resultsFinalizationTime": 120.9,
+    "startTime": 119.64,
+    "endTime": 120.9,
+    "isFinal": true,
+    "text": " Nothing."
+  },
+  {
+    "endTime": 121.999625,
+    "startTime": 120.9,
+    "isFinal": false,
+    "resultsFinalizationTime": 120.9,
+    "text": " quiet",
+    "fragments": [
+      {
+        "text": " quiet",
+        "startTime": 120.9,
+        "endTime": 121.999625
+      }
+    ]
+  },
+  {
+    "startTime": 120.9,
+    "isFinal": true,
+    "fragments": [
+      {
+        "text": " quiet.",
+        "startTime": 120.9,
+        "endTime": 121.32
+      }
+    ],
+    "text": " quiet.",
+    "endTime": 123.96,
+    "resultsFinalizationTime": 123.96
+  },
+  {
+    "startTime": 123.96,
+    "resultsFinalizationTime": 123.96,
+    "endTime": 127.799625,
+    "fragments": [
+      {
+        "text": " Sure",
+        "endTime": 127.799625,
+        "startTime": 123.96
+      }
+    ],
+    "text": " Sure",
+    "isFinal": false
+  },
+  {
+    "isFinal": true,
+    "resultsFinalizationTime": 126.9,
+    "fragments": [
+      {
+        "text": " Sure",
+        "startTime": 125.52,
+        "endTime": 126.78
+      }
+    ],
+    "endTime": 126.9,
+    "text": " Sure",
+    "startTime": 125.52
+  },
+  {
+    "startTime": 126.9,
+    "isFinal": false,
+    "resultsFinalizationTime": 126.9,
+    "fragments": [
+      {
+        "text": " Maybe",
+        "endTime": 134.599625,
+        "startTime": 126.9
+      }
+    ],
+    "text": " Maybe",
+    "endTime": 134.599625
+  },
+  {
+    "startTime": 126.9,
+    "isFinal": false,
+    "resultsFinalizationTime": 126.9,
+    "fragments": [
+      {
+        "text": " Maybe I",
+        "endTime": 134.599625,
+        "startTime": 126.9
+      }
+    ],
+    "text": " Maybe I",
+    "endTime": 134.599625
+  },
+  {
+    "startTime": 126.9,
+    "isFinal": false,
+    "resultsFinalizationTime": 126.9,
+    "fragments": [
+      {
+        "text": " Maybe I don",
+        "endTime": 134.599625,
+        "startTime": 126.9
+      }
+    ],
+    "text": " Maybe I don",
+    "endTime": 134.599625
+  },
+  {
+    "startTime": 126.9,
+    "isFinal": false,
+    "resultsFinalizationTime": 126.9,
+    "fragments": [
+      {
+        "text": " Maybe I don'",
+        "endTime": 134.599625,
+        "startTime": 126.9
+      }
+    ],
+    "text": " Maybe I don'",
+    "endTime": 134.599625
+  },
+  {
+    "startTime": 126.9,
+    "isFinal": false,
+    "resultsFinalizationTime": 126.9,
+    "fragments": [
+      {
+        "text": " Maybe I don't",
+        "endTime": 134.599625,
+        "startTime": 126.9
+      }
+    ],
+    "text": " Maybe I don't",
+    "endTime": 134.599625
+  },
+  {
+    "startTime": 126.9,
+    "isFinal": false,
+    "resultsFinalizationTime": 126.9,
+    "fragments": [
+      {
+        "text": " Maybe I don't know",
+        "endTime": 134.599625,
+        "startTime": 126.9
+      }
+    ],
+    "text": " Maybe I don't know",
+    "endTime": 134.599625
+  },
+  {
+    "startTime": 126.9,
+    "isFinal": false,
+    "resultsFinalizationTime": 126.9,
+    "fragments": [
+      {
+        "text": " Maybe I don't know.",
+        "endTime": 134.599625,
+        "startTime": 126.9
+      }
+    ],
+    "text": " Maybe I don't know.",
+    "endTime": 134.599625
+  },
+  {
+    "resultsFinalizationTime": 134.28,
+    "endTime": 134.28,
+    "text": " Maybe I don't know.",
+    "startTime": 132.9,
+    "isFinal": true,
+    "fragments": [
+      {
+        "endTime": 133.5,
+        "startTime": 132.9,
+        "text": " Maybe"
+      },
+      {
+        "startTime": 133.5,
+        "text": " I",
+        "endTime": 133.8
+      },
+      {
+        "startTime": 133.8,
+        "text": " don't",
+        "endTime": 134.04
+      },
+      {
+        "startTime": 134.04,
+        "endTime": 134.22,
+        "text": " know."
+      }
+    ]
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 135.599625,
+        "text": " H",
+        "startTime": 134.28
+      }
+    ],
+    "startTime": 134.28,
+    "resultsFinalizationTime": 134.28,
+    "endTime": 135.599625,
+    "text": " H",
+    "isFinal": false
+  },
+  {
+    "fragments": [
+      {
+        "endTime": 135.599625,
+        "text": " Hur",
+        "startTime": 134.28
+      }
+    ],
+    "startTime": 134.28,
+    "resultsFinalizationTime": 134.28,
+    "endTime": 135.599625,
+    "text": " Hur",
+    "isFinal": false
+  },
+  {
+    "resultsFinalizationTime": 134.28,
+    "endTime": 136.399625,
+    "fragments": [
+      {
+        "startTime": 134.28,
+        "text": " Hur.",
+        "endTime": 136.399625
+      }
+    ],
+    "startTime": 134.28,
+    "isFinal": false,
+    "text": " Hur."
+  },
+  {
+    "isFinal": true,
+    "endTime": 135.9,
+    "fragments": [
+      {
+        "text": " Hur.",
+        "endTime": 135.84,
+        "startTime": 134.28
+      }
+    ],
+    "text": " Hur.",
+    "startTime": 134.28,
+    "resultsFinalizationTime": 135.9
+  },
+  {
+    "text": " No",
+    "endTime": 137.399625,
+    "resultsFinalizationTime": 135.9,
+    "fragments": [
+      {
+        "endTime": 137.399625,
+        "startTime": 135.9,
+        "text": " No"
+      }
+    ],
+    "isFinal": false,
+    "startTime": 135.9
+  },
+  {
+    "isFinal": false,
+    "resultsFinalizationTime": 135.9,
+    "fragments": [
+      {
+        "startTime": 135.9,
+        "endTime": 138.399625,
+        "text": " No I"
+      }
+    ],
+    "endTime": 138.399625,
+    "text": " No I",
+    "startTime": 135.9
+  },
+  {
+    "isFinal": false,
+    "resultsFinalizationTime": 135.9,
+    "fragments": [
+      {
+        "startTime": 135.9,
+        "endTime": 138.399625,
+        "text": " No I home"
+      }
+    ],
+    "endTime": 138.399625,
+    "text": " No I home",
+    "startTime": 135.9
+  },
+  {
+    "isFinal": false,
+    "resultsFinalizationTime": 135.9,
+    "fragments": [
+      {
+        "startTime": 135.9,
+        "endTime": 138.399625,
+        "text": " No I home."
+      }
+    ],
+    "endTime": 138.399625,
+    "text": " No I home.",
+    "startTime": 135.9
+  },
+  {
+    "isFinal": true,
+    "resultsFinalizationTime": 137.88,
+    "fragments": [
+      {
+        "startTime": 135.9,
+        "endTime": 137.34,
+        "text": " No,"
+      },
+      {
+        "endTime": 137.4,
+        "text": " I",
+        "startTime": 137.34
+      },
+      {
+        "text": " know.",
+        "startTime": 137.4,
+        "endTime": 137.82
+      }
+    ],
+    "endTime": 137.88,
+    "text": " No, I know.",
+    "startTime": 135.9
+  }
+]

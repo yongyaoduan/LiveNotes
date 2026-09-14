@@ -40,158 +40,6 @@ struct RecordingPipelineTests {
         #expect(metrics["model_load_seconds"] == nil)
     }
 
-    @Test("live transcript buffer keeps the latest corrected partial")
-    func liveTranscriptBufferKeepsLatestPartial() {
-        var buffer = LiveTranscriptSegmentBuffer()
-
-        _ = buffer.updatePartial("Hello my name is")
-        let latest = buffer.updatePartial("Hello, my name is Yongyao.")
-        let final = buffer.finishSegment(endTime: 7)
-
-        #expect(latest == "Hello, my name is Yongyao.")
-        #expect(final.map(\.text) == ["Hello, my name is Yongyao."])
-        #expect(final.first?.startTime == 0)
-        #expect(final.first?.endTime == 7)
-        #expect(final.first?.translation == "")
-    }
-
-    @Test("live transcript buffer never emits partial word diffs")
-    func liveTranscriptBufferNeverEmitsPartialWordDiffs() {
-        var buffer = LiveTranscriptSegmentBuffer(startTime: 10)
-
-        _ = buffer.updatePartial("I will talk to you about the social")
-        _ = buffer.updatePartial("I will talk to you about the Social Security.")
-        let final = buffer.finishSegment(endTime: 18)
-
-        #expect(final.map(\.text) == ["I will talk to you about the Social Security."])
-        #expect(final.first?.startTime == 10)
-        #expect(final.first?.endTime == 18)
-    }
-
-    @Test("live preview display keeps longer text over prefix regressions")
-    func livePreviewDisplayKeepsLongerTextOverPrefixRegressions() {
-        let current = "What you are doing to President Trump is disgusting."
-        let displayed = LiveTranscriptPreviewDisplayPolicy.displayedText(
-            current: current,
-            incoming: "What you are doing"
-        )
-
-        #expect(displayed == current)
-    }
-
-    @Test("live preview display accepts non-prefix corrections")
-    func livePreviewDisplayAcceptsNonPrefixCorrections() {
-        let displayed = LiveTranscriptPreviewDisplayPolicy.displayedText(
-            current: "Alcohol, so they don't",
-            incoming: "Also, so they don't"
-        )
-
-        #expect(displayed == "Also, so they don't")
-    }
-
-    @Test("live preview clears after matching committed transcript")
-    func livePreviewClearsAfterMatchingCommittedTranscript() {
-        #expect(LiveTranscriptPreviewDisplayPolicy.shouldClearAfterCommit(
-            preview: "Alcohol, so they don't, so by tuning.",
-            committed: "Alcohol, so they don't, so by tuning."
-        ))
-        #expect(LiveTranscriptPreviewDisplayPolicy.shouldClearAfterCommit(
-            preview: "Alcohol, so they don't, so by tuning.",
-            committed: "Alcohol, so they don't"
-        ))
-        #expect(!LiveTranscriptPreviewDisplayPolicy.shouldClearAfterCommit(
-            preview: "Alcohol, so they don't, so by tuning.",
-            committed: "Except now"
-        ))
-    }
-
-    @Test("live fallback ignores volatile preview text")
-    func liveFallbackIgnoresVolatilePreviewText() {
-        let existing = [
-            TranscriptSentence(
-                startTime: 0,
-                endTime: 4,
-                text: "Hello, my name is today.",
-                translation: "",
-                confidence: .high
-            )
-        ]
-
-        let merged = TranscriptCoverage.mergedLiveFallback(
-            existing: existing,
-            previewText: "Hello, my name is Yong Yao Dun. Today I will talk to you about cybersecurity.",
-            previewTranslation: "大家好，我叫段永耀。今天我会讲网络安全。",
-            durationSeconds: 12
-        )
-
-        #expect(merged.map(\.text) == [
-            "Hello, my name is today."
-        ])
-        #expect(merged.first?.translation == "")
-        #expect(merged.first?.endTime == 4)
-    }
-
-    @Test("live fallback does not save preview-only tail")
-    func liveFallbackDoesNotSavePreviewOnlyTail() {
-        let existing = [
-            TranscriptSentence(
-                startTime: 0,
-                endTime: 7,
-                text: "I will talk about cybersecurity.",
-                translation: "",
-                confidence: .high
-            )
-        ]
-
-        let merged = TranscriptCoverage.mergedLiveFallback(
-            existing: existing,
-            previewText: "You can fix your problem in your life.",
-            previewTranslation: "",
-            durationSeconds: 16
-        )
-
-        #expect(merged.map(\.text) == [
-            "I will talk about cybersecurity."
-        ])
-        #expect(merged.last?.startTime == 0)
-        #expect(merged.last?.endTime == 7)
-    }
-
-    @Test("live fallback does not create a transcript from preview only")
-    func liveFallbackDoesNotCreateTranscriptFromPreviewOnly() {
-        let merged = TranscriptCoverage.mergedLiveFallback(
-            existing: [],
-            previewText: "This text is still volatile.",
-            previewTranslation: "这段文本仍然是临时预览。",
-            durationSeconds: 8
-        )
-
-        #expect(merged.isEmpty)
-    }
-
-    @Test("live fallback clamps committed timestamps to recording duration")
-    func liveFallbackClampsCommittedTimestamps() {
-        let existing = [
-            TranscriptSentence(
-                startTime: 45,
-                endTime: 134,
-                text: "So into it",
-                translation: "",
-                confidence: .high
-            )
-        ]
-
-        let merged = TranscriptCoverage.mergedLiveFallback(
-            existing: existing,
-            previewText: "",
-            previewTranslation: "",
-            durationSeconds: 52
-        )
-
-        #expect(merged.first?.startTime == 45)
-        #expect(merged.first?.endTime == 52)
-    }
-
     @Test("speech analyzer assembler commits volatile updates after stable range advances")
     func speechAnalyzerAssemblerCommitsVolatileUpdatesAfterStableRangeAdvances() {
         var assembler = SpeechAnalyzerTranscriptAssembler()
@@ -628,6 +476,74 @@ struct RecordingPipelineTests {
         #expect(results.count == (fixtureName.contains("-long-") ? 433 : fixtureName.contains("-acoustic-") ? 143 : 144))
         #expect(actual == expected)
         #expect(!actual.contains { $0.contains("secondnd") || $0.contains("thirdrd") || $0.contains("thirdr ") || $0.contains("Exort") })
+    }
+
+    @Test("real fast classroom results retire coarse hypotheses at every final result", arguments: [
+        "native-speech-5618-fast-results", "native-speech-5047-fast-results",
+        "native-speech-5047-150pct-results", "native-speech-classroom-acoustic-results"
+    ])
+    func fastClassroomResultsDoNotDuplicateHypotheses(_ fixtureName: String) async throws {
+        let url = try #require(Bundle.module.url(forResource: fixtureName, withExtension: "json", subdirectory: "Fixtures"))
+        let results = try JSONDecoder().decode([RecordedSpeechResult].self, from: Data(contentsOf: url))
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        var expected: [String] = []
+        for result in results {
+            var update = speechUpdate(result.text, start: result.startTime, end: result.endTime, final: result.isFinal)
+            update.resultsFinalizationTime = result.resultsFinalizationTime
+            update.fragments = result.fragments.map { .init(text: $0.text, startTime: $0.startTime, endTime: $0.endTime) }
+            let events = await store.apply(update)
+            if result.isFinal {
+                let text = result.text.trimmingCharacters(in: .whitespacesAndNewlines)
+                if !text.isEmpty { expected.append(text) }
+                #expect(await store.snapshot().map(\.text) == expected)
+                #expect(events.last == .preview(""))
+            }
+        }
+        _ = await store.finish()
+        #expect(await store.snapshot().map(\.text) == expected)
+    }
+
+    @Test("native coarse correction preserves an identifiable unfinished suffix and genuine repetition")
+    func nativeCoarseCorrectionPreservesUnfinishedSpeech() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        var pending = speechUpdate("Keep this sentence. More speech follows.", start: 0, end: 8)
+        pending.fragments = [.init(text: pending.text, startTime: 0, endTime: 8)]
+        _ = await store.apply(pending)
+        var final = speechUpdate("Keep this sentence.", start: 0, end: 4, final: true)
+        final.fragments = [.init(text: final.text, startTime: 0, endTime: 4)]
+        #expect(await store.apply(final).last == .preview("More speech follows."))
+        var repeated = speechUpdate("Keep this sentence.", start: 8, end: 12, final: true)
+        repeated.fragments = [.init(text: repeated.text, startTime: 8, endTime: 12)]
+        _ = await store.apply(repeated)
+        _ = await store.finish()
+        #expect(await store.snapshot().map(\.text) == ["Keep this sentence.", "More speech follows.", "Keep this sentence."])
+    }
+
+    @Test("acoustic coarse hypotheses are replaced when both final boundaries move")
+    func acousticCoarseHypothesesWithShiftedBoundaries() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        var pending = speechUpdate("Find", start: 38.64, end: 42.9)
+        pending.fragments = [.init(text: pending.text, startTime: pending.startTime, endTime: pending.endTime)]
+        _ = await store.apply(pending)
+        var final = speechUpdate("Find it, I'll have to set it.", start: 40.08, end: 43.38, final: true)
+        final.fragments = [.init(text: final.text, startTime: 40.08, endTime: 43.32)]
+        final.resultsFinalizationTime = 43.38
+        #expect(await store.apply(final).last == .preview(""))
+        _ = await store.finish()
+        #expect(await store.snapshot().map(\.text) == [final.text])
+    }
+
+    @Test("a small acoustic overlap does not erase a different pending utterance")
+    func smallAcousticOverlapPreservesDifferentSpeech() async {
+        let store = SpeechAnalyzerTranscriptAssemblyStore()
+        var pending = speechUpdate("An earlier sentence.", start: 0, end: 2.2)
+        pending.fragments = [.init(text: pending.text, startTime: 0, endTime: 2.2)]
+        _ = await store.apply(pending)
+        var next = speechUpdate("The next sentence.", start: 2.1, end: 5, final: true)
+        next.fragments = [.init(text: next.text, startTime: 2.1, endTime: 5)]
+        _ = await store.apply(next)
+        _ = await store.finish()
+        #expect(await store.snapshot().map(\.text) == [pending.text, next.text])
     }
 
     @Test("coarse word splitting corrections retain the following sentence")

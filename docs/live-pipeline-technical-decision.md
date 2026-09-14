@@ -1,6 +1,6 @@
 # Live Pipeline Technical Decision
 
-Last reviewed: 2026-09-05
+Last reviewed: 2026-09-14
 
 ## Scope
 
@@ -31,7 +31,7 @@ Do not use a separate progress callback to commit pending text ahead of the resu
 
 Preview text may change while recognition improves. Committing a prefix must preserve any remaining preview suffix. Completed transcript lines remain visible and retain their translations as later speech arrives.
 
-A pending hypothesis must not overwrite a finalized correction. Apple can return a coarse temporary phrase with wider timing than its corrected final result; retire that matching hypothesis when the final phrase arrives. Where timing and text cannot establish that two overlapping phrases are revisions of the same content, preserve the unmatched text. This favors retention but can leave duplication in ambiguous cases.
+A pending hypothesis must not overwrite a finalized correction. Apple can return a coarse temporary phrase with wider timing than its corrected final result. First retain any identifiable prefix/suffix using word timing or exact whole-word matching. When every attributed word of the pending phrase shares its entire coarse range, an attributed final result overlapping more than half of the shorter range replaces that atomic hypothesis, even if many words change. Do not require lexical similarity: short utterances and multiple recognition corrections otherwise leave stale duplicates. Unattributed legacy inputs still use the conservative text-matching fallback. Final boundaries can both shift; tiny overlaps and disjoint repeated speech remain separate. See the [real classroom recording regression](validation-2026-09-14.md).
 
 ## Stop, Save, and Export
 
