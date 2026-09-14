@@ -126,3 +126,14 @@ LIVENOTES_TEST_AUDIO_OUTPUT='MacBook Air Speakers' \
 Homebrew 生成器和发布检查改为当前支持的 `depends_on macos: :tahoe`，避免旧字符串声明的弃用警告；相关脚本测试通过。本轮完整发布验证在本机执行。历史远端运行 `33954000416` 在原生识别阶段报 `Local transcription failed`；不把这次本机通过写成远端 CI 通过。
 
 早期手动验收创建的三条 QA 记录及其音频已归档至 `.cache/xcuitest-acoustic/manual-qa-archive/`，保留原库备份；其余 28 条记录内容逐条比对未改变。后续 XCUITest 均使用隔离存储。
+
+
+## 发布与本机安装确认
+
+代码提交 `b91dd70a2638a0a0886fe03b03ebd3a29a1949db` 已推送，发布 [v1.0.2](https://github.com/yongyaoduan/LiveNotes/releases/tag/v1.0.2)，Homebrew tap 更新提交为 `891df6c`。GitHub 资产摘要与上面的 SHA-256 一致。
+
+通过 Homebrew 将本机从 1.0.1 更新为 1.0.2；安装的全部六个文件与 Release 压缩包逐一相同。再将 xctestrun 的 `UITargetAppPath` 指向 `/Applications/LiveNotes.app`，使用 5618 · 1.25× 的 30 秒真实音频执行生产录音、保存、导出测试，1 项测试通过，保存约 1.81 秒，导出文件约 1.46 秒就绪。证据为 `.cache/xcuitest-acoustic/installed-smoke.*` 和 `installed-verification.json`。随后普通启动成功，用户的 28 条既有记录及现存音频元数据比对未变。
+
+旧版本已保存稿件中的重复不会被本次更新自动重写，本次修复作用于新的转写组装。原生术语识别错误仍是已知限制。
+
+当前提交的[远端 CI](https://github.com/yongyaoduan/LiveNotes/actions/runs/34811024988)仍在原生音频端到端测试中报 `Local transcription failed`，未通过，不能与本机 42 项 UI 测试通过混称。标签触发的重复远端发布任务 `34811053883` 已取消，以保留这份经过本机完整验收的发布资产。
